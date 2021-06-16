@@ -1,0 +1,838 @@
+<html>
+
+<head>
+  <title>GNOC DV Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
+  <link rel="stylesheet" href="./css/global.css" />
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
+  <script type="text/javascript" src="./js/user.js"></script>
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script>
+    // Global digest value for auth
+    var digest = getFormDigest();
+    var listName = "Tickets";
+
+    $(function () {
+      if (!checkPermissions("Q1JFQVRFIFRUUw==", false, true)) {
+        $("html").remove();
+      }
+
+      if (checkPermissions("Q1JFQVRFIFRUUw==", false, false)) {
+
+        // nav
+        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
+        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
+        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
+          $("#tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
+        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
+        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
+        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
+        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
+          $("#flight_tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
+        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
+        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
+        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
+          $("#ccir_header_div").remove();
+        }
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
+        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
+        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
+          $("#reports_header_div").remove();
+        }
+        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
+        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
+        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
+        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
+        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
+        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
+        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
+
+
+        // Generate Ticket Number
+
+        // Get Julian Date
+        function daysIntoYear(date) {
+          return (Date.UTC(date.getFullYear(), date.getUTCMonth(), date.getUTCDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
+        }
+
+        // Ticket Number String:
+        var currentYear = new Date().getUTCFullYear();
+        var ticketLast = 1;
+
+        // Need to verify if there is a ticket for this number that exists:
+        var ticket_number = "ADWN-" + currentYear + "-" + ("00" + daysIntoYear(new Date())).slice(-3) + "-000" + ticketLast;
+
+        while (true) {
+          if (checkTicketNumber(ticket_number)) {
+            ticketLast++;
+            ticket_number = "ADWN-" + currentYear + "-" + ("00" + daysIntoYear(new Date())).slice(-3) + "-000" + ticketLast;
+          }
+          else {
+            break;
+          }
+        }
+
+        // Create Mission Table
+        $.fn.dataTable.moment('MM/DD/YYYY HH:mmZ');
+        $('#legs_current_mission').DataTable({
+          dom: 'Pfrtip',
+          "order": [[0, "desc"]],
+          searching: false,
+          paging: false,
+          info: false,
+        });
+
+        // Set Ticket Number:
+        $("#ticket_number").val(ticket_number);
+
+        // Populate DV Drop down
+        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('DVList')/items?$top=5000";
+        $.ajax({
+          url: urlLoad,
+          async: false,
+          method: "GET",
+          headers: {
+            "Accept": "application/json;odata=verbose"
+          },
+          success: function (data) {
+            var total = 0;
+            var allResults = data.d.results;
+            if (Number(allResults.length) > 0) {
+              var select = document.getElementById('dv_select');
+              for (var i = 0; i < Number(allResults.length); i++) {
+                // looping through all results
+                var opt = document.createElement('option');
+                opt.innerHTML = allResults[i].DV;
+                select.appendChild(opt);
+              }
+              $('.selectpicker').selectpicker('refresh');
+            }
+          },
+          error: function (data) {
+            //alert("Error: " + JSON.stringify(data));
+          }
+        });
+
+        // Populate Aircraft Drop Down
+        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('TailNumbers')/items?$top=5000&$orderby=Tail_x0020_Numbers%20asc";
+        $.ajax({
+          url: urlLoad,
+          async: false,
+          method: "GET",
+          headers: {
+            "Accept": "application/json;odata=verbose"
+          },
+          success: function (data) {
+            var total = 0;
+            var allResults = data.d.results;
+            if (Number(allResults.length) > 0) {
+              var select = document.getElementById('tail_number');
+              for (var i = 0; i < Number(allResults.length); i++) {
+                // looping through all results
+                var opt = document.createElement('option');
+                opt.innerHTML = allResults[i].Tail_x0020_Numbers;
+                select.appendChild(opt);
+              }
+              $('.selectpicker').selectpicker('refresh');
+            }
+          },
+          error: function (data) {
+            //alert("Error: " + JSON.stringify(data));
+          }
+        });
+
+        /*var dvOptions = ["ACC", "ACTSECAF", "AD DOAF", "ADNI", "AFCENT", "AFCENTCOM", "AFGHANCOM", "AFGSC", "AG", "AMC", "ANSA", "APNSA", "ASECDEF", "ATTGEN", "AWHCS", "CH", "CIA", "CNGB", "CNO", "COMACC", "COUNSSTATE", "CSAF", "CSARMY", "DCI", "DCIA", "DDNI", "DEPCSWHO", "DEPDIRCIA", "DEPOCI", "DEPSECDEF", "DEPSECSTATE", "DEPWHCOS", "DH", "DHS", "DIRADV", "DIRCIA", "DNI", "DNSA", "DODGC", "DSS", "DUSDP", "EPA ADMIN", "EUCOM", "FLOTUS", "GDSS", "HHS", "IAFCOM", "NGB", "NORTHCOM", "NSA", "OEPOCI", "OUSDP", "PACOM", "PAFCOM", "PDDNI", "PDEL", "PDM", "POONI", "POTUS", "POTUS ASST", "PRESDEL", "REP UN", "RORO", "SAPOTUS", "SECAF", "SECARMY", "SECCOM", "SECCOMMERCE", "SECHHS", "SECINTERIOR", "SECTREAS", "SECVA", "SES", "SLOTUS", "SO", "SOCOM", "SOE", "SOT", "SPEAC", "SPECOPSCO", "SPECOPSCOM", "SRAR", "TBD", "TRANSCOM", "TRNR", "UNKNOWN", "USAFRICOM", "USAMBASSADORUN", "USCENTCOM", "USCYBERCOM", "USD(P\u0026R)", "USDATL", "USDEPPOL", "USDI", "USDP", "USECAF", "USEUROCOMM", "USINDOPACOM", "USKCOM", "USNORTHCOM", "USOCOM", "USPACOM", "USSEN", "USSOCOM", "USSOUTHCOM", "USSPACECOM", "USSPACEFORCE", "USSTRATCOM", "USTRANSCOM", "VCJCS", "VCSAF", "VPOTUS Shadow", "VPSUPPORT", "WHCOS", "WHCS", "WHDEPCS", "WHSM", "WHSUPPORT"];
+        var select = document.getElementById('dv_select');
+        select.innerHTML = "<optgroup label=\"Top 5\"><option selected>POTUS</option><option>VPOTUS</option><option>SECDEF</option><option>SECSTATE</option><option>CJCS</option></optgroup>";
+        for (var i = 0; i < dvOptions.length; i++) {
+          var opt = document.createElement('option');
+          opt.innerHTML = dvOptions[i];
+          select.appendChild(opt);
+        }
+        $('.selectpicker').selectpicker('refresh');*/
+
+        // Get mission information
+        $("#mission_number").change(function () {
+          var $this = $(this);
+          var mission_search = $this.val();
+          checkMissionInfo(mission_search);
+        });
+
+        // Populate Ticket Categories
+        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Ticket_Categories')/items?$orderby=Category%20asc";
+        var firstCat = "";
+        $.ajax({
+          url: urlLoad,
+          async: false,
+          method: "GET",
+          headers: {
+            "Accept": "application/json;odata=verbose"
+          },
+          success: function (data) {
+            var total = 0;
+            var allResults = data.d.results;
+            if (Number(allResults.length) > 0) {
+              var select = document.getElementById('category');
+              for (var i = 0; i < Number(allResults.length); i++) {
+                if (i == 0) {
+                  firstCat = allResults[i].Category;
+                }
+                // looping through all results
+                var opt = document.createElement('option');
+                opt.innerHTML = allResults[i].Category;
+                select.appendChild(opt);
+              }
+              $('.selectpicker').selectpicker('refresh');
+            }
+          },
+          error: function (data) {
+            //alert("Error: " + JSON.stringify(data));
+          }
+        });
+
+        $("#category").val(firstCat);
+        $('.selectpicker').selectpicker('refresh');
+
+        // Enable disable CCIR
+        $("#ccir").change(function () {
+          var $this = $(this);
+          if ($this.val() == 0)
+            $("#ccir_number").prop("disabled", true);
+          else
+            $("#ccir_number").prop("disabled", false);
+        });
+
+        // Create Ticket
+        $(document).on('click', '#ticket_submit', function () {
+          var ticket_number = $("#ticket_number").val();
+          var dv = $("#dv_select").val();
+          var date = new Date();
+          var tail_number = $("#tail_number").val();
+          var mission_number = $("#mission_number").val();
+          var impact_level = $("#impact_level").val();
+          if (impact_level == "None") {
+            var dv_impact = "false";
+          }
+          else {
+            // there is DV impact
+            var dv_impact = "true";
+          }
+          var category = $("#category").val();
+          var sub_category = $("#sub_category").val();
+          var status = "New";
+          var issue_description = $("#issue_description").val();
+          var ccir = $("#ccir").val();
+          var ccir_number = $("#ccir_number").val();
+          var cso = $("#cso").val();
+          var leg = $("#leg").val();
+          if (tail_number != "" && category != "" && sub_category != "" && issue_description != "") {
+            // Disable Button
+            var $this = $(this);
+            var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            if ($(this).html() !== loadingText) {
+              $this.data('original-text', $(this).html());
+              $this.html(loadingText);
+              $this.attr("disabled", true);
+            }
+
+            /*
+              Lets check to make sure ticket wasn't created in the time we loaded the page, if so we will update the ticket number.
+            */
+            while (true) {
+              if (checkTicketNumber(ticket_number)) {
+                ticketLast++;
+                ticket_number = "ADWN-" + currentYear + "-" + ("00" + daysIntoYear(new Date())).slice(-3) + "-000" + ticketLast;
+              }
+              else {
+                break;
+              }
+            }
+
+            //var itemProperties = {'ticket_number':ticket_number,'dv':dv,'date_opened':date.toJSON(),'tail_number':tail_number,'mission_number':mission_number,'dv_impact':dv_impact,'impact_level':impact_level,'category':category,'sub_category':sub_category,'status':status,'issue_description':issue_description,'ccir':ccir,'ccir_number':ccir_number,'cso':cso};
+            var itemProperties = { 'GNOC_Ticket_Number': ticket_number, 'DV': dv, 'Tail_Number': tail_number, 'Mission_Number': mission_number, 'DV_Impact': dv_impact, 'Impact_Level': impact_level, 'Category': category, 'Sub_Category': sub_category, 'Status': status, 'Issue_Description': issue_description, 'CCIR_Number': ccir_number, 'CSO': cso, 'Leg': leg };
+
+            console.log(itemProperties);
+            CreateListItemWithDetails(listName, hostUrl, itemProperties, function () {
+              var updateText = "GNOC created ticket #" + ticket_number + ".";
+              itemProperties = { 'ticket_number': ticket_number, 'update': updateText };
+              // Update needs to be added to appropriate table.
+              addUpdate(hostUrl, itemProperties, function () {
+                alert("Ticket successfully created.");
+                location.reload();
+              })
+            }, function () {
+              alert("An error has occured. Please try again.");
+            });
+          }
+          else {
+            alert("One or more required field does not contain data. Please try again.");
+          }
+        });
+        feather.replace();
+      }
+    });
+
+
+    // Get Digest
+    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
+    function getFormDigest() {
+      console.log("Getting Form Digest..");
+      $.support.cors = true;
+      var _formDigest;
+      $.ajax({
+        url: hostUrl + "/_api/contextinfo",
+        type: "POST",
+        dataType: "json",
+
+        headers: { "Accept": "application/json; odata=verbose" },
+        xhrFields: { withCredentials: true },
+        async: false,
+        success: function (data) {
+          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
+          console.log(data.d.GetContextWebInformation.FormDigestValue);
+          console.log("Form Digest Done");
+
+        },
+        error: function () {
+          console.log("Error Occured");
+        }
+      });
+
+      return _formDigest;
+    }
+
+    // CREATE Operation
+    // listName: The name of the list you want to get items from
+    // weburl: The url of the web that the list is in. 
+    // newItemTitle: New Item title.
+    // success: The function to execute if the call is sucesfull
+    // failure: The function to execute if the call fails
+    function CreateListItemWithDetails(listName, webUrl, itemProperties, success, failure) {
+      var itemType = GetItemTypeForListName(listName);
+      itemProperties["__metadata"] = { "type": itemType };
+
+      $.ajax({
+        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(itemProperties),
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest
+        },
+        success: function (data) {
+          success(data);
+        },
+        error: function (data) {
+          failure(data);
+        }
+      });
+    }
+
+    // Get List Item Type metadata
+    function GetItemTypeForListName(name) {
+      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
+    }
+
+    function addUpdate(webUrl, itemProperties, success, failure) {
+      listName = "ticketUpdates";
+      var itemType = GetItemTypeForListName(listName);
+      itemProperties["__metadata"] = { "type": itemType };
+
+      $.ajax({
+        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(itemProperties),
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest
+        },
+        success: function (data) {
+          success(data);
+        },
+        error: function (data) {
+          failure(data);
+        }
+      });
+    }
+
+    // verify ticket number isnt used:
+    function checkTicketNumber(ticket_number) {
+      var found = false;
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$select=GNOC_Ticket_Number&$filter=GNOC_Ticket_Number eq '" + ticket_number + "'";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          var allResults = data.d.results;
+          if (Number(allResults.length) != 0) {
+            found = true;
+          }
+        },
+        error: function (data) {
+          //alert("Error: " + JSON.stringify(data));
+        }
+      });
+      return found;
+    }
+
+    Date.prototype.addHours = function (h) {
+      this.setTime(this.getTime() + (h * 60 * 60 * 1000));
+      return this;
+    }
+
+    function checkMissionInfo(mission_search) {
+
+      $("#mission_information").show();
+      var select = document.getElementById('leg');
+      select.innerHTML = "";
+      $('.selectpicker').selectpicker('refresh');
+      var opt = document.createElement('option');
+      opt.value = "N/A";
+      opt.innerHTML = "N/A";
+      select.appendChild(opt);
+      select.value = "N/A";
+      $('.selectpicker').selectpicker('refresh');
+      $('#legs_current_mission').dataTable().fnClearTable();
+
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$filter=Mission_Number eq '" + mission_search + "'&$orderby=Created%20asc";
+      var location = "";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          var allResults = data.d.results;
+          if (Number(allResults.length) > 0) {
+            $("#dv_select").val(allResults[0].DV);
+            $('.selectpicker').selectpicker('refresh');
+
+            $("#tail_number").val(allResults[0].Tail_Number);
+            $('.selectpicker').selectpicker('refresh');
+
+            var now = new Date();
+            console.log(now);
+            now.addHours(now.getTimezoneOffset() / 60);
+            console.log(now);
+            var select = document.getElementById('leg');
+            for (var i = 0; i < Number(allResults.length); i++) {
+              var opt = document.createElement('option');
+              opt.value = i + 1;
+              opt.innerHTML = i + 1;
+              select.appendChild(opt);
+              $('.selectpicker').selectpicker('refresh');
+              console.log("On result: " + i + ".");
+              console.log("Nows time is: " + now.toISOString());
+              console.log("Checking against: " + allResults[i].Departure_Date + " and " + allResults[i].Arrival_Date);
+              if (allResults[i].Departure_Date < now.toISOString() && allResults[i].Arrival_Date > now.toISOString()) {
+                console.log("Looks like this mission is applicable.");
+                select.value = i + 1;
+                $('.selectpicker').selectpicker('refresh');
+              }
+              var legNum = i + 1;
+              console.log(legNum);
+              var depDate = convertDate(allResults[i].Departure_Date);
+              var arrDate = convertDate(allResults[i].Arrival_Date);
+              $('#legs_current_mission').DataTable().row.add([String(legNum), allResults[i].Tail_Number, allResults[i].DV, allResults[i].Departure_IATA, allResults[i].Departure_Location, allResults[i].Arrival_IATA, allResults[i].Arrival_Location, depDate, arrDate]).draw();
+            }
+          }
+          else {
+            $("#dv_select").val('');
+            $('.selectpicker').selectpicker('refresh');
+
+            $("#tail_number").val('');
+            $('.selectpicker').selectpicker('refresh');
+            $("#mission_information").hide();
+          }
+        },
+        error: function (data) {
+          //alert("Error: " + JSON.stringify(data));
+        }
+      });
+
+    }
+
+    function convertDate(date) {
+      var convertDate = new Date(date);
+      var month = convertDate.getMonth();
+      month = ("0" + (convertDate.getMonth() + 1)).slice(-2)
+
+      var date = convertDate.getDate();
+      if (convertDate.getDate() < 10)
+        date = "0" + convertDate.getDate();
+
+      var minutes = convertDate.getUTCMinutes();
+      if (convertDate.getUTCMinutes() < 10)
+        minutes = "0" + convertDate.getUTCMinutes();
+
+      var t = new Date();
+      var hours = convertDate.getHours();
+
+      if (convertDate.getHours() < 10)
+        hours = "0" + hours;
+
+
+      return dateString = month + "/" + date + "/" + convertDate.getUTCFullYear() + " " + hours + ":" + minutes + "Z";
+    }
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="./index.html">
+      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z" />
+      </svg> &nbsp;
+      <b>GNOC DV Dashboard</b>
+    </a>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item" id="dashboard_div">
+              <a class="nav-link" href="./index.html">
+                <span data-feather="home"></span>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item" id="flight_schedule_div">
+              <a class="nav-link" href="./flightschedule.html">
+                <span data-feather="clock"></span>
+                Flight Schedule
+              </a>
+            </li>
+            <li class="nav-item" id="contact_list_div">
+              <a class="nav-link" href="./contactList.html">
+                <span data-feather="phone"></span>
+                Contact List
+              </a>
+            </li>
+          </ul>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+            id="tickets_header_div">
+            <span>Trouble Tickets</span>
+            <a class="d-flex align-items-center text-muted" href="./ticketSettings.html" id="ticket_settings_div">
+              <span data-feather="settings"></span>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2">
+            <li class="nav-item" id="create_tts_div">
+              <a class="nav-link active" href="./createTTS.html">
+                <span data-feather="file"></span>
+                Create a TTS <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item" id="create_master_tts_div">
+              <a class="nav-link" href="./createMasterTTS.html">
+                <span data-feather="file"></span>
+                Create a Master TTS
+              </a>
+            </li>
+            <li class="nav-item" id="view_tickets_div">
+              <a class="nav-link" href="./viewTickets.html">
+                <span data-feather="file-text"></span>
+                View Tickets
+              </a>
+            </li>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="flight_tickets_header_div">
+              <span>Flight Tickets</span>
+              <a class="d-flex align-items-center text-muted" href="./createFlightTicket.html"
+                id="create_flight_ticket_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="create_flight_ticket_div">
+                <a class="nav-link" href="./createFlightTicket.html">
+                  <span data-feather="file"></span>
+                  Create a Flight Ticket
+                </a>
+              </li>
+              <li class="nav-item" id="view_flight_tickets_div">
+                <a class="nav-link" href="./viewFlightTickets.html">
+                  <span data-feather="file-text"></span>
+                  View Flight Tickets
+                </a>
+              </li>
+              <li class="nav-item" id="view_missions_div">
+                <a class="nav-link" href="./viewMissions.html">
+                  <span data-feather="file-text"></span>
+                  View Missions
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="ccir_header_div">
+              <span>CCIRs</span>
+              <a class="d-flex align-items-center text-muted" href="./createCCIR.html" id="add_a_ccir_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="add_a_ccir_div">
+                <a class="nav-link" href="./createCCIR.html">
+                  <span data-feather="file"></span>
+                  Add a CCIR
+                </a>
+              </li>
+              <li class="nav-item" id="view_ccirs_div">
+                <a class="nav-link" href="./viewCCIRS.html">
+                  <span data-feather="file-text"></span>
+                  View CCIRs
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="reports_header_div">
+              <span>Reports</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="24_hour_report_div">
+                <a class="nav-link" href="./ticketReport.html">
+                  <span data-feather="file-text"></span>
+                  24 Hour Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="weekend_report_div">
+                <a class="nav-link" href="./weekendTicketReport.html">
+                  <span data-feather="file-text"></span>
+                  Weekend Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="morning_slides_div">
+                <a class="nav-link" href="./morningSlides.html">
+                  <span data-feather="file-text"></span>
+                  Morning Slides
+                </a>
+              </li>
+              <li class="nav-item" id="personnel_stats_div">
+                <a class="nav-link" href="./personnelStats.html">
+                  <span data-feather="file-text"></span>
+                  Personnel Stats
+                </a>
+              </li>
+              <li class="nav-item" id="monthly_metrics_div">
+                <a class="nav-link" href="./metrics.html">
+                  <span data-feather="file-text"></span>
+                  Monthly Metrics
+                </a>
+              </li>
+              <li class="nav-item" id="permissions_div">
+                <a class="nav-link" href="./permissions.html">
+                  <span data-feather="file-text"></span>
+                  Permissions
+                </a>
+              </li>
+            </ul>
+        </div>
+      </nav>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1>Create Trouble Ticket</h1>
+        </div>
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
+              </svg>
+              <b>&nbsp;Input Information</b>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group row">
+                      <label for="ticket_number" class="col-sm-4 col-form-label">Ticket
+                        Number</label>
+                      <div class="col-sm-8">
+                        <input type="text" class="form-control" id="ticket_number" disabled>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="dv_select" class="col-sm-4 col-form-label">DV</label>
+                      <div class="col-sm-8">
+                        <select class="selectpicker" id="dv_select" data-actions-box="true" data-live-search="true"
+                          tabindex=1 data-size="5" title="Choose one of the following...">
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="impact_level" class="col-sm-4 col-form-label">DV Impact</label>
+                      <div class="col-sm-8">
+                        <select class="selectpicker" id="impact_level" data-actions-box="true" tabindex=2
+                          title="Choose one of the following...">
+                          <option selected>None</option>
+                          <option>Low</option>
+                          <option>Medium</option>
+                          <option>High</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="mission_number" class="col-sm-4 col-form-label">Mission
+                        Number</label>
+                      <div class="col-sm-3">
+                        <input type="text" class="form-control" id="mission_number" tabindex=3>
+                      </div>
+                      <label for="leg" class="col-sm-1 col-form-label">Leg</label>
+                      <div class="col-sm-4">
+                        <select class="selectpicker" id="leg" data-actions-box="true" tabindex=4
+                          title="Choose one of the following...">
+                          <option selected>N/A</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="cso" class="col-sm-4 col-form-label">CSO Name</label>
+                      <div class="col-sm-8">
+                        <input type="email" class="form-control" id="cso" tabindex=5>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="ccir" class="col-sm-4 col-form-label">CCIR</label>
+                      <div class="col-sm-8">
+                        <select class="selectpicker" id="ccir" data-actions-box="true" tabindex=6
+                          title="Choose one of the following...">
+                          <option value="0" selected>No</option>
+                          <option value="1">Yes</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="ccir_number" class="col-sm-4 col-form-label">CCIR Number</label>
+                      <div class="col-sm-8">
+                        <input type="email" class="form-control" id="ccir_number" disabled tabindex=7>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="tail_number" class="col-sm-4 col-form-label"><b>Tail Number</b></label>
+                      <div class="col-sm-8">
+                        <select class="selectpicker" id="tail_number" data-actions-box="true" data-live-search="true"
+                          tabindex=8 data-size="5" title="Choose one of the following..." required>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-sm-10">
+                        <button type="button" id="ticket_submit" class="btn btn-primary" tabindex=12>Create
+                          Ticket</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row col-md-6">
+                    <div class="col">
+                      <div class="form-group row">
+                        <label for="category" class="col-sm-4 col-form-label"><b>Category</b></label>
+                        <div class="col-sm-8">
+                          <select class="selectpicker" id="category" data-actions-box="true" tabindex=9
+                            title="Choose one of the following..." required>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="sub_category" class="col-sm-4 col-form-label"><b>Sub
+                            Category</b></label>
+                        <div class="col-sm-8">
+                          <input type="text" class="form-control" id="sub_category" tabindex=10 required>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="issue_description" class="col-sm-4 col-form-label"><b>Issue
+                            Description</b></label>
+                        <textarea class="form-control col-sm-8" id="issue_description" rows="10" tabindex=11
+                          required></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <br>
+          <div class="card" id="mission_information" style="display:none;">
+            <div class="card-header">
+              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
+              </svg>
+              <b>&nbsp;Mission Information</b>
+            </div>
+            <div class="card-body">
+              <table id="legs_current_mission" class="display" style="width:100%">
+                <thead>
+                  <tr>
+                    <th>Leg #</th>
+                    <th>Tail #</th>
+                    <th>DV</th>
+                    <th>Dep. IATA</th>
+                    <th>Dep. Location</th>
+                    <th>Arr. IATA</th>
+                    <th>Arr. Location</th>
+                    <th>Dep. Date</th>
+                    <th>Arr. Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+      <br />
+      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+        <div class="container-fluid">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
+              <a href="mailto:89CS.SCOV.VIP.COMM@us.af.mil">89CS.SCOV.VIP.COMM@us.af.mil</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+
+</html>

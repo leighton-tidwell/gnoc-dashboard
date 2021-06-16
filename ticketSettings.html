@@ -1,0 +1,795 @@
+<html>
+
+<head>
+  <title>GNOC DV Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="./css/global.css" />
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script type="text/javascript" src="./js/user.js"></script>
+  <script>
+
+    // Get Digest for Auth purposes
+    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
+    function getFormDigest() {
+      console.log("Getting Form Digest..");
+      $.support.cors = true;
+      var _formDigest;
+      $.ajax({
+        url: hostUrl + "/_api/contextinfo",
+        type: "POST",
+        dataType: "json",
+
+        headers: { "Accept": "application/json; odata=verbose" },
+        xhrFields: { withCredentials: true },
+        async: false,
+        success: function (data) {
+          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
+          console.log(data.d.GetContextWebInformation.FormDigestValue);
+          console.log("Form Digest Done");
+
+        },
+        error: function () {
+          console.log("Error Occured");
+        }
+      });
+
+      return _formDigest;
+    }
+
+    var digest = getFormDigest();
+
+    $(function () {
+
+      if (!checkPermissions("VElDS0VUIFNFVFRJTkdT", false, true)) {
+        $("html").remove();
+      }
+
+      if (checkPermissions("VElDS0VUIFNFVFRJTkdT", false, false)) {
+        var dv_check = checkPermissions("QUREIEEgRFY=", "add_dv_div", false);
+        var category_check = checkPermissions("VElDS0VUIENBVEVHT1JJRVM=", "ticket_categories_div", false);
+        var aircraft_check = checkPermissions("QUlSQ1JBRlQgVEFJTFM=", "aircraft_tails_div", false);
+        var airport_check = checkPermissions("QUREIEFJUlBPUlQ=", "add_airport_div", false);
+
+        // nav
+        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
+        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
+        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
+          $("#tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
+        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
+        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
+        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
+        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
+          $("#flight_tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
+        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
+        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
+        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
+          $("#ccir_header_div").remove();
+        }
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
+        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
+        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
+          $("#reports_header_div").remove();
+        }
+        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
+        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
+        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
+        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
+        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
+        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
+        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
+
+        // Populate DV List
+        if (dv_check) {
+          var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('DVList')/items?$top=5000&$orderby=DV%20asc";
+          $.ajax({
+            url: urlLoad,
+            async: false,
+            method: "GET",
+            headers: {
+              "Accept": "application/json;odata=verbose"
+            },
+            success: function (data) {
+              var total = 0;
+              var allResults = data.d.results;
+              if (Number(allResults.length) > 0) {
+                var select = document.getElementById('dv_list');
+                for (var i = 0; i < Number(allResults.length); i++) {
+                  // looping through all results
+                  var opt = document.createElement('li');
+                  opt.classList.add("list-group-item");
+                  opt.setAttribute("id", "dv-" + allResults[i].Id + "");
+                  opt.innerHTML = allResults[i].DV + "<a class=\"float-right\" href=\"javascript: deleteDV(" + allResults[i].Id + ");\"><span data-feather=\"trash-2\"></span></a>";
+                  select.appendChild(opt);
+                }
+              }
+            },
+            error: function (data) {
+              //alert("Error: " + JSON.stringify(data));
+            }
+          });
+          // add dv add click handler
+          $(document).on('click', '#add_dv', function () {
+            // Disable Button
+            var dv = $("#dv").val();
+            if (dv != "") {
+              var $this = $(this);
+              var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+              if ($(this).html() !== loadingText) {
+                $this.data('original-text', $(this).html());
+                $this.html(loadingText);
+                $this.attr("disabled", true);
+              }
+
+              var itemProperties = { 'DV': dv.toUpperCase() };
+              CreateListItemWithDetails("DVList", hostUrl, itemProperties, function () {
+                alert("DV successfully added.");
+                location.reload();
+              }, function () {
+                alert("An error has occured. Please try again.");
+              });
+            }
+            else {
+              alert("DV cannot be empty.");
+            }
+          });
+        }
+
+        if (category_check) {
+          // Populate Ticket Categories
+          var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Ticket_Categories')/items?$orderby=Category%20asc";
+          $.ajax({
+            url: urlLoad,
+            async: false,
+            method: "GET",
+            headers: {
+              "Accept": "application/json;odata=verbose"
+            },
+            success: function (data) {
+              var total = 0;
+              var allResults = data.d.results;
+              if (Number(allResults.length) > 0) {
+                var select = document.getElementById('category_list');
+                for (var i = 0; i < Number(allResults.length); i++) {
+                  // looping through all results
+                  var opt = document.createElement('li');
+                  opt.classList.add("list-group-item");
+                  opt.setAttribute("id", "category-" + allResults[i].Id + "");
+                  opt.innerHTML = allResults[i].Category + "<a class=\"float-right\" href=\"javascript: deleteCategory(" + allResults[i].Id + ");\"><span data-feather=\"trash-2\"></span></a>";
+                  select.appendChild(opt);
+                }
+              }
+            },
+            error: function (data) {
+              //alert("Error: " + JSON.stringify(data));
+            }
+          });
+          // add category add click handler
+          $(document).on('click', '#add_category', function () {
+            // Disable Button
+            var category = $("#category").val();
+            if (category != "") {
+              var $this = $(this);
+              var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+              if ($(this).html() !== loadingText) {
+                $this.data('original-text', $(this).html());
+                $this.html(loadingText);
+                $this.attr("disabled", true);
+              }
+
+              var itemProperties = { 'Category': category };
+              CreateListItemWithDetails("Ticket_Categories", hostUrl, itemProperties, function () {
+                alert("Category successfully added.");
+                location.reload();
+              }, function () {
+                alert("An error has occured. Please try again.");
+              });
+            }
+            else {
+              alert("Category cannot be empty.");
+            }
+          });
+        }
+
+        if (aircraft_check) {
+          // Populate Aircraft 
+          var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('TailNumbers')/items?$top=5000&$orderby=Tail_x0020_Numbers%20asc";
+          $.ajax({
+            url: urlLoad,
+            async: false,
+            method: "GET",
+            headers: {
+              "Accept": "application/json;odata=verbose"
+            },
+            success: function (data) {
+              var total = 0;
+              var allResults = data.d.results;
+              if (Number(allResults.length) > 0) {
+                var select = document.getElementById('aircraft_list');
+                for (var i = 0; i < Number(allResults.length); i++) {
+                  // looping through all results
+                  var opt = document.createElement('li');
+                  opt.classList.add("list-group-item");
+                  opt.setAttribute("id", "tail-" + allResults[i].Id + "");
+                  opt.innerHTML = allResults[i].Tail_x0020_Numbers + "<a class=\"float-right\" href=\"javascript: deleteAircraft(" + allResults[i].Id + ");\"><span data-feather=\"trash-2\"></span></a>";
+                  select.appendChild(opt);
+                }
+              }
+            },
+            error: function (data) {
+              //alert("Error: " + JSON.stringify(data));
+            }
+          });
+          // add category add aircraft handler
+          $(document).on('click', '#add_aircraft', function () {
+            // Disable Button
+            var aircraft = $("#aircraft").val();
+            if (aircraft != "") {
+              var $this = $(this);
+              var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+              if ($(this).html() !== loadingText) {
+                $this.data('original-text', $(this).html());
+                $this.html(loadingText);
+                $this.attr("disabled", true);
+              }
+
+              var itemProperties = { 'Tail_x0020_Numbers': aircraft };
+              CreateListItemWithDetails("TailNumbers", hostUrl, itemProperties, function () {
+                alert("Aircraft successfully added.");
+                location.reload();
+              }, function () {
+                alert("An error has occured. Please try again.");
+              });
+            }
+            else {
+              alert("Tail number cannot be empty.");
+            }
+          });
+        }
+
+        if (airport_check) {
+          //Populate IATA
+          var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('iata_list')/items?$top=5000&$orderby=Title%20asc";
+          $.ajax({
+            url: urlLoad,
+            async: false,
+            method: "GET",
+            headers: {
+              "Accept": "application/json;odata=verbose"
+            },
+            success: function (data) {
+              var total = 0;
+              var allResults = data.d.results;
+              if (Number(allResults.length) > 0) {
+                var select = document.getElementById('iata_list');
+                for (var i = 0; i < Number(allResults.length); i++) {
+                  // looping through all results
+                  var opt = document.createElement('li');
+                  opt.classList.add("list-group-item");
+                  opt.setAttribute("id", "iata-" + allResults[i].Id + "");
+                  opt.innerHTML = allResults[i].Title + "<a class=\"float-right\" href=\"javascript: deleteIata(" + allResults[i].Id + ");\"><span data-feather=\"trash-2\"></span></a>";
+                  select.appendChild(opt);
+                }
+              }
+            },
+            error: function (data) {
+              //alert("Error: " + JSON.stringify(data));
+            }
+          });
+          // add iata add click handler
+          $(document).on('click', '#add_iata', function () {
+            // Disable Button
+            var iata = $("#iata").val();
+            if (iata != "") {
+              var $this = $(this);
+              var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+              if ($(this).html() !== loadingText) {
+                $this.data('original-text', $(this).html());
+                $this.html(loadingText);
+                $this.attr("disabled", true);
+              }
+
+              var itemProperties = { 'Title': iata.toUpperCase() };
+              CreateListItemWithDetails("iata_list", hostUrl, itemProperties, function () {
+                alert("IATA successfully added.");
+                location.reload();
+              }, function () {
+                alert("An error has occured. Please try again.");
+              });
+            }
+            else {
+              alert("IATA cannot be empty.");
+            }
+          });
+        }
+      }
+
+      $('#nightMode').click(function () {
+        if (!$.cookie('nightmode')) {
+          nightmode = true;
+          $.cookie('nightmode', 'true');
+          console.log("cookie made");
+        }
+        var $this = $(this);
+        if ($(this).html() == '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun" style="width:23px;height:23px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>') {
+          console.log("currently night mode");
+          $.cookie('nightmode', 'false');
+          nightmode = false;
+          checkNightMode();
+        }
+        else {
+          console.log("currently day mode");
+          $.cookie('nightmode', 'true');
+          nightmode = true;
+          checkNightMode();
+        }
+      });
+      checkNightMode();
+      feather.replace();
+    });
+
+
+
+    function CreateListItemWithDetails(listName, webUrl, itemProperties, success, failure) {
+      var itemType = GetItemTypeForListName(listName);
+      if (listName == "Ticket_Categories")
+        itemType = "SP.Data.Ticket_x005f_CategoriesListItem";
+
+      if (listName == "iata_list")
+        itemType = "SP.Data.Iata_x005f_listListItem";
+
+      itemProperties["__metadata"] = { "type": itemType };
+
+      $.ajax({
+        url: webUrl + "_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(itemProperties),
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest
+        },
+        success: function (data) {
+          success(data);
+        },
+        error: function (data) {
+          failure(data);
+        }
+      });
+    }
+
+    // Get List Item Type metadata
+    function GetItemTypeForListName(name) {
+      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
+    }
+
+    function deleteDV(id) {
+      $.ajax({
+        url: hostUrl + "/_api/web/lists/getbytitle('DVList')/items(" + id + ")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest,
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE",
+        },
+        success: function (data) {
+          $("#dv-" + id + "").hide('slow', function () { $target.remove(); });
+        },
+        error: function (data) {
+          alert("An error has occured. Please try again.");
+        }
+      });
+    }
+
+    function deleteCategory(id) {
+      $.ajax({
+        url: hostUrl + "/_api/web/lists/getbytitle('Ticket_Categories')/items(" + id + ")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest,
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE",
+        },
+        success: function (data) {
+          $("#category-" + id + "").hide('slow', function () { $target.remove(); });
+        },
+        error: function (data) {
+          alert("An error has occured. Please try again.");
+        }
+      });
+    }
+
+    function deleteAircraft(id) {
+      $.ajax({
+        url: hostUrl + "/_api/web/lists/getbytitle('TailNumbers')/items(" + id + ")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest,
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE",
+        },
+        success: function (data) {
+          $("#tail-" + id + "").hide('slow', function () { $target.remove(); });
+        },
+        error: function (data) {
+          alert("An error has occured. Please try again.");
+        }
+      });
+    }
+
+    function deleteIata(id) {
+      $.ajax({
+        url: hostUrl + "/_api/web/lists/getbytitle('iata_list')/items(" + id + ")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest,
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE",
+        },
+        success: function (data) {
+          $("#iata-" + id + "").hide('slow', function () { $target.remove(); });
+        },
+        error: function (data) {
+          alert("An error has occured. Please try again.");
+        }
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="./index.html">
+      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z" />
+      </svg> &nbsp;
+      <b>GNOC DV Dashboard</b>
+    </a>
+    <button type="button" id="nightMode" class="btn btn-secondary float-right" style="margin-right:5px;"><span
+        data-feather="moon"></span></button>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item" id="dashboard_div">
+              <a class="nav-link" href="./index.html">
+                <span data-feather="home"></span>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item" id="flight_schedule_div">
+              <a class="nav-link" href="./flightschedule.html">
+                <span data-feather="clock"></span>
+                Flight Schedule
+              </a>
+            </li>
+            <li class="nav-item" id="contact_list_div">
+              <a class="nav-link" href="./contactList.html">
+                <span data-feather="phone"></span>
+                Contact List
+              </a>
+            </li>
+          </ul>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+            id="tickets_header_div">
+            <span>Trouble Tickets</span>
+            <a class="d-flex align-items-center text-muted" href="./ticketSettings.html" id="ticket_settings_div">
+              <span data-feather="settings"></span>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2">
+            <li class="nav-item" id="create_tts_div">
+              <a class="nav-link" href="./createTTS.html">
+                <span data-feather="file"></span>
+                Create a TTS
+              </a>
+            </li>
+            <li class="nav-item" id="create_master_tts_div">
+              <a class="nav-link" href="./createMasterTTS.html">
+                <span data-feather="file"></span>
+                Create a Master TTS
+              </a>
+            </li>
+            <li class="nav-item" id="view_tickets_div">
+              <a class="nav-link" href="./viewTickets.html">
+                <span data-feather="file-text"></span>
+                View Tickets
+              </a>
+            </li>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="flight_tickets_header_div">
+              <span>Flight Tickets</span>
+              <a class="d-flex align-items-center text-muted" href="./createFlightTicket.html"
+                id="create_flight_ticket_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="create_flight_ticket_div">
+                <a class="nav-link" href="./createFlightTicket.html">
+                  <span data-feather="file"></span>
+                  Create a Flight Ticket
+                </a>
+              </li>
+              <li class="nav-item" id="view_flight_tickets_div">
+                <a class="nav-link" href="./viewFlightTickets.html">
+                  <span data-feather="file-text"></span>
+                  View Flight Tickets
+                </a>
+              </li>
+              <li class="nav-item" id="view_missions_div">
+                <a class="nav-link" href="./viewMissions.html">
+                  <span data-feather="file-text"></span>
+                  View Missions
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="ccir_header_div">
+              <span>CCIRs</span>
+              <a class="d-flex align-items-center text-muted" href="./createCCIR.html" id="add_a_ccir_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="add_a_ccir_div">
+                <a class="nav-link" href="./createCCIR.html">
+                  <span data-feather="file"></span>
+                  Add a CCIR
+                </a>
+              </li>
+              <li class="nav-item" id="view_ccirs_div">
+                <a class="nav-link" href="./viewCCIRS.html">
+                  <span data-feather="file-text"></span>
+                  View CCIRs
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="reports_header_div">
+              <span>Reports</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="24_hour_report_div">
+                <a class="nav-link" href="./ticketReport.html">
+                  <span data-feather="file-text"></span>
+                  24 Hour Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="weekend_report_div">
+                <a class="nav-link" href="./weekendTicketReport.html">
+                  <span data-feather="file-text"></span>
+                  Weekend Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="morning_slides_div">
+                <a class="nav-link" href="./morningSlides.html">
+                  <span data-feather="file-text"></span>
+                  Morning Slides
+                </a>
+              </li>
+              <li class="nav-item" id="personnel_stats_div">
+                <a class="nav-link" href="./personnelStats.html">
+                  <span data-feather="file-text"></span>
+                  Personnel Stats
+                </a>
+              </li>
+              <li class="nav-item" id="monthly_metrics_div">
+                <a class="nav-link" href="./metrics.html">
+                  <span data-feather="file-text"></span>
+                  Monthly Metrics
+                </a>
+              </li>
+              <li class="nav-item" id="permissions_div">
+                <a class="nav-link" href="./permissions.html">
+                  <span data-feather="file-text"></span>
+                  Permissions
+                </a>
+              </li>
+            </ul>
+        </div>
+      </nav>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1>Ticket Settings</h1>
+        </div>
+        <div class="col-md-12">
+          <div class="card" id="add_dv_div">
+            <div class="card-header">
+              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
+              </svg>
+              <b>Add a DV</b>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group row">
+                      <label for="dv" class="col-sm-4 col-form-label">DV Name</label>
+                      <div class="col-sm-8">
+                        <input type="text" class="form-control" id="dv">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-sm-10">
+                        <button type="button" id="add_dv" class="btn btn-primary">Add
+                          DV</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row col-md-6">
+                    <div class="col">
+                      <div class="form-group row" style="height:300px;overflow:auto;">
+                        <ul class="list-group" id="dv_list" style="width:99%;">
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <br />
+          <div class="card" id="ticket_categories_div">
+            <div class="card-header">
+              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
+              </svg>
+              <b>Ticket Categories</b>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group row">
+                      <label for="category" class="col-sm-4 col-form-label">Category</label>
+                      <div class="col-sm-8">
+                        <input type="text" class="form-control" id="category">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-sm-10">
+                        <button type="button" id="add_category" class="btn btn-primary">Add
+                          Category</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row col-md-6">
+                    <div class="col">
+                      <div class="form-group row" style="height:300px;overflow:auto;">
+                        <ul class="list-group" id="category_list" style="width:99%;">
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <br />
+          <div class="card" id="aircraft_tails_div">
+            <div class="card-header">
+              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
+              </svg>
+              <b>Aircraft Tails</b>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group row">
+                      <label for="aircraft" class="col-sm-4 col-form-label">Tail Number</label>
+                      <div class="col-sm-8">
+                        <input type="text" class="form-control" id="aircraft">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-sm-10">
+                        <button type="button" id="add_aircraft" class="btn btn-primary">Add
+                          Aircraft</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row col-md-6">
+                    <div class="col">
+                      <div class="form-group row" style="height:300px;overflow:auto;">
+                        <ul class="list-group" id="aircraft_list" style="width:99%;">
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <br />
+          <div class="card" id="add_airport_div">
+            <div class="card-header">
+              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
+              </svg>
+              <b>Airport IATAs</b>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group row">
+                      <label for="iata" class="col-sm-4 col-form-label">IATA</label>
+                      <div class="col-sm-8">
+                        <input type="text" class="form-control" id="iata" placeholder="KADW">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-sm-10">
+                        <button type="button" id="add_iata" class="btn btn-primary">Add
+                          IATA</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row col-md-6">
+                    <div class="col">
+                      <div class="form-group row" style="height:300px;overflow:auto;">
+                        <ul class="list-group" id="iata_list" style="width:99%;">
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+      <br />
+      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+        <div class="container-fluid">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
+              <a href="mailto:89CS.SCOV.VIP.COMM@us.af.mil">89CS.SCOV.VIP.COMM@us.af.mil</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+
+</html>

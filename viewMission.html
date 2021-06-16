@@ -1,0 +1,433 @@
+<html>
+
+<head>
+  <title>GNOC DV Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
+  <link rel="stylesheet" href="./css/global.css" />
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js"></script>
+  <script type="text/javascript" src="./js/user.js"></script>
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script>
+    var listName = "Missions";
+
+    // To get ticket Number from URL
+    var getUrlParameter = function getUrlParameter(sParam) {
+      var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+      for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+          return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+      }
+    };
+    var mission = getUrlParameter('mission');
+
+    $(function () {
+
+      if (!checkPermissions("VklFVyBNSVNTSU9O", false, true)) {
+        $("html").remove();
+      }
+
+      // Permissions of content if page true and let page content run
+      if (checkPermissions("VklFVyBNSVNTSU9O", false, false)) {
+
+        // nav
+        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
+        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
+        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
+          $("#tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
+        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
+        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
+        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
+        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
+          $("#flight_tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
+        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
+        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
+        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
+          $("#ccir_header_div").remove();
+        }
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
+        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
+        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
+          $("#reports_header_div").remove();
+        }
+        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
+        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
+        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
+        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
+        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
+        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
+        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
+
+
+        $.fn.dataTable.moment('MM/DD/YYYY HH:mm');
+        // Create Ticket Table
+        $('#listTickets').DataTable({
+          dom: 'Bfrtip',
+          buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+          ],
+          "order": [[7, "desc"]]
+        });
+        // Get all of the flight tickets:
+        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$top=500&$orderby=Created%20desc&$filter=Mission_Number eq '" + mission + "'";
+        $.ajax({
+          url: urlLoad,
+          async: false,
+          method: "GET",
+          headers: {
+            "Accept": "application/json;odata=verbose"
+          },
+          success: function (data) {
+            var total = 0;
+            var arrayOfTimes = [];
+            var allResults = data.d.results;
+            if (Number(allResults.length) > 0) {
+
+              for (var i = 0; i < Number(allResults.length); i++) {
+                // looping through all results
+                var currentTime = allResults[i].Created;
+
+                if (!arrayOfTimes.includes(currentTime)) {
+                  // this is to make sure no duplicates are included.
+                  var href = "<a href=\"./viewFlightTicket.html?ticket=" + allResults[i].Id + "\">" + allResults[i].Mission_Number + "</a>";
+                  var depDate = convertDate(allResults[i].Departure_Date, 0);
+                  var arrDate = convertDate(allResults[i].Arrival_Date, 0);
+                  console.log(arrDate);
+                  console.log(allResults[i].Arrival_Date);
+
+
+                  $('#listTickets').DataTable().row.add([href, allResults[i].Tail_Number, allResults[i].DV, allResults[i].Departure_IATA, allResults[i].Departure_Location, allResults[i].Arrival_IATA, allResults[i].Arrival_Location, depDate, arrDate]).draw();
+                  arrayOfTimes.push(currentTime);
+                }
+              }
+            }
+          },
+          error: function (data) {
+            //alert("Error: " + JSON.stringify(data));
+          }
+        });
+
+        // Get all of the tickets:
+        var select = document.getElementById('ticket_body');
+        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$filter=Mission_Number eq '" + mission + "'";
+        $.ajax({
+          url: urlLoad,
+          async: false,
+          method: "GET",
+          headers: {
+            "Accept": "application/json;odata=verbose"
+          },
+          success: function (data) {
+            var allResults = data.d.results;
+            if (Number(allResults.length) > 0) {
+              // looping through all results
+              for (var i = 0; i < Number(allResults.length); i++) {
+                var opt = document.createElement('div');
+                opt.className = "card";
+                opt.innerHTML = "<div class=\"card-header\"><b><a href=\"viewTicket.html?ticket=" + allResults[i].GNOC_Ticket_Number + "\">Ticket #" + allResults[i].GNOC_Ticket_Number + "</a></b></div>";
+                var openDate = convertDate(allResults[i].Date_Opened, 1);
+                var impact = allResults[i].Impact_Level;
+                if (impact == null)
+                  impact = "N/A";
+
+                var lastAction = allResults[i].Last_Reported_Action;
+                if (lastAction == null)
+                  lastAction = "N/A";
+
+                var ccir = allResults[i].CCIR_Number;
+                if (ccir == null)
+                  ccir = "N/A";
+
+                opt.innerHTML = opt.innerHTML + "<div class=\"card-body\"><div class=\"row\"><div class=\"col\"><div class=\"form-group row\"><label for=\"status\" class=\"col-sm-4 col-form-label\">Status</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"status\" value=\"" + allResults[i].Status + "\" disabled></div></div><div class=\"form-group row\"><label for=\"open_date\" class=\"col-sm-4 col-form-label\">Open Date</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"open_date\" value=\"" + openDate + "\" disabled></div></div><div class=\"form-group row\"><label for=\"ticket_number\" class=\"col-sm-4 col-form-label\">Ticket Number</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"ticket_number\" value=\"" + allResults[i].GNOC_Ticket_Number + "\" disabled></div></div><div class=\"form-group row\"><label for=\"dv_select\" class=\"col-sm-4 col-form-label\">DV</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"dv_select\" value=\"" + allResults[i].DV + "\" disabled></div></div><div class=\"form-group row\"><label for=\"impact_level\" class=\"col-sm-4 col-form-label\">DV Impact</label><div class=\"col-sm-8\"><input type=\email\" class=\"form-control\" id=\"impact_level\" value=\"" + impact + "\" disabled></div></div><div class=\"form-group row\"><label for=\"mission_number\" class=\"col-sm-4 col-form-label\">Mission Number</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"mission_number\" value=\"" + allResults[i].Mission_Number + "\" disabled></div></div><div class=\"form-group row\"><label for=\"cso\" class=\"col-sm-4 col-form-label\">CSO Name</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"cso\" value=\"" + allResults[i].CSO + "\" disabled></div></div><div class=\"form-group row\"><label for=\"ccir_number\" class=\"col-sm-4 col-form-label\">CCIR Number</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"ccir_number\" value=\"" + ccir + "\" disabled></div></div><div class=\"form-group row\"><label for=\"tail_number\" class=\"col-sm-4 col-form-label\">Tail Number</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"tail_number\" value=\"" + allResults[i].Tail_Number + "\" disabled></div></div></div><div class=\"row col-md-6\"><div class=\"col\"><div class=\"form-group row\"><label for=\"category\" class=\"col-sm-4 col-form-label\">Category</label><div class=\"col - sm - 8\"><input type=\"email\" class=\"form-control\" id=\"category\" value=\"" + allResults[i].Category + "\" disabled></div></div><div class=\"form-group row\"><label for=\"sub_category\" class=\"col-sm-4 col-form-label\">Sub Category</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"sub_category\" value=\"" + allResults[i].Sub_Category + "\" disabled></div></div><div class=\"form-group row\"><label for=\"issue_description\" class=\"col-sm-4 col-form-label\">Initial Description</label><textarea disabled class=\"form-control col-sm-8\" id=\"issue_description\" rows=\"10\">" + allResults[i].Issue_Description + "</textarea></div><div class=\"form-group row\"><label for=\"issue_description\" class=\"col-sm-4 col-form-label\">Most Recent Update</label><textarea class=\"form-control col-sm-8\" id=\"update_text\" rows=\"10\" disabled>" + lastAction + "</textarea></div></div></div></div></div><br />";
+                select.appendChild(opt);
+                var br = document.createElement("br");
+                select.appendChild(br);
+              }
+            }
+          },
+          error: function (data) {
+            //alert("Error: " + JSON.stringify(data));
+          }
+        });
+      }
+      feather.replace();
+    });
+
+    function convertDate(date, offset) {
+      var convertDate = new Date(date);
+      var month = convertDate.getMonth();
+      month = ("0" + (convertDate.getMonth() + 1)).slice(-2)
+
+      var date = convertDate.getDate();
+      if (convertDate.getDate() < 10)
+        date = "0" + convertDate.getDate();
+
+      var minutes = convertDate.getUTCMinutes();
+      if (convertDate.getUTCMinutes() < 10)
+        minutes = "0" + convertDate.getUTCMinutes();
+
+      var t = new Date();
+      if (offset == 1) {
+        var currentoffset = convertDate.getTimezoneOffset() * 60000;
+        convertDate.setTime(convertDate.getTime() + currentoffset);
+      }
+
+      var hours = convertDate.getHours();
+
+      if (convertDate.getHours() < 10)
+        hours = "0" + hours;
+
+
+      return dateString = month + "/" + date + "/" + convertDate.getUTCFullYear() + " " + hours + ":" + minutes + "Z";
+    }
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="./index.html">
+      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z" />
+      </svg> &nbsp;
+      <b>GNOC DV Dashboard</b>
+    </a>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item" id="dashboard_div">
+              <a class="nav-link" href="./index.html">
+                <span data-feather="home"></span>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item" id="flight_schedule_div">
+              <a class="nav-link" href="./flightschedule.html">
+                <span data-feather="clock"></span>
+                Flight Schedule
+              </a>
+            </li>
+            <li class="nav-item" id="contact_list_div">
+              <a class="nav-link" href="./contactList.html">
+                <span data-feather="phone"></span>
+                Contact List
+              </a>
+            </li>
+          </ul>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+            id="tickets_header_div">
+            <span>Trouble Tickets</span>
+            <a class="d-flex align-items-center text-muted" href="./ticketSettings.html" id="ticket_settings_div">
+              <span data-feather="settings"></span>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2">
+            <li class="nav-item" id="create_tts_div">
+              <a class="nav-link" href="./createTTS.html">
+                <span data-feather="file"></span>
+                Create a TTS
+              </a>
+            </li>
+            <li class="nav-item" id="create_master_tts_div">
+              <a class="nav-link" href="./createMasterTTS.html">
+                <span data-feather="file"></span>
+                Create a Master TTS
+              </a>
+            </li>
+            <li class="nav-item" id="view_tickets_div">
+              <a class="nav-link" href="./viewTickets.html">
+                <span data-feather="file-text"></span>
+                View Tickets
+              </a>
+            </li>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="flight_tickets_header_div">
+              <span>Flight Tickets</span>
+              <a class="d-flex align-items-center text-muted" href="./createFlightTicket.html"
+                id="create_flight_ticket_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="create_flight_ticket_div">
+                <a class="nav-link" href="./createFlightTicket.html">
+                  <span data-feather="file"></span>
+                  Create a Flight Ticket
+                </a>
+              </li>
+              <li class="nav-item" id="view_flight_tickets_div">
+                <a class="nav-link" href="./viewFlightTickets.html">
+                  <span data-feather="file-text"></span>
+                  View Flight Tickets
+                </a>
+              </li>
+              <li class="nav-item" id="view_missions_div">
+                <a class="nav-link active" href="./viewMissions.html">
+                  <span data-feather="file-text"></span>
+                  View Missions <span class="sr-only">(current)</span>
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="ccir_header_div">
+              <span>CCIRs</span>
+              <a class="d-flex align-items-center text-muted" href="./createCCIR.html" id="add_a_ccir_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="add_a_ccir_div">
+                <a class="nav-link" href="./createCCIR.html">
+                  <span data-feather="file"></span>
+                  Add a CCIR
+                </a>
+              </li>
+              <li class="nav-item" id="view_ccirs_div">
+                <a class="nav-link" href="./viewCCIRS.html">
+                  <span data-feather="file-text"></span>
+                  View CCIRs
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="reports_header_div">
+              <span>Reports</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="24_hour_report_div">
+                <a class="nav-link" href="./ticketReport.html">
+                  <span data-feather="file-text"></span>
+                  24 Hour Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="weekend_report_div">
+                <a class="nav-link" href="./weekendTicketReport.html">
+                  <span data-feather="file-text"></span>
+                  Weekend Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="morning_slides_div">
+                <a class="nav-link" href="./morningSlides.html">
+                  <span data-feather="file-text"></span>
+                  Morning Slides
+                </a>
+              </li>
+              <li class="nav-item" id="personnel_stats_div">
+                <a class="nav-link" href="./personnelStats.html">
+                  <span data-feather="file-text"></span>
+                  Personnel Stats
+                </a>
+              </li>
+              <li class="nav-item" id="monthly_metrics_div">
+                <a class="nav-link" href="./metrics.html">
+                  <span data-feather="file-text"></span>
+                  Monthly Metrics
+                </a>
+              </li>
+              <li class="nav-item" id="permissions_div">
+                <a class="nav-link" href="./permissions.html">
+                  <span data-feather="file-text"></span>
+                  Permissions
+                </a>
+              </li>
+            </ul>
+        </div>
+      </nav>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1>View Mission</h1>
+        </div>
+        <div class="col-md-12" id="ticket_body">
+          <div class="card">
+            <div class="card-header">
+              <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
+                  d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
+              </svg>
+              <b>&nbsp;View Mission</b>
+            </div>
+            <div class="card-body">
+              <table id="listTickets" class="display" style="width:100%">
+                <thead>
+                  <tr>
+                    <th>Mission #</th>
+                    <th>Tail #</th>
+                    <th>DV</th>
+                    <th>Dep. IATA</th>
+                    <th>Dep. Location</th>
+                    <th>Arr. IATA</th>
+                    <th>Arr. Location</th>
+                    <th>Dep. Date</th>
+                    <th>Arr. Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th>Mission #</th>
+                    <th>Tail #</th>
+                    <th>DV</th>
+                    <th>Dep. IATA</th>
+                    <th>Dep. Location</th>
+                    <th>Arr. IATA</th>
+                    <th>Arr. Location</th>
+                    <th>Dep. Date</th>
+                    <th>Arr. Date</th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          <br />
+        </div>
+      </main>
+      <br />
+      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+        <div class="container-fluid">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
+              <a href="mailto:89CS.SCOV.VIP.COMM@us.af.mil">89CS.SCOV.VIP.COMM@us.af.mil</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+
+</html>

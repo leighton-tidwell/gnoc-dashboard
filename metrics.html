@@ -1,0 +1,1362 @@
+<html>
+
+<head>
+  <title>GNOC DV Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
+  <link rel="stylesheet" href="./css/global.css" />
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.3.1/dist/pptxgen.bundle.js"></script>
+  <script type="text/javascript" src="./js/user.js"></script>
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script>
+    var now = new Date();
+    var now3, month3, lastDay3, startDate3, endDate3;
+    now.setMonth(now.getMonth() - 1);
+    var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+    var startDate = now.getFullYear() + "-" + (month) + "-01T00:00:00Z";
+    var endDate = now.getFullYear() + "-" + (month) + "-" + lastDay + "T23:59:59Z";
+    var options = { month: 'long' };
+    console.log(startDate + " -(INITIAL)  " + endDate);
+    var previousMonths = [0, 0, now.toLocaleDateString("en-US", options)];
+
+    $(function () {
+
+      // Check permissions of page:
+      if (!checkPermissions("TU9STklORyBTTElERVM=", false, true)) {
+        $("html").remove();
+      }
+
+      // Permissions of content if page true and let page content run
+      if (checkPermissions("TU9STklORyBTTElERVM=", false, false)) {
+
+
+        // nav
+        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
+        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
+        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
+        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
+          $("#tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
+        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
+        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
+        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
+        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
+          $("#flight_tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
+        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
+        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
+        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
+          $("#ccir_header_div").remove();
+        }
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
+        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
+        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
+          $("#reports_header_div").remove();
+        }
+        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
+        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
+        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
+        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
+        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
+        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
+
+        $("#selected_date").val(now.getFullYear() + "-" + month);
+        $('#selected_date').on('change', function (e) {
+          var dateVal = $(this).val();
+          var dateSplit = dateVal.split("-");
+          var dateMonth = Number(dateSplit[1]) - 1;
+          var dateYear = dateSplit[0];
+
+          now = new Date(dateYear, dateMonth, 1, 0, 0, 0);
+          lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+          month = ("0" + (now.getMonth() + 1)).slice(-2);
+          startDate = now.getFullYear() + "-" + (month) + "-01T00:00:00Z";
+          endDate = now.getFullYear() + "-" + (month) + "-" + lastDay + "T23:59:59Z";
+          previousMonths = [0, 0, now.toLocaleDateString("en-US", options)];
+
+          console.log("Start Date and End Date 1: " + startDate + " - " + endDate);
+        });
+
+        $(document).on('click', '#genAllPdf', function () {
+          var dateVal = $("#selected_date").val();
+          var dateSplit = dateVal.split("-");
+          var dateMonth = Number(dateSplit[1]) - 1;
+          var dateYear = dateSplit[0];
+
+          // Lets set the date up for the 3 months:
+          now3 = new Date(dateYear, dateMonth, 1, 0, 0, 0);
+          now3.setMonth(now3.getMonth() - 2);
+          month3 = ("0" + (now3.getMonth() + 1)).slice(-2);
+          startDate3 = now3.getFullYear() + "-" + (month3) + "-01T00:00:00Z";
+
+          now3 = new Date(dateYear, dateMonth, 1, 0, 0, 0); // reset the date
+          now3.setMonth(now3.getMonth() - 1);
+          lastDay3 = new Date(now3.getFullYear(), now3.getMonth() + 1, 0).getDate();
+          month3 = ("0" + (now3.getMonth() + 1)).slice(-2);
+          endDate3 = now3.getFullYear() + "-" + (month3) + "-" + lastDay3 + "T23:59:59Z";
+
+          console.log("Start Date & End Date 3: " + startDate3 + " - " + endDate3);
+          // the above is probably not the most efficient way to do this lol - but for now it works.
+
+          var $this = $(this);
+          var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+          if ($(this).html() !== loadingText) {
+            $this.data('original-text', $(this).html());
+            $this.html(loadingText);
+            $this.attr("disabled", true);
+          }
+
+          dataGrab();
+          generatePDF();
+        });
+
+      }
+
+      feather.replace();
+    });
+
+    function convertDate(date, offset) {
+      var convertDate = new Date(date);
+      var month = convertDate.getUTCMonth();
+      if (convertDate.getUTCMonth() + 1 < 10) {
+        month = convertDate.getUTCMonth() + 1;
+        month = "0" + month;
+      }
+      else
+        month = convertDate.getUTCMonth() + 1;
+
+      var date = convertDate.getDate();
+      if (convertDate.getDate() < 10)
+        date = "0" + convertDate.getDate();
+
+      var minutes = convertDate.getUTCMinutes();
+      if (convertDate.getUTCMinutes() < 10)
+        minutes = "0" + convertDate.getUTCMinutes();
+
+      var t = new Date();
+      if (offset == 1) {
+        var currentoffset = convertDate.getTimezoneOffset() * 60000;
+        convertDate.setTime(convertDate.getTime() + currentoffset);
+      }
+      var hours = convertDate.getHours();
+
+      if (convertDate.getHours() < 10)
+        hours = "0" + hours;
+
+      return dateString = month + "/" + date + "/" + convertDate.getUTCFullYear() + " " + hours + ":" + minutes + "Z";
+    }
+
+    // Globals
+    var ticketData;
+    var ticketData3Months;
+    var ccirData;
+    var missionData;
+    var missionData3Months;
+    var dvTotalCCIRs = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+    var dvTotalTickets = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+    var dvMissionImpact = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+    var dvMissionImpact3Months = { VPOTUS: [0, 0, 0], SECSTATE: [0, 0, 0], SECDEF: [0, 0, 0], CJCS: [0, 0, 0] };
+    var legsPerDv = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+    var legsPerDv3Months = { VPOTUS: [0, 0, 0], SECSTATE: [0, 0, 0], SECDEF: [0, 0, 0], CJCS: [0, 0, 0] };
+    var legsPerAc = { VPOTUS: {}, SECSTATE: {}, SECDEF: {}, CJCS: {} };
+    var missionsPerDV = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+    var missionsPerDv3Months = { VPOTUS: [0, 0, 0], SECSTATE: [0, 0, 0], SECDEF: [0, 0, 0], CJCS: [0, 0, 0] };
+    var percentMissionsIssues = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+    var percentMissionIssues3Months = { VPOTUS: [0, 0, 0], SECSTATE: [0, 0, 0], SECDEF: [0, 0, 0], CJCS: [0, 0, 0] };
+    var legImpactPer3Months = { VPOTUS: {}, SECSTATE: {}, SECDEF: {}, CJCS: {} };
+    var ticketCategories3Months = { VPOTUS: [0, 0, 0], SECSTATE: [0, 0, 0], SECDEF: [0, 0, 0], CJCS: [0, 0, 0] };
+    var ticketCategories = [];
+    var dvTicketCategories = { VPOTUS: [[], [], []], SECSTATE: [[], [], []], SECDEF: [[], [], []], CJCS: [[], [], []] };
+    var ticketCategoryNumbers = [];
+    var tailsWithTickets = [];
+    var tailsNoImpact = [];
+    var tailsLowImpact = [];
+    var tailsMedImpact = [];
+    var tailsHighImpact = [];
+    function dataGrab() {
+      var dvs = ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"];
+      grabAllTickets();
+      grabAllMissions();
+      totalCCIRS();
+      dvTotalTicketCount();
+      dvTotalMissionImpact();
+      legsPerDvCount();
+      missionsPerDvCount();
+      for (var i = 0; i < dvs.length; i++) {
+        legsPerAcCount(dvs[i]);
+      }
+      for (var i = 0; i < dvs.length; i++) {
+        percentMissionsIssuesCount(dvs[i]);
+      }
+      ticketsByCategoryFunc();
+      ticketsByTail();
+      grabAllData3Months();
+      //dvTotalTicketCount3Months()
+      for (var i = 0; i < dvs.length; i++) {
+        legsWithIssues3Months(dvs[i]);
+      }
+      for (var i = 0; i < dvs.length; i++) {
+        legsImpact3Months(dvs[i]);
+      }
+      for (var i = 0; i < dvs.length; i++) {
+        dvTicketCatFunc(dvs[i]);
+      }
+    }
+
+    function grabAllTickets() {
+      // First lets pull ALL of the tickets TOTAL
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$top=5000&$filter=Created le '" + endDate + "' and Created ge '" + startDate + "'";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          ticketData = data.d.results;
+        }
+      });
+    }
+
+    function grabAllMissions() {
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=Created le '" + endDate + "' and Created ge '" + startDate + "'";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          missionData = data.d.results;
+        }
+      });
+    }
+
+    function totalCCIRS() {
+      // First lets pull ALL of the CCIRs TOTAL
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('CCIR')/items?$top=5000&$filter=Date le '" + endDate + "' and Date ge '" + startDate + "'";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          var allResults = data.d.results;
+          ccirData = data.d.results;
+          if (allResults.length > 0) {
+            for (var i = 0; i < allResults.length; i++) {
+              // looping through all results
+              var currentTime = allResults[i].Created;
+              if (allResults[i].DV == "VPOTUS") {
+                dvTotalCCIRs.VPOTUS++;
+              }
+              else if (allResults[i].DV == "SECSTATE") {
+                dvTotalCCIRs.SECSTATE++;
+              }
+              else if (allResults[i].DV == "SECDEF") {
+                dvTotalCCIRs.SECDEF++;
+              }
+              else if (allResults[i].DV == "CJCS") {
+                dvTotalCCIRs.CJCS++;
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function dvTotalTicketCount() {
+      var total = 0;
+      for (i = 0; i < ticketData.length; i++) {
+        if (ticketData[i].DV == "VPOTUS")
+          dvTotalTickets.VPOTUS++;
+        if (ticketData[i].DV == "SECSTATE")
+          dvTotalTickets.SECSTATE++;
+        if (ticketData[i].DV == "SECDEF")
+          dvTotalTickets.SECDEF++;
+        if (ticketData[i].DV == "CJCS")
+          dvTotalTickets.CJCS++;
+      }
+    }
+
+    function dvTotalMissionImpact() {
+      var total = 0;
+      for (i = 0; i < ticketData.length; i++) {
+        if (ticketData[i].DV == "VPOTUS" && ticketData[i].Leg != "N/A" && ticketData[i].Impact_Level != "None") {
+          dvMissionImpact.VPOTUS++;
+        }
+        if (ticketData[i].DV == "SECSTATE" && ticketData[i].Leg != "N/A" && ticketData[i].Impact_Level != "None") {
+          dvMissionImpact.SECSTATE++;
+        }
+        if (ticketData[i].DV == "SECDEF" && ticketData[i].Leg != "N/A" && ticketData[i].Impact_Level != "None") {
+          dvMissionImpact.SECDEF++;
+        }
+        if (ticketData[i].DV == "CJCS" && ticketData[i].Leg != "N/A" && ticketData[i].Impact_Level != "None") {
+          dvMissionImpact.CJCS++;
+        }
+      }
+    }
+
+    function legsPerDvCount() {
+      var total = 0;
+      for (i = 0; i < missionData.length; i++) {
+        if (missionData[i].DV == "VPOTUS")
+          legsPerDv.VPOTUS++;
+        if (missionData[i].DV == "SECSTATE")
+          legsPerDv.SECSTATE++;
+        if (missionData[i].DV == "SECDEF")
+          legsPerDv.SECDEF++;
+        if (missionData[i].DV == "CJCS")
+          legsPerDv.CJCS++;
+      }
+    }
+
+    function missionsPerDvCount() {
+      var total = 0;
+      var missions = [];
+      for (i = 0; i < missionData.length; i++) {
+        if (missionData[i].DV == "VPOTUS" && !missions.includes(missionData[i].Mission_Number)) {
+          missionsPerDV.VPOTUS++;
+          missions.push(missionData[i].Mission_Number);
+        }
+        if (missionData[i].DV == "SECSTATE" && !missions.includes(missionData[i].Mission_Number)) {
+          missionsPerDV.SECSTATE++;
+          missions.push(missionData[i].Mission_Number);
+        }
+        if (missionData[i].DV == "SECDEF" && !missions.includes(missionData[i].Mission_Number)) {
+          missionsPerDV.SECDEF++;
+          missions.push(missionData[i].Mission_Number);
+        }
+        if (missionData[i].DV == "CJCS" && !missions.includes(missionData[i].Mission_Number)) {
+          missionsPerDV.CJCS++;
+          missions.push(missionData[i].Mission_Number);
+        }
+      }
+    }
+
+    function legsPerAcCount(dv) {
+      for (i = 0; i < missionData.length; i++) {
+        if (missionData[i].DV == dv) {
+          if (!legsPerAc[dv][missionData[i].Tail_Number])
+            legsPerAc[dv][missionData[i].Tail_Number] = 1;
+          else
+            legsPerAc[dv][missionData[i].Tail_Number]++;
+        }
+      }
+    }
+
+    function percentMissionsIssuesCount(dv) {
+      // first get count of mission legs
+      var missionCounter = {};
+      var totalMissions = 0;
+      var unsuccess = 0;
+      for (j = 0; j < missionData.length; j++) {
+        if (missionData[j].DV == dv) {
+          if (!missionCounter[missionData[j].Mission_Number]) {
+            missionCounter[missionData[j].Mission_Number] = 1;
+          } else {
+            missionCounter[missionData[j].Mission_Number]++;
+          }
+          totalMissions++;
+        }
+      }
+
+      for (j = 0; j < ticketData.length; j++) {
+        if (ticketData[j].DV == dv && ticketData[j].Leg != "N/A") {
+          unsuccess++;
+        }
+      }
+
+      var success = totalMissions - unsuccess;
+      var percentile = (success / totalMissions);
+      if (success != 0) {
+        percentMissionsIssues[dv] = percentile;
+        percentMissionIssues3Months[dv][2] = percentile;
+      }
+    }
+
+    function searchMission(mission) {
+      for (i = 0; i < missionData.length; i++) {
+        if (missionData[i].Mission_Number == mission)
+          return true;
+      }
+      return false;
+    }
+
+    function ticketsByCategoryFunc() {
+      for (var i = 0; i < ticketData.length; i++) {
+        // Add ticket category
+        if (!ticketCategories.includes(ticketData[i].Category)) {
+          ticketCategories.push(ticketData[i].Category);
+        }
+      }
+
+      for (var i = 0; i < ticketCategories.length; i++) {
+        var count = 0;
+        for (var j = 0; j < ticketData.length; j++) {
+          if (ticketData[j].Category == ticketCategories[i])
+            count++;
+        }
+        ticketCategoryNumbers.push(count);
+      }
+    }
+
+    function totalTicketsByCategoryFunc() {
+      var total = 0;
+      for (var i = 0; i < ticketCategoryNumbers.length; i++) {
+        total = total + ticketCategoryNumbers[i];
+      }
+      return total;
+    }
+
+    function ticketsByTail() {
+      for (var i = 0; i < ticketData.length; i++) {
+        if (!tailsWithTickets.includes(ticketData[i].Tail_Number) && ticketData[i].Tail_Number != null) {
+          tailsWithTickets.push(ticketData[i].Tail_Number);
+        }
+      }
+
+      for (var i = 0; i < tailsWithTickets.length; i++) {
+        var none = 0;
+        var low = 0;
+        var med = 0;
+        var high = 0;
+        for (var j = 0; j < ticketData.length; j++) {
+          if (ticketData[j].Tail_Number == tailsWithTickets[i]) {
+            if (ticketData[j].Impact_Level == "None")
+              none++;
+            if (ticketData[j].Impact_Level == "Low")
+              low++;
+            if (ticketData[j].Impact_Level == "Medium")
+              med++;
+            if (ticketData[j].Impact_Level == "High")
+              high++;
+          }
+        }
+        tailsNoImpact.push(none);
+        tailsLowImpact.push(low);
+        tailsMedImpact.push(med);
+        tailsHighImpact.push(high);
+      }
+    }
+
+    function grabAllData3Months() {
+      // We are getting the tickets from the 2 months prior to last month so that we can have a 3 month setting of tickets. We've already done calculations on the past month so only need to
+      // do calculations on the months prior to that.
+
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$top=5000&$filter=Created le '" + endDate3 + "' and Created ge '" + startDate3 + "'";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          ticketData3Months = data.d.results;
+        }
+      });
+
+      // lets get the missions
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=Created le '" + endDate3 + "' and Created ge '" + startDate3 + "'";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          missionData3Months = data.d.results;
+        }
+      });
+    }
+
+
+    function legsWithIssues3Months(dv) {
+      var d = new Date(now);
+      d.setMonth(d.getMonth() - 2);
+      var m = ("0" + (d.getMonth() + 1)).slice(-2);
+      var strt = d.getFullYear() + "-" + (m) + "-01T00:00:00Z";
+      lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      var end = d.getFullYear() + "-" + (m) + "-" + lday + "T23:59:59Z";
+
+      // first get count of mission legs
+      var missionCounter = {};
+      var totalMissions = [0, 0];
+      var unsuccess = [0, 0];
+      for (var i = 0; i < 2; i++) {
+        var options = { month: 'long' };
+        previousMonths[i] = d.toLocaleDateString("en-US", options);
+        for (j = 0; j < missionData3Months.length; j++) {
+          if (missionData3Months[j].Created < end && missionData3Months[j].Created > strt && missionData3Months[j].DV == dv) {
+            if (!missionCounter[missionData3Months[j].Mission_Number]) {
+              missionCounter[missionData3Months[j].Mission_Number] = 1;
+            } else {
+              missionCounter[missionData3Months[j].Mission_Number]++;
+            }
+            totalMissions[i]++;
+            legsPerDv3Months[dv][i]++;
+          }
+        }
+
+        for (j = 0; j < ticketData3Months.length; j++) {
+          if (ticketData3Months[j].DV == dv && ticketData3Months[j].Created < end && ticketData3Months[j].Created > strt && ticketData3Months[j].Leg != "N/A") {
+            unsuccess[i]++;
+          }
+        }
+
+        var success = totalMissions[i] - unsuccess[i];
+        var percentile = (success / totalMissions[i]);
+        if (success != 0)
+          percentMissionIssues3Months[dv][i] = percentile;
+
+        d.setMonth(d.getMonth() + 1);
+        m = ("0" + (d.getMonth() + 1)).slice(-2);
+        strt = d.getFullYear() + "-" + (m) + "-01T00:00:00Z";
+        lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        end = d.getFullYear() + "-" + (m) + "-" + lday + "T23:59:59Z";
+      }
+    }
+
+    function legsImpact3Months(dv) {
+      var d = new Date(now);
+      d.setMonth(d.getMonth() - 2);
+      var m = ("0" + (d.getMonth() + 1)).slice(-2);
+      var strt = d.getFullYear() + "-" + (m) + "-01T00:00:00Z";
+      lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      var end = d.getFullYear() + "-" + (m) + "-" + lday + "T23:59:59Z";
+
+      var totalMissions = [0, 0, 0];
+      var noImpact = [0, 0, 0];
+      var impact = [0, 0, 0];
+
+      for (var i = 0; i < missionData.length; i++) {
+        if (missionData[i].DV == dv) {
+          totalMissions[2]++;
+        }
+      }
+
+      for (i = 0; i < ticketData.length; i++) {
+        if (ticketData[i].DV == dv && ticketData[i].Impact_Level == "None" && ticketData[i].Leg != "N/A") {
+          // no impact ticket on leg
+          if (totalMissions[2] != 0)
+            totalMissions[2]--;
+          noImpact[2]++;
+        } else if (ticketData[i].DV == dv && ticketData[i].Impact_Level != "None" && ticketData[i].Leg != "N/A") {
+          // impact ticket
+          if (totalMissions[2] != 0)
+            totalMissions[2]--;
+          impact[2]++;
+        }
+      }
+
+      legImpactPer3Months[dv][previousMonths[2]] = [noImpact[2], impact[2], totalMissions[2]];
+
+      for (var i = 0; i < 2; i++) {
+        for (j = 0; j < missionData3Months.length; j++) {
+          if (missionData3Months[j].Created < end && missionData3Months[j].Created > strt && missionData3Months[j].DV == dv) {
+            totalMissions[i]++;
+          }
+        }
+        for (j = 0; j < ticketData3Months.length; j++) {
+          if (ticketData3Months[j].Created < end && ticketData3Months[j].Created > strt) {
+            if (ticketData3Months[j].DV == dv && ticketData3Months[j].Impact_Level == "None" && ticketData3Months[j].Leg != "N/A") {
+              // no impact ticket on leg
+              if (totalMissions[i] != 0)
+                totalMissions[i]--;
+              noImpact[i]++;
+            } else if (ticketData3Months[j].DV == dv && ticketData3Months[j].Impact_Level != "None" && ticketData3Months[j].Leg != "N/A") {
+              // impact ticket
+              if (totalMissions[i] != 0)
+                totalMissions[i]--;
+              impact[i]++;
+            }
+          }
+        }
+
+        legImpactPer3Months[dv][previousMonths[i]] = [noImpact[i], impact[i], totalMissions[i]];
+        d.setMonth(d.getMonth() + 1);
+        m = ("0" + (d.getMonth() + 1)).slice(-2);
+        strt = d.getFullYear() + "-" + (m) + "-01T00:00:00Z";
+        lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        end = d.getFullYear() + "-" + (m) + "-" + lday + "T23:59:59Z";
+      }
+
+
+    }
+
+    function dvTicketCatFunc(dv) {
+      var currentCategories = [];
+      var ccirNum = [];
+      var noCcirNum = [];
+
+      for (i = 0; i < ticketData.length; i++) {
+        if (ticketData[i].DV == dv) {
+          if (!currentCategories.includes(ticketData[i].Category)) {
+            currentCategories.push(ticketData[i].Category);
+            ccirNum.push(0);
+            noCcirNum.push(0);
+          }
+          if (ticketData[i].CCIR)
+            ccirNum[currentCategories.indexOf(ticketData[i].Category)]++;
+          if (!ticketData[i].CCIR)
+            noCcirNum[currentCategories.indexOf(ticketData[i].Category)]++;
+        }
+      }
+
+
+      dvTicketCategories[dv][0] = currentCategories;
+      dvTicketCategories[dv][1] = ccirNum;
+      dvTicketCategories[dv][2] = noCcirNum;
+
+    }
+
+    function generatePDF() {
+      var pptx = new PptxGenJS();
+      pptx.layout = "LAYOUT_WIDE";
+      pptx.author = "GNOC";
+      pptx.suject = "MONTHLY METRICS";
+
+
+      /* BEGIN TITLE SLIDE */
+
+      pptx.defineSlideMaster({
+        title: "TITLE_SLIDE",
+        background: { color: "FFFFFF" },
+        objects: [
+          {
+            placeholder: {
+              options: { name: 'body', type: 'body', x: 0, y: 2.75, w: "100%", h: 2.0, fontSize: 72, bold: true, align: 'center', color: '262699', fontFace: 'Arial', shadow: { type: "outer", color: "696969", blur: 3, offset: 2, angle: 45 } },
+              text: "TITLE HERE",
+            },
+          },
+          {
+            placeholder: {
+              options: { name: 'date', type: 'body', x: 3.67, y: 6.28, w: 6, h: 0.51, fontSize: 24, bold: true, align: 'center', color: '262699', fontFace: 'Arial' },
+              text: "TITLE HERE",
+            },
+          },
+          {
+            text: {
+              text: "SAM FOX...PERFECTION is our Standard",
+              options: { x: 0, y: "90%", w: "100%", h: 1.0, fontSize: 16, bold: true, italic: true, align: 'center', color: '000000', fontFace: 'Century Schoolbook' }
+            }
+          },
+          { rect: { x: 5.6, y: 0, w: 2.3, h: 0.29, fill: { color: '00B050' } } },
+          {
+            text: {
+              text: "For Official Use Only (FOUO)",
+              options: { x: 5.6, y: 0, w: 2.3, h: 0.29, fontSize: 11, bold: true, color: 'ffffff', fontFace: 'Arial' }
+            }
+          },
+          { rect: { x: 0.7, y: 1.3, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { rect: { x: 0.7, y: 7.0, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { image: { x: 0.7, y: 0.2, w: 1.0, h: 1.0, path: "./img/89cs.png" } },
+          { image: { x: 11.8, y: 0.2, w: 1.0, h: 1.0, path: "./img/samfox.jpg" } },
+        ]
+      });
+
+      var slide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
+      var options = { timeZone: 'UTC', year: 'numeric', month: 'short', day: 'numeric' };
+      var parsedate1 = new Date(startDate);
+      var parsedate2 = new Date(endDate);
+      slide.addText("GNOC METRICS REPORT", { placeholder: "body" });
+      slide.addText(parsedate1.toLocaleDateString("en-US", options) + " - " + parsedate2.toLocaleDateString("en-US", options), { placeholder: "date" });
+
+      /* END TITLE SLIDE START OTHER SLIDES */
+
+
+      /* BEGIN SLIDE 2. DV MONTHLY SUMMARY */
+      pptx.defineSlideMaster({
+        title: "MASTER_SLIDE",
+        background: { color: "FFFFFF" },
+        objects: [
+          {
+            placeholder: {
+              options: { name: 'title', type: 'title', x: 0, y: 0.45, w: "100%", h: 1.0, fontSize: 36, bold: true, italic: true, align: 'center', color: '262699', fontFace: 'Arial' },
+              text: "TITLE HERE",
+            },
+          },
+          {
+            text: {
+              text: "SAM FOX...PERFECTION is our Standard",
+              options: { x: 0, y: "90%", w: "100%", h: 1.0, fontSize: 16, bold: true, italic: true, align: 'center', color: '000000', fontFace: 'Century Schoolbook' }
+            }
+          },
+          { rect: { x: 5.6, y: 0, w: 2.3, h: 0.29, fill: { color: '00B050' } } },
+          {
+            text: {
+              text: "For Official Use Only (FOUO)",
+              options: { x: 5.6, y: 0, w: 2.3, h: 0.29, fontSize: 11, bold: true, color: 'ffffff', fontFace: 'Arial' }
+            }
+          },
+          { rect: { x: 0.7, y: 1.3, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { rect: { x: 0.7, y: 7.0, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { image: { x: 0.7, y: 0.2, w: 1.0, h: 1.0, path: "./img/89cs.png" } },
+          { image: { x: 11.8, y: 0.2, w: 1.0, h: 1.0, path: "./img/samfox.jpg" } },
+        ]
+      });
+
+
+      slide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+      slide.addText("DV Monthly Summary", { placeholder: "title" })
+      slide.addShape(pptx.shapes.RECTANGLE, { h: '2.58', w: '3.4', x: '0.27', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+      slide.addShape(pptx.shapes.RECTANGLE, { h: '2.58', w: '6.0', x: '3.67', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+      slide.addShape(pptx.shapes.RECTANGLE, { h: '2.58', w: '3.4', x: '9.67', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+      slide.addShape(pptx.shapes.RECTANGLE, { h: '2.58', w: '6.4', x: '0.27', y: '4.09', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+      slide.addShape(pptx.shapes.RECTANGLE, { h: '2.58', w: '6.4', x: '6.67', y: '4.09', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+      slide.addText('Total Tickets', { h: '0.34', w: '1.24', x: '0.55', y: '2.21', fontSize: 14, align: 'center' });
+      slide.addText(String(ticketData.length), { shape: pptx.shapes.ROUNDED_RECTANGLE, h: '0.55', w: '1.03', x: '0.66', y: '2.52', align: 'center', fontSize: 18, bold: true, fill: { color: "FFFFFF" }, line: { color: '000000' } }); // Total Tickets
+      slide.addText('Total CCIRs', { h: '0.34', w: '1.24', x: '2.06', y: '2.21', fontSize: 14, align: 'center' });
+      slide.addText(String(ccirData.length), { shape: pptx.shapes.ROUNDED_RECTANGLE, h: '0.55', w: '1.03', x: '2.16', y: '2.52', align: 'center', fontSize: 18, bold: true, fill: { color: "FFFFFF" }, line: { color: '000000' } }); // Total CCIR
+      slide.addText(String(dvTotalTickets.VPOTUS + dvTotalTickets.SECSTATE + dvTotalTickets.SECDEF), { h: '0.4', w: '0.95', x: '10.89', y: '2.6', align: 'center', fontSize: 18, bold: true }); // Total VIPSAM Tickets
+
+      /* Missions w DV Impact data */
+      var missionsWithDVImpactData = [
+        {
+          name: 'Legs With DV Impact',
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
+          values: [dvMissionImpact.VPOTUS, dvMissionImpact.SECSTATE, dvMissionImpact.SECDEF]
+        }
+      ];
+      // S2 Missions w DV Impact
+      var missionsWithDVImpactChart = {
+        x: '3.67', y: '1.51', w: '6.0', h: '2.59',
+        barDir: 'bar',
+        showTitle: true,
+        title: 'Legs With DV Impact',
+        valAxisMajorUnit: 1.0,
+        chartColors: ["ED7D31", "FFC000", "70AD47", "4472C4"]
+      };
+      slide.addChart(pptx.charts.BAR, missionsWithDVImpactData, missionsWithDVImpactChart);
+      /* END MISSIONS w DV Impact Chart */
+
+      /* Total VIPSAM Tickets Chart */
+      var totalVipsamTicketsData = [
+        {
+          name: 'Total VIPSAM Tickets',
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
+          values: [dvTotalTickets.VPOTUS, dvTotalTickets.SECSTATE, dvTotalTickets.SECDEF]
+        }
+      ];
+      var totalVipsamTicketsChart = {
+        x: 9.67, y: 1.51, w: 3.4, h: 2.58,
+        legendPos: 'b',
+        showLegend: true,
+        showPercent: false,
+        showValue: true,
+        showTitle: true,
+        titleAlign: 'center',
+        titlePos: { x: 0, y: 0 },
+        title: 'Total VIPSAM Tickets',
+        chartColors: ["ED7D31", "FFC000", "70AD47", "4472C4"],
+        holeSize: 70,
+      };
+      slide.addChart(pptx.charts.DOUGHNUT, totalVipsamTicketsData, totalVipsamTicketsChart);
+      /* End TOTAL VIPSAM tickets chart */
+
+      /* Percent of Missions Without Issues Chart */
+      var percentMissionsIssuesData = [
+        {
+          name: 'Percentage of Legs Without Issues',
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
+          values: [percentMissionsIssues.VPOTUS, percentMissionsIssues.SECSTATE, percentMissionsIssues.SECDEF]
+        }
+      ];
+
+      var percentMissionsIssuesChart = {
+        x: 0.27, y: 4.1, w: 6.4, h: 2.57,
+        barDir: 'col',
+        showLegend: false,
+        showTitle: true,
+        showPercent: true,
+        valAxisMaxVal: 1,
+        valAxisMajorUnit: 0.2,
+        showValue: true,
+        dataLabelFormatCode: '#%',
+        valAxisLabelFormatCode: '#%',
+        chartColors: ["ED7D31", "FFC000", "70AD47", "4472C4"],
+        title: 'Percentage of Missions Without Issues'
+
+      };
+      slide.addChart(pptx.charts.BAR, percentMissionsIssuesData, percentMissionsIssuesChart);
+      /* END Percent of Missions Without Issues */
+
+      /* Legs Per DV Chart */
+      var legsPerDvData = [
+        {
+          name: 'Legs Per DV',
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
+          values: [legsPerDv.VPOTUS, legsPerDv.SECSTATE, legsPerDv.SECDEF]
+        }
+      ];
+
+      var legsPerDvChart = {
+        x: 6.67, y: 4.1, w: 6.4, h: 2.59,
+        barDir: 'col',
+        showLegend: false,
+        showTitle: true,
+        showValue: true,
+        chartColors: ["ED7D31", "FFC000", "70AD47", "4472C4"],
+        title: 'Legs Per DV'
+
+      };
+      slide.addChart(pptx.charts.BAR, legsPerDvData, legsPerDvChart);
+      /* END Legs Per DV */
+      /* END SLIDE 2 MONTHLY DV SUMMARY */
+
+
+
+      /* BEGIN SLIDE 3 MONTHLY TICKET SUMMARY */
+      pptx.defineSlideMaster({
+        title: "MASTER_SLIDE",
+        background: { color: "FFFFFF" },
+        objects: [
+          {
+            placeholder: {
+              options: { name: 'title', type: 'title', x: 0, y: 0.45, w: "100%", h: 1.0, fontSize: 36, bold: true, italic: true, align: 'center', color: '262699', fontFace: 'Arial' },
+              text: "TITLE HERE",
+            },
+          },
+          {
+            text: {
+              text: "SAM FOX...PERFECTION is our Standard",
+              options: { x: 0, y: "90%", w: "100%", h: 1.0, fontSize: 16, bold: true, italic: true, align: 'center', color: '000000', fontFace: 'Century Schoolbook' }
+            }
+          },
+          { rect: { x: 5.6, y: 0, w: 2.3, h: 0.29, fill: { color: '00B050' } } },
+          {
+            text: {
+              text: "For Official Use Only (FOUO)",
+              options: { x: 5.6, y: 0, w: 2.3, h: 0.29, fontSize: 11, bold: true, color: 'ffffff', fontFace: 'Arial' }
+            }
+          },
+          { rect: { x: 0.7, y: 1.3, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { rect: { x: 0.7, y: 7.0, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { image: { x: 0.7, y: 0.2, w: 1.0, h: 1.0, path: "./img/89cs.png" } },
+          { image: { x: 11.8, y: 0.2, w: 1.0, h: 1.0, path: "./img/samfox.jpg" } },
+        ]
+      });
+
+
+      slide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+      slide.addText("Monthly Ticket Summary", { placeholder: "title" })
+      slide.addShape(pptx.shapes.RECTANGLE, { h: '5.16', w: '8.7', x: '0.27', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+      slide.addShape(pptx.shapes.RECTANGLE, { h: '5.16', w: '4.1', x: '8.97', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+      slide.addText(String(totalTicketsByCategoryFunc()), { h: '0.51', w: '0.57', x: '10.73', y: '3.84', align: 'center', fontSize: 18, bold: true }); // Total Tickets by Category
+
+      /* Tickets by Tail Data */
+      // None, low, med, high
+      var ticketsByTailData = [
+        {
+          name: 'None',
+          labels: tailsWithTickets,
+          values: tailsNoImpact
+        },
+        {
+          name: 'Low',
+          labels: tailsWithTickets,
+          values: tailsLowImpact
+        },
+        {
+          name: 'Medium',
+          labels: tailsWithTickets,
+          values: tailsMedImpact
+        },
+        {
+          name: 'High',
+          labels: tailsWithTickets,
+          values: tailsHighImpact
+        },
+      ]
+
+      // tickets by tail chart
+      var ticketsByTailChart = {
+        x: 0.26, y: 1.51, w: 8.7, h: 5.16,
+        barDir: 'bar',
+        barGrouping: 'stacked',
+
+        catAxisOrientation: 'maxMin',
+        catAxisLabelColor: '000000',
+        catAxisLabelFontFace: 'Helvetica Neue',
+        catAxisLabelFontSize: 12,
+        catAxisLabelFontBold: true,
+        valAxisLabelFontBold: true,
+        showLegend: true,
+
+        dataLabelColor: 'FFFFFF',
+        showValue: true,
+
+        titleColor: '33CF22',
+        titleFontFace: 'Helvetica Neue',
+        titleFontSize: 24,
+        chartColors: ["70AD47", "FFC000", "ED7D31", "FF0000"]
+      };
+      slide.addChart(pptx.charts.BAR, ticketsByTailData, ticketsByTailChart);
+
+      /* End Tickets by Tail Data */
+
+      /* Tickets By Category Data */
+
+      var ticketsByCategoryData = [
+        {
+          name: 'Total Tickets by Category',
+          labels: ticketCategories,
+          values: ticketCategoryNumbers
+        }
+      ]
+
+      // tickets by category chart
+      var ticketsByCategoryChart = {
+        x: 8.97, y: 1.51, w: 4.1, h: 5.16,
+        legendPos: 'b',
+        showLegend: true,
+        showPercent: false,
+        showValue: true,
+        showTitle: true,
+        titleAlign: 'center',
+        titlePos: { x: 0, y: 0 },
+        title: 'Total Tickets by Category',
+        holeSize: 70,
+      };
+      slide.addChart(pptx.charts.DOUGHNUT, ticketsByCategoryData, ticketsByCategoryChart);
+
+      /* End Tickets by Category Data */
+
+
+      /* END SLIDE 3 MONTHLY TICKET SUMMARY */
+      var dvs = ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"];
+      var dvColors = { VPOTUS: ["BDD7EE", "DBDBDB", "ED7D31"], SECSTATE: ["BDD7EE", "DBDBDB", "FFC000"], SECDEF: ["BDD7EE", "DBDBDB", "70AD47"], CJCS: ["BDD7EE", "DBDBDB", "4472C4"] };
+      for (i = 0; i < dvs.length; i++) {
+        /* BEGIN SLIDE 4 VPOTUS */
+        pptx.defineSlideMaster({
+          title: "MASTER_SLIDE",
+          background: { color: "FFFFFF" },
+          objects: [
+            {
+              placeholder: {
+                options: { name: 'title', type: 'title', x: 0, y: 0.45, w: "100%", h: 1.0, fontSize: 31, bold: true, align: 'center', color: '0C2D83', fontFace: 'Arial' },
+                text: "TITLE HERE",
+              },
+            },
+            {
+              text: {
+                text: "SAM FOX...PERFECTION is our Standard",
+                options: { x: 0, y: "90%", w: "100%", h: 1.0, fontSize: 16, bold: true, italic: true, align: 'center', color: '000000', fontFace: 'Century Schoolbook' }
+              }
+            },
+            { rect: { x: 0, y: 1.3, w: '100%', h: 0.05, fill: { color: '0C2D83' } } },
+            { rect: { x: 0, y: 7.0, w: '100%', h: 0.05, fill: { color: '0C2D83' } } },
+            { image: { x: 0.7, y: 0.2, w: 1.0, h: 1.0, path: "./img/89cs.png" } },
+            { image: { x: 11.8, y: 0.2, w: 1.0, h: 1.0, path: "./img/samfox.jpg" } },
+          ]
+        });
+
+        slide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+        slide.addText(String(dvs[i]), { placeholder: "title" })
+        slide.addShape(pptx.shapes.RECTANGLE, { h: '2.59', w: '3.09', x: '0.27', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+        slide.addShape(pptx.shapes.RECTANGLE, { h: '2.59', w: '4.31', x: '3.36', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+        slide.addShape(pptx.shapes.RECTANGLE, { h: '2.59', w: '5.37', x: '7.67', y: '1.51', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+        slide.addShape(pptx.shapes.RECTANGLE, { h: '2.59', w: '6.4', x: '0.27', y: '4.1', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+        slide.addShape(pptx.shapes.RECTANGLE, { h: '2.59', w: '6.4', x: '6.65', y: '4.1', fill: { color: "FFFFFF" }, line: { color: '000000' } });
+        slide.addText('Total Tickets', { h: '0.34', w: '1.24', x: '0.44', y: '2.06', fontSize: 14, align: 'center' });
+        slide.addText(String(dvTotalTickets[dvs[i]]), { shape: pptx.shapes.ROUNDED_RECTANGLE, h: '0.55', w: '1.03', x: '0.55', y: '2.37', align: 'center', fontSize: 18, bold: true, fill: { color: "FFFFFF" }, line: { color: '000000' } }); // Total Tickets 3 months
+        slide.addText('Total CCIRs', { h: '0.34', w: '1.24', x: '1.95', y: '2.06', fontSize: 14, align: 'center' });
+        slide.addText(String(dvTotalCCIRs[dvs[i]]), { shape: pptx.shapes.ROUNDED_RECTANGLE, h: '0.55', w: '1.03', x: '2.05', y: '2.37', align: 'center', fontSize: 18, bold: true, fill: { color: "FFFFFF" }, line: { color: '000000' } }); // Total CCIR 3 months
+
+
+        /* DV Data */
+        /* Percent of Legs without Issues Chart */
+        var percentLegsIssuesDataVpotus = [
+          {
+            name: 'Percentage of Legs Without Issues',
+            labels: [String(previousMonths[0]), String(previousMonths[1]), String(previousMonths[2])],
+            values: percentMissionIssues3Months[dvs[i]]
+          }
+        ];
+
+        var percentLegsIssuesChartVpotus = {
+          x: 3.36, y: 1.51, w: 4.31, h: 2.59,
+          barDir: 'col',
+          showLegend: false,
+          showTitle: true,
+          showPercent: true,
+          valAxisMaxVal: 1,
+          valAxisMajorUnit: 0.2,
+          showValue: true,
+          dataLabelFormatCode: '#%',
+          valAxisLabelFormatCode: '#%',
+          title: 'Percentage of Legs Without Issues',
+          chartColors: [dvColors[dvs[i]][2]]
+
+        };
+        slide.addChart(pptx.charts.BAR, percentLegsIssuesDataVpotus, percentLegsIssuesChartVpotus);
+        /* END Percent of Missions Without Issues */
+        /* Legs Per AC Chart */
+        var templable = [];
+        var tempvalue = [];
+        for (ac in legsPerAc[dvs[i]]) { templable.push(ac); }
+        for (ac in legsPerAc[dvs[i]]) { tempvalue.push(legsPerAc[dvs[i]][ac]); }
+        var legsPerAcDataVpotus = [
+          {
+            name: 'Total Legs per AC',
+            labels: templable,
+            values: tempvalue
+          }
+        ];
+
+        var legsPeracChartVpotus = {
+          x: 7.66, y: 1.51, w: 5.37, h: 2.59,
+          barDir: 'col',
+          showLegend: false,
+          showTitle: true,
+          showValue: true,
+          valAxisMajorUnit: 1.0,
+          title: 'Total Legs per AC',
+          chartColors: [dvColors[dvs[i]][2]]
+
+        };
+        slide.addChart(pptx.charts.BAR, legsPerAcDataVpotus, legsPeracChartVpotus);
+        /* END Legs Per AC */
+
+        /* Legs with Impact */
+        // None, low, med, high
+        var legsWithImpactVpotusData = [
+          {
+            name: 'Legs without Issues',
+            labels: previousMonths,
+            values: [legImpactPer3Months[dvs[i]][previousMonths[0]][2], legImpactPer3Months[dvs[i]][previousMonths[1]][2], legImpactPer3Months[dvs[i]][previousMonths[2]][2]]
+          },
+          {
+            name: 'Legs without DV Impact',
+            labels: previousMonths,
+            values: [legImpactPer3Months[dvs[i]][previousMonths[0]][0], legImpactPer3Months[dvs[i]][previousMonths[1]][0], legImpactPer3Months[dvs[i]][previousMonths[2]][0]]
+          },
+          {
+            name: 'Legs w/ DV Impact',
+            labels: previousMonths,
+            values: [legImpactPer3Months[dvs[i]][previousMonths[0]][1], legImpactPer3Months[dvs[i]][previousMonths[1]][1], legImpactPer3Months[dvs[i]][previousMonths[2]][1]]
+          }
+        ]
+
+        // tickets by tail chart
+        var legsWithImpactVpotusChart = {
+          x: 0.26, y: 4.1, w: 6.39, h: 2.57,
+          barDir: 'bar',
+          barGrouping: 'stacked',
+
+          catAxisOrientation: 'maxMin',
+          catAxisLabelColor: '000000',
+          catAxisLabelFontFace: 'Helvetica Neue',
+          catAxisLabelFontSize: 12,
+          catAxisLabelFontBold: true,
+          valAxisLabelFontBold: true,
+          showLegend: true,
+          legendPos: "b",
+
+          dataLabelColor: 'FFFFFF',
+          showValue: true,
+
+          titleColor: '33CF22',
+          titleFontFace: 'Helvetica Neue',
+          titleFontSize: 24,
+          chartColors: dvColors[dvs[i]]
+        };
+        slide.addChart(pptx.charts.BAR, legsWithImpactVpotusData, legsWithImpactVpotusChart);
+
+        /* End Tickets by Tail Data */
+        /* Tickets per Category Chart */
+        var ticketPerCatDataVpotus = [
+          {
+            name: 'Issues with No CCIR',
+            labels: dvTicketCategories[dvs[i]][0],
+            values: dvTicketCategories[dvs[i]][2]
+          },
+          {
+            name: 'Issues with CCIR',
+            labels: dvTicketCategories[dvs[i]][0],
+            values: dvTicketCategories[dvs[i]][1]
+          }
+        ];
+
+        var ticketPerCatChartVpotus = {
+          x: 6.65, y: 4.1, w: 6.39, h: 2.59,
+          barDir: 'col',
+          barGrouping: 'stacked',
+          showLegend: true,
+          legendPos: "b",
+          showTitle: true,
+          showValue: true,
+          valAxisMajorUnit: 1.0,
+          title: 'Ticket Categories',
+          chartColors: [dvColors[dvs[i]][1], dvColors[dvs[i]][2]]
+
+        };
+        slide.addChart(pptx.charts.BAR, ticketPerCatDataVpotus, ticketPerCatChartVpotus);
+        /* END Legs Per AC */
+        /* END VPOTUS DATA */
+
+        /* END SLIDE 4 VPOTUS */
+      }
+
+      /* SLIDE 5 CONTACT INFO */
+
+      pptx.defineSlideMaster({
+        title: "END_SLIDE",
+        background: { color: "FFFFFF" },
+        objects: [
+          {
+            placeholder: {
+              options: { name: 'title', type: 'title', x: 0, y: 0.45, w: "100%", h: 1.0, fontSize: 31, bold: true, align: 'center', color: '0C2D83', fontFace: 'Arial' },
+              text: "TITLE HERE",
+            },
+          },
+          {
+            placeholder: {
+              options: { name: 'body', type: 'body', x: 0, y: 3.3, w: "100%", h: 2.0, fontSize: 24, align: 'center', color: '000000', fontFace: 'Arial' },
+              text: "TITLE HERE",
+            },
+          },
+          {
+            text: {
+              text: "SAM FOX...PERFECTION is our Standard",
+              options: { x: 0, y: "90%", w: "100%", h: 1.0, fontSize: 16, bold: true, italic: true, align: 'center', color: '000000', fontFace: 'Century Schoolbook' }
+            }
+          },
+          { rect: { x: 5.6, y: 0, w: 2.3, h: 0.29, fill: { color: '00B050' } } },
+          {
+            text: {
+              text: "For Official Use Only (FOUO)",
+              options: { x: 5.6, y: 0, w: 2.3, h: 0.29, fontSize: 11, bold: true, color: 'ffffff', fontFace: 'Arial' }
+            }
+          },
+          { rect: { x: 0.7, y: 1.3, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { rect: { x: 0.7, y: 7.0, w: 12.1, h: 0.05, fill: { color: '0C2D83' } } },
+          { image: { x: 0.7, y: 0.2, w: 1.0, h: 1.0, path: "./img/89cs.png" } },
+          { image: { x: 11.8, y: 0.2, w: 1.0, h: 1.0, path: "./img/samfox.jpg" } },
+        ]
+      });
+
+      var slide = pptx.addSlide({ masterName: "END_SLIDE" });
+      var options = { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' };
+      var parsedate1 = new Date(startDate);
+      var parsedate2 = new Date(endDate);
+      slide.addText("Contact Information", { placeholder: "title" })
+      slide.addText("If you have any questions regarding this report, please contact the org box at 89CS.SCOV.VIP.COMM@us.af.mil or via DSN 858-2411.", { placeholder: "body" });
+
+      /* END SLIDE 5 CONTACT INFO */
+
+      pptx.writeFile("Monthly Metrics " + month + "");
+    }
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="./index.html">
+      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z" />
+      </svg> &nbsp;
+      <b>GNOC DV Dashboard</b>
+    </a>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item" id="dashboard_div">
+              <a class="nav-link" href="./index.html">
+                <span data-feather="home"></span>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item" id="flight_schedule_div">
+              <a class="nav-link" href="./flightschedule.html">
+                <span data-feather="clock"></span>
+                Flight Schedule
+              </a>
+            </li>
+            <li class="nav-item" id="contact_list_div">
+              <a class="nav-link" href="./contactList.html">
+                <span data-feather="phone"></span>
+                Contact List
+              </a>
+            </li>
+          </ul>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+            id="tickets_header_div">
+            <span>Trouble Tickets</span>
+            <a class="d-flex align-items-center text-muted" href="./ticketSettings.html" id="ticket_settings_div">
+              <span data-feather="settings"></span>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2">
+            <li class="nav-item" id="create_tts_div">
+              <a class="nav-link" href="./createTTS.html">
+                <span data-feather="file"></span>
+                Create a TTS
+              </a>
+            </li>
+            <li class="nav-item" id="create_master_tts_div">
+              <a class="nav-link" href="./createMasterTTS.html">
+                <span data-feather="file"></span>
+                Create a Master TTS
+              </a>
+            </li>
+            <li class="nav-item" id="view_tickets_div">
+              <a class="nav-link" href="./viewTickets.html">
+                <span data-feather="file-text"></span>
+                View Tickets
+              </a>
+            </li>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="flight_tickets_header_div">
+              <span>Flight Tickets</span>
+              <a class="d-flex align-items-center text-muted" href="./createFlightTicket.html"
+                id="create_flight_ticket_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="create_flight_ticket_div">
+                <a class="nav-link" href="./createFlightTicket.html">
+                  <span data-feather="file"></span>
+                  Create a Flight Ticket
+                </a>
+              </li>
+              <li class="nav-item" id="view_flight_tickets_div">
+                <a class="nav-link" href="./viewFlightTickets.html">
+                  <span data-feather="file-text"></span>
+                  View Flight Tickets
+                </a>
+              </li>
+              <li class="nav-item" id="view_missions_div">
+                <a class="nav-link" href="./viewMissions.html">
+                  <span data-feather="file-text"></span>
+                  View Missions
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="ccir_header_div">
+              <span>CCIRs</span>
+              <a class="d-flex align-items-center text-muted" href="./createCCIR.html" id="add_a_ccir_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="add_a_ccir_div">
+                <a class="nav-link" href="./createCCIR.html">
+                  <span data-feather="file"></span>
+                  Add a CCIR
+                </a>
+              </li>
+              <li class="nav-item" id="view_ccirs_div">
+                <a class="nav-link" href="./viewCCIRS.html">
+                  <span data-feather="file-text"></span>
+                  View CCIRs
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="reports_header_div">
+              <span>Reports</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="24_hour_report_div">
+                <a class="nav-link" href="./ticketReport.html">
+                  <span data-feather="file-text"></span>
+                  24 Hour Ticket Report <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="nav-item" id="weekend_report_div">
+                <a class="nav-link" href="./weekendTicketReport.html">
+                  <span data-feather="file-text"></span>
+                  Weekend Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="morning_slides_div">
+                <a class="nav-link" href="./morningSlides.html">
+                  <span data-feather="file-text"></span>
+                  Morning Slides
+                </a>
+              </li>
+              <li class="nav-item" id="personnel_stats_div">
+                <a class="nav-link" href="./personnelStats.html">
+                  <span data-feather="file-text"></span>
+                  Personnel Stats
+                </a>
+              </li>
+              <li class="nav-item" id="monthly_metrics_div">
+                <a class="nav-link active" href="./metrics.html">
+                  <span data-feather="file-text"></span>
+                  Monthly Metrics <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="nav-item" id="permissions_div">
+                <a class="nav-link" href="./permissions.html">
+                  <span data-feather="file-text"></span>
+                  Permissions
+                </a>
+              </li>
+            </ul>
+        </div>
+      </nav>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4" id="export">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 id="header">Monthly Metrics</h1>
+        </div>
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              Download Options
+            </div>
+            <div class="card-body">
+              <label for="monthYear" class="col-2 col-form-label">Select Month:&nbsp;</label>
+              <div class="col-4">
+                <input class="form-control" name="monthYear" type="month" id="selected_date">
+              </div>
+              <br>
+              <div class="col-2">
+                <button type="button" id="genAllPdf" class="form-control btn btn-primary">Download Powerpoint</button>
+              </div>
+              &nbsp;
+            </div>
+          </div>
+        </div>
+      </main>
+      <br />
+      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+        <div class="container-fluid">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
+              <a href="mailto:89CS.SCOV.VIP.COMM@us.af.mil">89CS.SCOV.VIP.COMM@us.af.mil</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+
+</html>

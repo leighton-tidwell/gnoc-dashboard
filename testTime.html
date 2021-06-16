@@ -1,0 +1,17 @@
+<script>
+  var time = "";
+  function getTime() {
+    fetch("https://world-clock.p.rapidapi.com/json/utc/now", {
+      "method": "GET",
+      "headers": {
+        "x-rapidapi-key": "84c7b64046msh5217228229e80e2p1ffd0ajsn9097588ec189",
+        "x-rapidapi-host": "world-clock.p.rapidapi.com"
+      }
+    })
+      .then(response => response.json())
+      .then(data => time = data.currentDateTime)
+      .catch(err => {
+        console.error(err);
+      });
+  }
+</script>

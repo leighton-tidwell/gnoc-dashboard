@@ -1,0 +1,872 @@
+<html>
+
+<head>
+  <title>GNOC DV Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
+  <link rel="stylesheet" href="./css/global.css" />
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script type="text/javascript" src="./js/user.js"></script>
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script>
+    var listName = "Missions";
+    var currentFlights = [];
+    var estTimeoffset = 0;
+    var checkRowTimer;
+
+    // Get Digest for Auth purposes
+    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
+    function getFormDigest() {
+      console.log("Getting Form Digest..");
+      $.support.cors = true;
+      var _formDigest;
+      $.ajax({
+        url: hostUrl + "/_api/contextinfo",
+        type: "POST",
+        dataType: "json",
+
+        headers: { "Accept": "application/json; odata=verbose" },
+        xhrFields: { withCredentials: true },
+        async: false,
+        success: function (data) {
+          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
+          console.log(data.d.GetContextWebInformation.FormDigestValue);
+          console.log("Form Digest Done");
+
+        },
+        error: function () {
+          console.log("Error Occured");
+        }
+      });
+
+      return _formDigest;
+    }
+
+    var digest = getFormDigest();
+    var nightmode;
+
+    $(function () {
+      // Check permissions
+
+      // page specific
+      if (!checkPermissions("RkxJR0hUIFNDSEVEVUxF", false, true)) {
+        $("html").remove();
+      }
+      checkPermissions("UFJJTUFSWQ==", "primary", false);
+
+      if (checkPermissions("RkxJR0hUIFNDSEVEVUxF", false, false)) {
+
+
+        // nav
+        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
+        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
+        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
+          $("#tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
+        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
+        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
+        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
+        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
+          $("#flight_tickets_header_div").remove();
+        }
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
+        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
+        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
+        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
+        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
+          $("#ccir_header_div").remove();
+        }
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
+        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
+        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
+        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
+          $("#reports_header_div").remove();
+        }
+        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
+        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
+        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
+        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
+        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
+
+        getESTOffset();
+        updateDay();
+        setInterval(updateDay, 60000);
+        setInterval(updateClock, 1000);
+        getFlightTickets();
+        setInterval(getFlightTickets, 60000);
+        updateFlights();
+        checkFullScreen();
+        checkNightMode();
+        checkRowTimer = setInterval(checkRows, 1000);
+        setTimeout(function () { locatin.reload(); }, 3600000); // keep it from becoming a stale session
+        getPrimaryA2G2();
+        $(document).on('click', '#sanitize', function () {
+          var $this = $(this);
+          var loadingText = 'UNSANITIZE';
+          if ($(this).html() !== loadingText) {
+            // SANITIZE
+            $this.data('original-text', $(this).html());
+            $this.html(loadingText);
+            $this.removeClass("btn-danger").addClass("btn-success");
+            $("#flights tr:gt(0)").each(function () {
+              var this_row = $(this);
+              var dv = this_row.find('td:eq(0)');
+              dv.html(btoa(dv.html()));
+            });
+          }
+          else {
+            // UNSANITIZE
+            $this.data('original-text', $(this).html());
+            $this.html('SANITIZE');
+            $this.removeClass("btn-success").addClass("btn-danger");
+            $("#flights tr:gt(0)").each(function () {
+              var this_row = $(this);
+              var dv = this_row.find('td:eq(0)');
+              dv.html(atob(dv.html()));
+            });
+          }
+        });
+
+        $(document).on('click', '#primaryclick', function () {
+          changePrimary();
+        });
+
+        $(document).on('click', '#showPast', function () {
+          var $this = $(this);
+          if ($(this).html() != 'HIDE PAST FLIGHTS') {
+            $this.data('original-text', $(this).html());
+            $this.html('HIDE PAST FLIGHTS');
+            showPastFlights();
+          }
+          else {
+            $this.data('original-text', $(this).html());
+            $this.html('SHOW PAST FLIGHTS');
+            showPastFlights();
+          }
+        });
+
+        $(document).on('click', '#minmax', function () {
+          var $this = $(this);
+          if ($.cookie('fullscreen') == 'false') {
+            $.cookie('fullscreen', 'true');
+            $(this).html('<span data-feather="minimize-2" style="width:23px;height:23px;"></span>');
+            feather.replace();
+            checkFullScreen();
+          }
+          else {
+            $.cookie('fullscreen', 'false');
+            $(this).html('<span data-feather="maximize-2" style="width:23px;height:23px;"></span>');
+            feather.replace();
+            checkFullScreen();
+          }
+
+        });
+
+        $('#nightMode').click(function () {
+          if (!$.cookie('nightmode')) {
+            nightmode = true;
+            $.cookie('nightmode', 'true');
+            console.log("cookie made");
+          }
+          var $this = $(this);
+          if ($(this).html() == '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun" style="width:23px;height:23px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>') {
+            console.log("currently night mode");
+            $.cookie('nightmode', 'false');
+            nightmode = false;
+            checkNightMode();
+          }
+          else {
+            console.log("currently day mode");
+            $.cookie('nightmode', 'true');
+            nightmode = true;
+            checkNightMode();
+          }
+        });
+        feather.replace();
+      }
+    });
+
+    function checkNightMode() {
+      if ($.cookie('nightmode') == 'true') {
+        nightmode = true;
+        console.log("cookie true");
+        $('link[href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css"]').attr('href', 'https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css');
+        $('link[href="./css/global.css"]').attr('href', './css/nightMode.css');
+        $(".sidebar").removeClass("bg-light");
+        $(".sidebar").addClass("bg-dark");
+        $(".nav-link.active").removeClass("active").addClass("bg-secondary");
+        $("footer").removeClass("bg-light").addClass("bg-dark");
+        $("#nightMode").html('<span data-feather="sun" style="width:23px;height:23px;"></span>');
+        feather.replace();
+      }
+      else {
+        console.log("cookie false");
+        nightmode = false;
+        $('link[href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css"]').attr('href', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css');
+        $('link[href="./css/nightMode.css"]').attr('href', './css/global.css');
+        $(".sidebar").addClass("bg-light");
+        $(".sidebar").removeClass("bg-dark");
+        $(".nav-link.bg-secondary").addClass("active").removeClass("bg-secondary");
+        $("footer").addClass("bg-light").removeClass("bg-dark");
+        $("#nightMode").html('<span data-feather="moon" style="width:23px;height:23px;"></span>');
+        feather.replace();
+      }
+    }
+
+    function updateDay() {
+      var currentdate = new Date();
+      var currentoffset = currentdate.getTimezoneOffset() * 60000;
+      currentdate.setTime(currentdate.getTime() + currentoffset);
+
+      // Get Julian Date
+      function daysIntoYear(date) {
+        return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
+      }
+      var julianDay = daysIntoYear(currentdate);
+      var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      $("#todaysDate").html(currentdate.toLocaleDateString("en-US", options));
+      $("#todaysJulian").html("(J DAY: " + julianDay + ")");
+    }
+
+    function updateClock() {
+      var currentTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
+      currentTime = new Date(currentTime);
+      // Operating System Clock Hours for 12h clock
+      var currentHoursAP = currentTime.getHours();
+      // Operating System Clock Hours for 24h clock
+      var currentHours = currentTime.getHours();
+      // Operating System Clock Minutes
+      var currentMinutes = currentTime.getMinutes();
+      // Operating System Clock Seconds
+      var currentSeconds = currentTime.getSeconds();
+      // Adding 0 if Minutes & Seconds is More or Less than 10
+      currentMinutes = (currentMinutes < 10 ? "0" : "") + currentMinutes;
+      currentSeconds = (currentSeconds < 10 ? "0" : "") + currentSeconds;
+
+      $(".sec").html(currentSeconds);
+      $(".min").html(currentMinutes);
+      $(".hours").html(currentHours);
+
+      currentTime = new Date();
+      var offset = currentTime.getTimezoneOffset() * 60000;
+      currentTime.setTime(currentTime.getTime() + offset);
+      // Operating System Clock Hours for 12h clock
+      currentHoursAP = currentTime.getHours();
+      // Operating System Clock Hours for 24h clock
+      currentHours = currentTime.getHours();
+      // Operating System Clock Minutes
+      currentMinutes = currentTime.getMinutes();
+      // Operating System Clock Seconds
+      currentSeconds = currentTime.getSeconds();
+      // Adding 0 if Minutes & Seconds is More or Less than 10
+      currentMinutes = (currentMinutes < 10 ? "0" : "") + currentMinutes;
+      currentSeconds = (currentSeconds < 10 ? "0" : "") + currentSeconds;
+
+      $(".zsec").html(currentSeconds);
+      $(".zmin").html(currentMinutes);
+      $(".zhours").html(currentHours);
+
+      currentTime = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
+      currentTime = new Date(currentTime);
+      // Operating System Clock Hours for 12h clock
+      currentHoursAP = currentTime.getHours();
+      // Operating System Clock Hours for 24h clock
+      currentHours = currentTime.getHours();
+      // Operating System Clock Minutes
+      currentMinutes = currentTime.getMinutes();
+      // Operating System Clock Seconds
+      currentSeconds = currentTime.getSeconds();
+      // Adding 0 if Minutes & Seconds is More or Less than 10
+      currentMinutes = (currentMinutes < 10 ? "0" : "") + currentMinutes;
+      currentSeconds = (currentSeconds < 10 ? "0" : "") + currentSeconds;
+
+      $(".msec").html(currentSeconds);
+      $(".mmin").html(currentMinutes);
+      $(".mhours").html(currentHours);
+    }
+
+    function getESTOffset() {
+      var estTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
+      estTime = new Date(estTime);
+
+      var localTime = new Date();
+
+      estTimeOffset = estTime.getHours() - localTime.getHours();
+    }
+
+    function updateFlights() {
+      $('.isodateArr').each(function () {
+        var $this = $(this);
+        var countDownDate = new Date($this.html());
+        var countTime = countDownDate.getTime();
+        countDownDate.addHours(estTimeOffset);
+        countTime = countDownDate.getTime();
+        var now = new Date();
+        var offset = now.getTimezoneOffset() * 60000;
+        now.setTime(now.getTime() + offset);
+        var diff = countTime - now;
+
+        countdown = setInterval(function () {
+          if (diff <= 0) {
+            $this.html("ARRIVED");
+            $this.addClass("font-weight-bold");
+          }
+          else {
+            diff = diff - 1000;
+            var h = Math.floor(diff / 3600000);
+            var m = Math.floor((diff - (h * 3600000)) / 60000);
+            m = (m < 10 ? "0" : "") + m;
+            var s = Math.floor((diff - (h * 3600000) - (m * 60000)) / 1000);
+            s = (s < 10 ? "0" : "") + s;
+            var goodDate = h + ":" + m + ":" + s;
+            $this.html(goodDate);
+          }
+        }, 1000)
+      });
+      $('.isodateDep').each(function () {
+        var $this = $(this);
+        var countDownDate = new Date($this.html());
+        countDownDate.addHours(estTimeOffset);
+        countTime = countDownDate.getTime();
+        var countTime = countDownDate.getTime();
+        var now = new Date();
+        var offset = now.getTimezoneOffset() * 60000;
+        now.setTime(now.getTime() + offset);
+
+        var diff = countTime - now;
+
+        countdown = setInterval(function () {
+          if (diff <= 0) {
+            $this.html("DEPARTED");
+            $this.addClass("font-weight-bold");
+            $this.closest('td').removeClass("departedRow"); // actually should be preflight row
+          }
+          else {
+            diff = diff - 1000;
+            var h = Math.floor(diff / 3600000);
+            var m = Math.floor((diff - (h * 3600000)) / 60000);
+            m = (m < 10 ? "0" : "") + m;
+            var s = Math.floor((diff - (h * 3600000) - (m * 60000)) / 1000);
+            s = (s < 10 ? "0" : "") + s;
+            var goodDate = h + ":" + m + ":" + s;
+            if(h == "0" && parseInt(m) <= 59){
+              $this.closest('td').addClass("departedRow");
+            }
+            $this.html(goodDate);
+          }
+        }, 1000)
+      });
+    }
+
+    function getFlightTickets() {
+      // Get all of the tickets:
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$top=30&$orderby=Departure_Date%20desc";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          var total = 0;
+          var arrayOfTimes = [];
+          var allResults = data.d.results;
+          if (Number(allResults.length) > 0) {
+            for (var i = 0; i < Number(allResults.length); i++) {
+              // get current time/date
+              var nowDate = new Date();
+              var nowDateString = nowDate.toISOString();
+
+              // Check if within next 24 hours
+              var tommorowDate = new Date();
+              tommorowDate.setDate(tommorowDate.getDate() + 1);
+              var toDate = tommorowDate.toISOString();
+
+              var departure_time = allResults[i].Departure_Date;
+              var arrival_time = allResults[i].Arrival_Date;
+              if (departure_time < toDate && arrival_time > nowDateString) {
+                var currentId = allResults[i].Id;
+                if (jQuery.inArray(currentId, currentFlights) == -1) {
+                  // make sure no duplicates
+                  currentFlights.push(currentId);
+
+                  var table = document.getElementById('flightsBody');
+                  var row = "";
+
+                  var depTime = convertDate(allResults[i].Departure_Date);
+                  var arrTime = convertDate(allResults[i].Arrival_Date);
+
+                  if (allResults[i].DV == "VPOTUS" || allResults[i].DV == "SECSTATE" || allResults[i].DV == "SECDEF" || allResults[i].DV == "POTUS" || allResults[i].DV == "CJCS") {
+                    if (nightmode)
+                      var classText = "class=\"bg-primary font-weight-bold\"";
+                    else
+                      var classText = "class=\"bg-success font-weight-bold\"";
+                  }
+                  else {
+                    var classText = "";
+                  }
+                  if (checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", false, false)) {
+                    row += '<tr id=\"' + currentId + '\"><td ' + classText + '>' + allResults[i].DV + '</td><td><a href="viewFlightTicket.html?ticket=' + allResults[i].Id + '">' + allResults[i].Mission_Number + '</a><td>' + allResults[i].Tail_Number + '</td><td>' + allResults[i].Departure_Location + '</td><td>' + allResults[i].Arrival_Location + '</td><td>' + depTime + '<br /><span class=\"isodateDep\">' + allResults[i].Departure_Date + '</span></td><td>' + arrTime + '<br /><span class=\"isodateArr\">' + allResults[i].Arrival_Date + '</span></td></tr>';
+                  }
+                  else {
+                    row += '<tr id=\"' + currentId + '\"><td ' + classText + '>' + allResults[i].DV + '</td><td>' + allResults[i].Mission_Number + '<td>' + allResults[i].Tail_Number + '</td><td>' + allResults[i].Departure_Location + '</td><td>' + allResults[i].Arrival_Location + '</td><td>' + depTime + '<br /><span class=\"isodateDep\">' + allResults[i].Departure_Date + '</span></td><td>' + arrTime + '<br /><span class=\"isodateArr\">' + allResults[i].Arrival_Date + '</span></td></tr>';
+                  }
+
+                  var html = row + table.innerHTML;
+                  table.innerHTML = html;
+                }
+              }
+            }
+          }
+        },
+        error: function (data) {
+          //alert("Error: " + JSON.stringify(data));
+        }
+      });
+    }
+
+    function showPastFlights() {
+      if (!checkRowTimer) {
+        checkRowTimer = setInterval(checkRows(), 1000);
+      }
+      else {
+        clearInterval(checkRowTimer);
+        checkRowTimer = null;
+        $("#flights tr").show();
+      }
+
+
+    }
+    function parseISOString(s) {
+      var b = s.split(/\D+/);
+      return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
+    }
+
+    function convertDate(date) {
+      var convertDate = parseISOString(date);
+      //var convertDate = new Date(date);
+
+      var month = convertDate.getUTCMonth();
+      month = ("0" + (convertDate.getMonth() + 1)).slice(-2)
+
+      var date = convertDate.getDate();
+      if (convertDate.getDate() < 10)
+        date = "0" + convertDate.getDate();
+
+      var minutes = convertDate.getUTCMinutes();
+      if (convertDate.getUTCMinutes() < 10)
+        minutes = "0" + convertDate.getUTCMinutes();
+
+      var t = new Date();
+      var hours = convertDate.addHours(estTimeOffset);
+      hours = convertDate.getHours();
+
+      if (convertDate.getHours() < 10)
+        hours = "0" + hours;
+
+
+      return dateString = "<span class=\"hourCount\">" + hours + "</span>:<span class=\"minCount\">" + minutes + "</span>";
+    }
+
+    function checkRows() {
+      $('table > tbody  > tr').each(function (index, tr) {
+        var $this = $(this);
+        if ($(this).text().match('ARRIVED')) {
+          $(this).addClass("table-success");
+          $(this).hide();
+        }
+
+        if ($(this).text().match('DEPARTED')) {
+          if (nightmode)
+            $(this).addClass("table-secondary").removeClass("table-primary");
+          else
+            $(this).addClass("table-primary").removeClass("table-secondary");
+        }
+      });
+    }
+
+
+    function getPrimaryA2G2() {
+      var primary = "";
+      // Get all of the tickets:
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('primarya2g2')/items";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          var allResults = data.d.results;
+          primary = allResults[0].Title;
+          if (primary.includes("ADW")) {
+            $("#primary").html("Andrews is Primary");
+          }
+          else if (primary.includes("MCC")) {
+            $("#primary").html("McChord is Primary");
+          }
+        },
+        error: function (data) {
+          //alert("Error: " + JSON.stringify(data));
+        }
+      });
+    }
+
+
+    function updatePrimary(primary) {
+      var listName = "primarya2g2";
+      var itemType = GetItemTypeForListName(listName);
+      var itemProperties = { 'Title': primary };
+      itemProperties["__metadata"] = { "type": itemType };
+
+      $.ajax({
+        url: hostUrl + "/_api/web/lists/getbytitle('" + listName + "')/items(1)",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(itemProperties),
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest,
+          "IF-MATCH": "*", // Overwrite changes
+          "X-HTTP-Method": "MERGE" // update operation
+        },
+        success: function (data) {
+          console.log("Primary is updated.");
+        },
+        error: function (data) {
+          console.log("An error has occured.");
+        }
+      });
+    }
+
+    // Get List Item Type metadata
+    function GetItemTypeForListName(name) {
+      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
+    }
+
+
+    Date.prototype.addHours = function (h) {
+      this.setTime(this.getTime() + (h * 60 * 60 * 1000));
+      return this;
+    }
+
+    function changePrimary(primary) {
+      var curprimary = $("#primary").text();
+      if (curprimary == "Andrews is Primary") {
+        $("#primary").text("McChord is Primary");
+        updatePrimary("MCC");
+      }
+      else {
+        $("#primary").text("Andrews is Primary");
+        updatePrimary("ADW");
+      }
+    }
+
+    function checkFullScreen() {
+      // Fall back for if those do not work
+      if (!$.cookie('fullscreen')) {
+        $.cookie('fullscreen', 'false');
+        console.log("cookie made");
+      }
+      else if ($.cookie('fullscreen') == 'false') {
+        console.log("Cookie is false");
+        $(".sidebar").addClass("d-none");
+        $(".sidebar").addClass("d-md-block");
+        $(".sidebar").show();
+        $("footer").show();
+        $("main").addClass("col-md-9");
+        $("main").addClass("col-lg-10");
+        $("main").removeClass("col-md-12");
+        $("#minmax").html('<span data-feather="minimize-2" style="width:23px;height:23px;"></span>');
+        feather.replace();
+      }
+      else if ($.cookie('fullscreen') == 'true') {
+        console.log("cookie is true");
+        $(".sidebar").removeClass("d-none");
+        $(".sidebar").removeClass("d-md-block");
+        $(".sidebar").hide();
+        $("footer").hide();
+        $("main").removeClass("col-md-9");
+        $("main").removeClass("col-lg-10");
+        $("main").addClass("col-md-12");
+        $("#minmax").html('<span data-feather="maximize-2" style="width:23px;height:23px;"></span>');
+        feather.replace();
+      }
+    }
+
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="./index.html">
+      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z" />
+      </svg> &nbsp;
+      <b>GNOC DV Dashboard</b>
+    </a>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item" id="dashboard_div">
+              <a class="nav-link" href="./index.html">
+                <span data-feather="home"></span>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item" id="flight_schedule_div">
+              <a class="nav-link bg-secondary" href="./flightschedule.html">
+                <span data-feather="clock"></span>
+                Flight Schedule <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item" id="contact_list_div">
+              <a class="nav-link" href="./contactList.html">
+                <span data-feather="phone"></span>
+                Contact List
+              </a>
+            </li>
+          </ul>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+            id="tickets_header_div">
+            <span>Trouble Tickets</span>
+            <a class="d-flex align-items-center text-muted" href="./ticketSettings.html" id="ticket_settings_div">
+              <span data-feather="settings"></span>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2">
+            <li class="nav-item" id="create_tts_div">
+              <a class="nav-link" href="./createTTS.html">
+                <span data-feather="file"></span>
+                Create a TTS
+              </a>
+            </li>
+            <li class="nav-item" id="create_master_tts_div">
+              <a class="nav-link" href="./createMasterTTS.html">
+                <span data-feather="file"></span>
+                Create a Master TTS
+              </a>
+            </li>
+            <li class="nav-item" id="view_tickets_div">
+              <a class="nav-link" href="./viewTickets.html">
+                <span data-feather="file-text"></span>
+                View Tickets
+              </a>
+            </li>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="flight_tickets_header_div">
+              <span>Flight Tickets</span>
+              <a class="d-flex align-items-center text-muted" href="./createFlightTicket.html"
+                id="create_flight_ticket_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="create_flight_ticket_div">
+                <a class="nav-link" href="./createFlightTicket.html">
+                  <span data-feather="file"></span>
+                  Create a Flight Ticket
+                </a>
+              </li>
+              <li class="nav-item" id="view_flight_tickets_div">
+                <a class="nav-link" href="./viewFlightTickets.html">
+                  <span data-feather="file-text"></span>
+                  View Flight Tickets
+                </a>
+              </li>
+              <li class="nav-item" id="view_missions_div">
+                <a class="nav-link" href="./viewMissions.html">
+                  <span data-feather="file-text"></span>
+                  View Missions
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="ccir_header_div">
+              <span>CCIRs</span>
+              <a class="d-flex align-items-center text-muted" href="./createCCIR.html" id="add_a_ccir_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="add_a_ccir_div">
+                <a class="nav-link" href="./createCCIR.html">
+                  <span data-feather="file"></span>
+                  Add a CCIR
+                </a>
+              </li>
+              <li class="nav-item" id="view_ccirs_div">
+                <a class="nav-link" href="./viewCCIRS.html">
+                  <span data-feather="file-text"></span>
+                  View CCIRs
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="reports_header_div">
+              <span>Reports</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="24_hour_report_div">
+                <a class="nav-link" href="./ticketReport.html">
+                  <span data-feather="file-text"></span>
+                  24 Hour Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="weekend_report_div">
+                <a class="nav-link" href="./weekendTicketReport.html">
+                  <span data-feather="file-text"></span>
+                  Weekend Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="morning_slides_div">
+                <a class="nav-link" href="./morningSlides.html">
+                  <span data-feather="file-text"></span>
+                  Morning Slides
+                </a>
+              </li>
+              <li class="nav-item" id="personnel_stats_div">
+                <a class="nav-link" href="./personnelStats.html">
+                  <span data-feather="file-text"></span>
+                  Personnel Stats
+                </a>
+              </li>
+              <!--<li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file-text"></span>
+                  Monthly Metrics
+                </a>
+              </li>-->
+            </ul>
+        </div>
+      </nav>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <h2 class="text-center col-xl-12 mt-4 font-weight-bold" id="todaysDate">Flight Schedule</h2>
+        <div class="text-center col-xl-12 font-weight-bold" style="font-size:x-large;" id="todaysJulian">(J DAY: XXX)
+        </div>
+        <hr />
+        <!-- clock row -->
+        <div class="row justify-content-md-center">
+          <div class="col-md-4">
+            <div class="card text-white h3">
+              <div class="card-body bg-dark text-center font-weight-bold">
+                <p class="card-title mt-2"> ZULU -
+                  <a><span class="font-weight-bold zhours"></span></a> :
+                  <a><span class="font-weight-bold zmin"></span></a> :
+                  <a><span class="font-weight-bold zsec"></span></a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white h3">
+              <div class="card-body bg-primary text-center font-weight-bold">
+                <p class="card-title mt-2"> ADW -
+                  <a><span class="font-weight-bold hours"></span></a> :
+                  <a><span class="font-weight-bold min"></span></a> :
+                  <a><span class="font-weight-bold sec"></span></a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white h3">
+              <div class="card-body bg-secondary text-center font-weight-bold">
+                <p class="card-title mt-2"> MCC -
+                  <a><span class="font-weight-bold mhours"></span></a> :
+                  <a><span class="font-weight-bold mmin"></span></a> :
+                  <a><span class="font-weight-bold msec"></span></a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /.clock row -->
+        <br />
+        <div class="col-md-12">
+          <div style="
+      background-color: #343a40;
+      color: #fff;
+      border-radius: 0;
+      margin-bottom: 0;
+      margin-left: auto;
+      margin-right: auto;
+  " role="alert" class="alert text-center row">
+            <div class="col-md-3">
+              <button type="button" id="minmax" class="btn btn-secondary float-left" style="margin-right: 5px;"><span
+                  data-feather="maximize-2" style="width:23px;height:23px;"></span></button>&nbsp;
+              <button type="button" id="sanitize" class="btn btn-danger font-weight-bold float-left">SANITIZE</button>
+            </div>
+            <div class="col-md-6 text-center">
+              <span id="primaryclick" style="cursor:pointer;">
+                <h3 class="alert-link" id="primary">
+                  Andrews is Primary
+                </h3>
+              </span>
+            </div>
+            <div class="col-md-3">
+              <button type="button" id="nightMode" class="btn btn-secondary float-right"><span data-feather="moon"
+                  style="width:23px;height:23px;"></span></button>
+              <button type="button" id="showPast" class="btn btn-secondary float-right font-weight-bold"
+                style="margin-right:5px;">SHOW PAST
+                FLIGHTS</button>
+            </div>
+          </div>
+          <table id="flights" class="table table-striped table-bordered"
+            style="width:100%;font-size: large;font-weight: 500;">
+            <thead class="thead-dark">
+              <tr>
+                <th class="align-middle">DV</th>
+                <th class="align-middle">MISSION NUMBER</th>
+                <th class="align-middle">TAIL NUMBER</th>
+                <th class="align-middle">DEP. LOCATION</th>
+                <th class="align-middle">ARR. LOCATION</th>
+                <th class="align-middle">DEP. TIME</th>
+                <th class="align-middle">ARR. TIME</th>
+              </tr>
+            </thead>
+            <tbody id="flightsBody">
+            </tbody>
+          </table>
+        </div>
+      </main>
+      <br />
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+        <div class="container-fluid">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
+              <a href="mailto:89CS.SCOV.VIP.COMM@us.af.mil">89CS.SCOV.VIP.COMM@us.af.mil</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+
+</html>
