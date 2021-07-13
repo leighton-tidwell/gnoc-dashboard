@@ -536,7 +536,7 @@
     function generatePDF(title, rows) {
       var pptx = new PptxGenJS();
       pptx.layout = "LAYOUT_WIDE";
-      pptx.author = "GNOC";
+      pptx.author = "GSOC";
       pptx.suject = "TICKET REPORT";
       var titles = ["DVS FLYING", "OPEN TICKETS", "FIXED TICKETS"];
       var rowChoice = [dvsRows, openRows, fixedRows];
@@ -550,7 +550,7 @@
             objects: [
               {
                 text: {
-                  text: "GNOC - " + title + "",
+                  text: "GSOC - " + title + "",
                   options: { x: 0, y: 0.2, w: "100%", h: 1.0, fontSize: 31, bold: true, align: 'center', color: '0C2D83', fontFace: 'Arial' }
                 }
               },
@@ -589,7 +589,7 @@
           objects: [
             {
               text: {
-                text: "GNOC - " + title + "",
+                text: "GSOC - " + title + "",
                 options: { x: 4, y: 0.2, w: "70%", h: 1.0, fontSize: 31, bold: true, color: '0C2D83', fontFace: 'Arial' }
               }
             },

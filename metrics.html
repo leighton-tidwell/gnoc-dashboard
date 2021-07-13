@@ -725,14 +725,14 @@
       slide.addText(String(ticketData.length), { shape: pptx.shapes.ROUNDED_RECTANGLE, h: '0.55', w: '1.03', x: '0.66', y: '2.52', align: 'center', fontSize: 18, bold: true, fill: { color: "FFFFFF" }, line: { color: '000000' } }); // Total Tickets
       slide.addText('Total CCIRs', { h: '0.34', w: '1.24', x: '2.06', y: '2.21', fontSize: 14, align: 'center' });
       slide.addText(String(ccirData.length), { shape: pptx.shapes.ROUNDED_RECTANGLE, h: '0.55', w: '1.03', x: '2.16', y: '2.52', align: 'center', fontSize: 18, bold: true, fill: { color: "FFFFFF" }, line: { color: '000000' } }); // Total CCIR
-      slide.addText(String(dvTotalTickets.VPOTUS + dvTotalTickets.SECSTATE + dvTotalTickets.SECDEF), { h: '0.4', w: '0.95', x: '10.89', y: '2.6', align: 'center', fontSize: 18, bold: true }); // Total VIPSAM Tickets
+      slide.addText(String(dvTotalTickets.VPOTUS + dvTotalTickets.SECSTATE + dvTotalTickets.SECDEF + dvTotalTickets.CJCS), { h: '0.4', w: '0.95', x: '10.89', y: '2.6', align: 'center', fontSize: 18, bold: true }); // Total VIPSAM Tickets
 
       /* Missions w DV Impact data */
       var missionsWithDVImpactData = [
         {
           name: 'Legs With DV Impact',
-          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
-          values: [dvMissionImpact.VPOTUS, dvMissionImpact.SECSTATE, dvMissionImpact.SECDEF]
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF', 'CJCS'],
+          values: [dvMissionImpact.VPOTUS, dvMissionImpact.SECSTATE, dvMissionImpact.SECDEF, dvMissionImpact.CJCS]
         }
       ];
       // S2 Missions w DV Impact
@@ -751,8 +751,8 @@
       var totalVipsamTicketsData = [
         {
           name: 'Total VIPSAM Tickets',
-          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
-          values: [dvTotalTickets.VPOTUS, dvTotalTickets.SECSTATE, dvTotalTickets.SECDEF]
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF', 'CJCS'],
+          values: [dvTotalTickets.VPOTUS, dvTotalTickets.SECSTATE, dvTotalTickets.SECDEF, dvTotalTickets.CJCS]
         }
       ];
       var totalVipsamTicketsChart = {
@@ -775,8 +775,8 @@
       var percentMissionsIssuesData = [
         {
           name: 'Percentage of Legs Without Issues',
-          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
-          values: [percentMissionsIssues.VPOTUS, percentMissionsIssues.SECSTATE, percentMissionsIssues.SECDEF]
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF', 'CJCS'],
+          values: [percentMissionsIssues.VPOTUS, percentMissionsIssues.SECSTATE, percentMissionsIssues.SECDEF, percentMissionsIssues.CJCS]
         }
       ];
 
@@ -802,8 +802,8 @@
       var legsPerDvData = [
         {
           name: 'Legs Per DV',
-          labels: ['VPOTUS', 'SECSTATE', 'SECDEF'],
-          values: [legsPerDv.VPOTUS, legsPerDv.SECSTATE, legsPerDv.SECDEF]
+          labels: ['VPOTUS', 'SECSTATE', 'SECDEF', 'CJCS'],
+          values: [legsPerDv.VPOTUS, legsPerDv.SECSTATE, legsPerDv.SECDEF, legsPerDv.CJCS]
         }
       ];
 

@@ -2,14 +2,16 @@
 
 <head>
   <title>GNOC DV Dashboard</title>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" />
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
     integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   <link rel="stylesheet"
     href="https://unpkg.com/tempusdominus-bootstrap@5.37.0/build/css/tempusdominus-bootstrap.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="./css/global.css" />
+
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
@@ -19,444 +21,9 @@
   <script type="text/javascript"
     src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
   <script src="https://unpkg.com/tempusdominus-bootstrap@5.37.0/build/js/tempusdominus-bootstrap.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    // Global digest value for auth
-    var digest = getFormDigest();
-    var listName = "Missions";
-    var arrival_date;
-    var departure_date;
-
-    $(function () {
-      if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", false, true)) {
-        $("html").remove();
-      }
-
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", false, false)) {
-
-        // page specific
-        if (!checkPermissions("RURJVCBUSUNLRVQ=", "ticket_attachments_div", false)) {
-          // if they cant edit ticket
-          $("input").prop("disabled", true);
-          $("textarea").prop("disabled", true);
-          $("select").prop("disabled", true);
-          $("button").remove();
-        }
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        // Populate DV Drop down
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('DVList')/items?$top=5000";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              var select = document.getElementById('dv_select');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].DV;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        //Populate IATA
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('iata_list')/items?$top=5000&$orderby=Title%20asc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              var select = document.getElementById('arrival_iata');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].Title;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-
-              var select = document.getElementById('departure_iata');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].Title;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // Populate Aircraft Drop Down
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('TailNumbers')/items?$top=5000&$orderby=Tail_x0020_Numbers%20asc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              var select = document.getElementById('tail_number');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].Tail_x0020_Numbers;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // Create Ticket
-        $(document).on('click', '#ticket_submit', function () {
-          // Disable Button
-          var $this = $(this);
-          var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-          if ($(this).html() !== loadingText) {
-            $this.data('original-text', $(this).html());
-            $this.html(loadingText);
-            $this.attr("disabled", true);
-          }
-
-          var mission_number = $("#mission_number").val().toUpperCase();
-          var tail_number = $("#tail_number").val();
-          var dv = $("#dv_select").val();
-          var departure_iata = $("#departure_iata").val();
-          var departure_location = $("#departure_location").val().toUpperCase();
-          var arrival_iata = $("#arrival_iata").val();
-          var arrival_location = $("#arrival_location").val().toUpperCase();
-          // arrival and departure date are declared globally at the top
-
-          var itemProperties = { 'Mission_Number': mission_number, 'Tail_Number': tail_number, 'DV': dv, 'Departure_IATA': departure_iata, 'Departure_Date': departure_date, 'Departure_Location': departure_location, 'Arrival_IATA': arrival_iata, 'Arrival_Date': arrival_date, 'Arrival_Location': arrival_location };
-          console.log(itemProperties);
-          CreateListItemWithDetails(listName, hostUrl, itemProperties, function () {
-            alert("Ticket was created successfully.");
-            location.reload();
-          }, function () {
-            alert("An error has occured. Please try again.");
-          });
-        });
-
-        // Generate Location
-        $('#departure_iata').change(function () {
-          // Load location from previous flight tickets
-          var $this = $(this);
-          var iata = $this.val();
-          var location_text = getLocationInformation(iata);
-          $("#departure_location").val(location_text);
-        });
-
-        // Generate Location
-        $('#arrival_iata').change(function () {
-          // Load location from previous flight tickets
-          var $this = $(this);
-          var iata = $this.val();
-          var location_text = getLocationInformation(iata);
-          $("#arrival_location").val(location_text);
-        });
-
-        // generate calendar objects
-        $("#datetimepicker1").datetimepicker({
-          format: 'MM/DD/YYYY, HH:mm',
-        });
-        $("#datetimepicker2").datetimepicker({
-          format: 'MM/DD/YYYY, HH:mm',
-        });
-
-        // Add data handling for said calendar objects
-        $('#datetimepicker1').on("change.datetimepicker", function (e) {
-          var date = $('#datetimepicker1').datetimepicker('viewDate');
-          //date = new Date(date);
-          //date.setHours(date.getHours() - date.getTimezoneOffset()/60);
-
-          // now you can get the string
-          var isodate = date.toISOString();
-          departure_date = isodate;
-        });
-
-        $('#datetimepicker2').on("change.datetimepicker", function (e) {
-          var date = $('#datetimepicker2').datetimepicker('viewDate');
-          //date = new Date(date);
-          //date.setHours(date.getHours() - date.getTimezoneOffset()/60);
-
-          // now you can get the string
-          var isodate = date.toISOString();
-          arrival_date = isodate;
-        });
-
-        // Get mission information
-        $("#mission_number").change(function () {
-          var $this = $(this);
-          var mission_search = $this.val();
-          checkMissionInfo(mission_search);
-        });
-      }
-      feather.replace();
-
-    });
-
-
-    // Get Digest
-    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
-    function getFormDigest() {
-      console.log("Getting Form Digest..");
-      $.support.cors = true;
-      var _formDigest;
-      $.ajax({
-        url: hostUrl + "/_api/contextinfo",
-        type: "POST",
-        dataType: "json",
-
-        headers: { "Accept": "application/json; odata=verbose" },
-        xhrFields: { withCredentials: true },
-        async: false,
-        success: function (data) {
-          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
-          console.log(data.d.GetContextWebInformation.FormDigestValue);
-          console.log("Form Digest Done");
-
-        },
-        error: function () {
-          console.log("Error Occured");
-        }
-      });
-
-      return _formDigest;
-    }
-
-
-    // Create Flight Ticket
-    function CreateListItemWithDetails(listName, webUrl, itemProperties, success, failure) {
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-
-    function getLocationInformation(iata) {
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Airports_Codes')/items?$filter=ident eq '" + iata + "'&$top=1&$orderby=Created%20desc"
-      var location = "";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var allResults = data.d.results;
-          if (Number(allResults.length) > 0) {
-            var country = allResults[0].iso_country;
-            var region = allResults[0].iso_region;
-            var municipality = allResults[0].municipality;
-            var name = allResults[0].name;
-
-            if (country == "US") {
-              // need to use region to find state
-              var state = region.split("-");
-              state = state[1];
-              if (name.includes("Air Base") || name.includes("Air Force Base")) {
-                location = name + ", " + state;
-              }
-              else {
-                location = municipality + ", " + state;
-              }
-            }
-            else {
-              if (name.includes("Air Base") || name.includes("Air Force Base")) {
-                location = name + ", " + country;
-              }
-              else {
-                location = municipality + ", " + country;
-              }
-            }
-          }
-          else {
-            // search by other code
-            urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Airports_Codes')/items?$filter=gps_code eq '" + iata + "'&$top=1&$orderby=Created%20desc";
-            $.ajax({
-              url: urlLoad,
-              async: false,
-              method: "GET",
-              headers: {
-                "Accept": "application/json;odata=verbose"
-              },
-              success: function (data) {
-                var allResults = data.d.results;
-                if (Number(allResults.length) > 0) {
-                  var country = allResults[0].iso_country;
-                  var region = allResults[0].iso_region;
-                  var municipality = allResults[0].municipality;
-                  var name = allResults[0].name;
-
-                  if (country == "US") {
-                    // need to use region to find state
-                    var state = region.split("-");
-                    state = state[1];
-                    if (name.includes("Air Base") || name.includes("Air Force Base")) {
-                      location = name + ", " + state;
-                    }
-                    else {
-                      location = municipality + ", " + state;
-                    }
-                  }
-                  else {
-                    if (name.includes("Air Base") || name.includes("Air Force Base")) {
-                      location = name + ", " + country;
-                    }
-                    else {
-                      location = municipality + ", " + country;
-                    }
-                  }
-                }
-              }
-            });
-          }
-        }
-      });
-      /*
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$filter=Departure_IATA eq '" + iata + "'&$top=1&$orderby=Created%20desc";
-      var location = "";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var allResults = data.d.results;
-          if (Number(allResults.length) > 0) {
-            location = allResults[0].Departure_Location;
-          }
-        },
-        error: function (data) {
-          //alert("Error: " + JSON.stringify(data));
-        }
-      });*/
-      return location;
-    }
-
-    function checkMissionInfo(mission_search) {
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$filter=Mission_Number eq '" + mission_search + "'&$top=1&$orderby=Created%20desc";
-      var location = "";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var allResults = data.d.results;
-          if (Number(allResults.length) > 0) {
-            $("#dv_select").val(allResults[0].DV);
-            $('.selectpicker').selectpicker('refresh');
-
-            $("#tail_number").val(allResults[0].Tail_Number);
-            $('.selectpicker').selectpicker('refresh');
-
-            $("#departure_iata").val(allResults[0].Arrival_IATA);
-            $('.selectpicker').selectpicker('refresh');
-
-            var location_text = getLocationInformation(allResults[0].Arrival_IATA);
-            $("#departure_location").val(location_text);
-          }
-        },
-        error: function (data) {
-          //alert("Error: " + JSON.stringify(data));
-        }
-      });
-
-    }
-
-    // Get List Item Type metadata
-    function GetItemTypeForListName(name) {
-      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
-    }
-
-
-  </script>
+  <script type="module" src="./js/user.js"></script>
+  <script type="module" src="./js/pages/createFlightTicket.js"></script>
 </head>
 
 <body>
@@ -472,7 +39,7 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -627,6 +194,9 @@
                   d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
               </svg>
               <b>&nbsp;Input Information</b>
+              <div class="spinner-border" id="ticket_form_loader" style="width:1em;height:1em" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
             </div>
             <div class="card-body">
               <form>
@@ -657,7 +227,7 @@
                     <div class="form-group row">
                       <label for="departure_iata" class="col-sm-4 col-form-label">Departure IATA</label>
                       <div class="col-sm-8">
-                        <select class="selectpicker" id="departure_iata" data-actions-box="true" data-live-search="true"
+                        <select class="selectpicker" id="departure_iata" data-actions-box="true" data-live-search="true" disabled
                           data-size="5" tabindex=4 title="Choose one of the following...">
                         </select>
                       </div>
@@ -671,7 +241,7 @@
                     <div class="form-group row">
                       <label for="arrival_iata" class="col-sm-4 col-form-label">Arrival IATA</label>
                       <div class="col-sm-8">
-                        <select class="selectpicker" id="arrival_iata" data-actions-box="true" data-live-search="true"
+                        <select class="selectpicker" id="arrival_iata" data-actions-box="true" data-live-search="true" disabled
                           data-size="5" tabindex=6 title="Choose one of the following...">
                         </select>
                       </div>
@@ -722,7 +292,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />

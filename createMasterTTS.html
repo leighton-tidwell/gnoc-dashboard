@@ -2,282 +2,19 @@
 
 <head>
   <title>GNOC DV Dashboard</title>
+  <meta charset="utf-8"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript"
-    src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
+    src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>  
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    // Global digest value for auth
-    var digest = getFormDigest();
-    var listName = "masterTickets";
-
-    $(function () {
-      if (!checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", false, true)) {
-        $("html").remove();
-      }
-
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", false, false)) {
-
-        // page specific
-        if (!checkPermissions("RURJVCBUSUNLRVQ=", "ticket_attachments_div", false)) {
-          // if they cant edit ticket
-          $("input").prop("disabled", true);
-          $("textarea").prop("disabled", true);
-          $("select").prop("disabled", true);
-          $("button").remove();
-        }
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        // Generate Ticket Number
-
-        // Get Julian Date
-        function daysIntoYear(date) {
-          return (Date.UTC(date.getFullYear(), date.getUTCMonth(), date.getUTCDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
-        }
-
-        // Ticket Number String:
-        var currentYear = new Date().getUTCFullYear();
-        var ticketLast = 1;
-
-        // Need to verify if there is a ticket for this number that exists:
-        var ticket_number = "ADWN-M-" + currentYear + "-" + ("00" + daysIntoYear(new Date())).slice(-3) + "-000" + ticketLast;
-
-        while (true) {
-          if (checkTicketNumber(ticket_number)) {
-            ticketLast++;
-            ticket_number = "ADWN-M-" + currentYear + "-" + ("00" + daysIntoYear(new Date())).slice(-3) + "-000" + ticketLast;
-          }
-          else {
-            break;
-          }
-        }
-
-        // Set Ticket Number:
-        $("#ticket_number").val(ticket_number);
-
-
-        // Populate Ticket Dropdown
-        var ticket_selection = [];
-        var select = document.getElementById('ticket_select');
-        // Get all of the tickets:
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=GNOC_Ticket_Number&$top=200&$orderby=Created%20desc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var ticket = allResults[i].GNOC_Ticket_Number;
-
-                if (!ticket_selection.includes(ticket)) {
-                  // this is to make sure no duplicates are included.
-                  ticket_selection.push(ticket);
-                }
-              }
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-        for (var i = 0; i < ticket_selection.length; i++) {
-          var opt = document.createElement('option');
-          opt.innerHTML = ticket_selection[i];
-          select.appendChild(opt);
-        }
-        $('.selectpicker').selectpicker('refresh');
-
-        // Create Ticket
-        $(document).on('click', '#ticket_submit', function () {
-          // Disable Button
-          var $this = $(this);
-          var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-          if ($(this).html() !== loadingText) {
-            $this.data('original-text', $(this).html());
-            $this.html(loadingText);
-            $this.attr("disabled", true);
-          }
-
-          var ticket_number = $("#ticket_number").val();
-          var ticket_select = String($("#ticket_select").val());
-          var issue_description = $("#issue_description").val();
-
-          var itemProperties = { 'Title': ticket_number, 'ticket_list': ticket_select, 'issue_description': issue_description };
-
-          console.log(itemProperties);
-          CreateListItemWithDetails(listName, hostUrl, itemProperties, function () {
-            var updateText = "GNOC created ticket #" + ticket_number + ".";
-            itemProperties = { 'ticket_number': ticket_number, 'update': updateText };
-            // Update needs to be added to appropriate table.
-            addUpdate(hostUrl, itemProperties, function () {
-              alert("Ticket successfully created.");
-              location.reload();
-            })
-          }, function () {
-            alert("An error has occured. Please try again.");
-          });
-        });
-      }
-      feather.replace();
-
-    });
-
-    function addUpdate(webUrl, itemProperties, success, failure) {
-      listName = "ticketUpdates";
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-
-    // Get Digest
-    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
-    function getFormDigest() {
-      console.log("Getting Form Digest..");
-      $.support.cors = true;
-      var _formDigest;
-      $.ajax({
-        url: hostUrl + "/_api/contextinfo",
-        type: "POST",
-        dataType: "json",
-
-        headers: { "Accept": "application/json; odata=verbose" },
-        xhrFields: { withCredentials: true },
-        async: false,
-        success: function (data) {
-          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
-          console.log(data.d.GetContextWebInformation.FormDigestValue);
-          console.log("Form Digest Done");
-
-        },
-        error: function () {
-          console.log("Error Occured");
-        }
-      });
-
-      return _formDigest;
-    }
-
-    // CREATE Operation
-    // listName: The name of the list you want to get items from
-    // weburl: The url of the web that the list is in. 
-    // newItemTitle: New Item title.
-    // success: The function to execute if the call is sucesfull
-    // failure: The function to execute if the call fails
-    function CreateListItemWithDetails(listName, webUrl, itemProperties, success, failure) {
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: webUrl + "_api/web/lists/getbytitle('" + listName + "')/items",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-
-    // Get List Item Type metadata
-    function GetItemTypeForListName(name) {
-      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
-    }
-
-    // verify ticket number isnt used:
-    function checkTicketNumber(ticket_number) {
-      var found = false;
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$select=Title&$filter=Title eq '" + ticket_number + "'";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var allResults = data.d.results;
-          if (Number(allResults.length) != 0) {
-            found = true;
-          }
-        },
-        error: function (data) {
-          //alert("Error: " + JSON.stringify(data));
-        }
-      });
-      return found;
-    }
-  </script>
+  <script type="module" src="./js/user.js"></script>
+  <script type="module" src="./js/pages/createMasterTTS.js"></script>
 </head>
 
 <body>
@@ -293,7 +30,7 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -330,7 +67,7 @@
               </a>
             </li>
             <li class="nav-item" id="create_master_tts_div">
-              <a class="nav-link active" href="./createMasterTTS.html">
+              <a class="nav-link bg-secondary" href="./createMasterTTS.html">
                 <span data-feather="file"></span>
                 Create a Master TTS <span class="sr-only">(current)</span>
               </a>
@@ -469,7 +206,9 @@
                     </div>
                     <div class="form-group row">
                       <label for="issue_description" class="col-sm-4 col-form-label">Issue Description</label>
-                      <textarea class="form-control col-sm-8" id="issue_description" rows="10"></textarea>
+                      <div class="col-sm-8">
+                        <textarea class="form-control" id="issue_description" rows="10"></textarea>
+                      </div>
                     </div>
                     <div class="form-group row">
                       <div class="col-sm-10">
@@ -478,7 +217,7 @@
                     </div>
                   </div>
                   <div class="col">
-                    <div class="alert alert-info">
+                    <div class="alert alert-primary">
                       <b>Important:</b><br>
                       <span>When creating a master TTS, you <b>must</b> create an individual ticket for each aircraft
                         affected and then select them as tickets attached in the drop down.<br>
@@ -494,7 +233,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />

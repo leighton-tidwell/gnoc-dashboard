@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="css/global.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
@@ -27,14 +27,14 @@
   <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
   <script type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
+  <script type="module" src="js/user.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script type="text/javascript" src="./js/index.min.js"></script>
+  <script type="module" src="js/index.min.js"></script>
 </head>
 
 <body>
   <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
-    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="./index.html">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="index.html">
       <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor"
         xmlns="http://www.w3.org/2000/svg">
         <path fill-rule="evenodd"
@@ -51,19 +51,19 @@
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
-              <a class="nav-link active" href="./index.html">
+              <a class="nav-link active" href="index.html">
                 <span data-feather="home"></span>
                 Dashboard <span class="sr-only">(current)</span>
               </a>
             </li>
             <li class="nav-item" id="flight_schedule_div">
-              <a class="nav-link" href="./flightschedule.html">
+              <a class="nav-link" href="flightschedule.html">
                 <span data-feather="clock"></span>
                 Flight Schedule
               </a>
             </li>
             <li class="nav-item" id="contact_list_div">
-              <a class="nav-link" href="./contactList.html">
+              <a class="nav-link" href="contactList.html">
                 <span data-feather="phone"></span>
                 Contact List
               </a>
@@ -72,25 +72,25 @@
           <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
             id="tickets_header_div">
             <span>Trouble Tickets</span>
-            <a class="d-flex align-items-center text-muted" href="./ticketSettings.html" id="ticket_settings_div">
+            <a class="d-flex align-items-center text-muted" href="ticketSettings.html" id="ticket_settings_div">
               <span data-feather="settings"></span>
             </a>
           </h6>
           <ul class="nav flex-column mb-2">
             <li class="nav-item" id="create_tts_div">
-              <a class="nav-link" href="./createTTS.html">
+              <a class="nav-link" href="createTTS.html">
                 <span data-feather="file"></span>
                 Create a TTS
               </a>
             </li>
             <li class="nav-item" id="create_master_tts_div">
-              <a class="nav-link" href="./createMasterTTS.html">
+              <a class="nav-link" href="createMasterTTS.html">
                 <span data-feather="file"></span>
                 Create a Master TTS
               </a>
             </li>
             <li class="nav-item" id="view_tickets_div">
-              <a class="nav-link" href="./viewTickets.html">
+              <a class="nav-link" href="viewTickets.html">
                 <span data-feather="file-text"></span>
                 View Tickets
               </a>
@@ -98,26 +98,26 @@
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
               id="flight_tickets_header_div">
               <span>Flight Tickets</span>
-              <a class="d-flex align-items-center text-muted" href="./createFlightTicket.html"
+              <a class="d-flex align-items-center text-muted" href="createFlightTicket.html"
                 id="create_flight_ticket_icon_div">
                 <span data-feather="plus-circle"></span>
               </a>
             </h6>
             <ul class="nav flex-column mb-2">
               <li class="nav-item" id="create_flight_ticket_div">
-                <a class="nav-link" href="./createFlightTicket.html">
+                <a class="nav-link" href="createFlightTicket.html">
                   <span data-feather="file"></span>
                   Create a Flight Ticket
                 </a>
               </li>
               <li class="nav-item" id="view_flight_tickets_div">
-                <a class="nav-link" href="./viewFlightTickets.html">
+                <a class="nav-link" href="viewFlightTickets.html">
                   <span data-feather="file-text"></span>
                   View Flight Tickets
                 </a>
               </li>
               <li class="nav-item" id="view_missions_div">
-                <a class="nav-link" href="./viewMissions.html">
+                <a class="nav-link" href="viewMissions.html">
                   <span data-feather="file-text"></span>
                   View Missions
                 </a>
@@ -126,19 +126,19 @@
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
               id="ccir_header_div">
               <span>CCIRs</span>
-              <a class="d-flex align-items-center text-muted" href="./createCCIR.html" id="add_a_ccir_icon_div">
+              <a class="d-flex align-items-center text-muted" href="createCCIR.html" id="add_a_ccir_icon_div">
                 <span data-feather="plus-circle"></span>
               </a>
             </h6>
             <ul class="nav flex-column mb-2">
               <li class="nav-item" id="add_a_ccir_div">
-                <a class="nav-link" href="./createCCIR.html">
+                <a class="nav-link" href="createCCIR.html">
                   <span data-feather="file"></span>
                   Add a CCIR
                 </a>
               </li>
               <li class="nav-item" id="view_ccirs_div">
-                <a class="nav-link" href="./viewCCIRS.html">
+                <a class="nav-link" href="viewCCIRS.html">
                   <span data-feather="file-text"></span>
                   View CCIRs
                 </a>
@@ -150,37 +150,37 @@
             </h6>
             <ul class="nav flex-column mb-2">
               <li class="nav-item" id="24_hour_report_div">
-                <a class="nav-link" href="./ticketReport.html">
+                <a class="nav-link" href="ticketReport.html">
                   <span data-feather="file-text"></span>
                   24 Hour Ticket Report
                 </a>
               </li>
               <li class="nav-item" id="weekend_report_div">
-                <a class="nav-link" href="./weekendTicketReport.html">
+                <a class="nav-link" href="weekendTicketReport.html">
                   <span data-feather="file-text"></span>
                   Weekend Ticket Report
                 </a>
               </li>
               <li class="nav-item" id="morning_slides_div">
-                <a class="nav-link" href="./morningSlides.html">
+                <a class="nav-link" href="morningSlides.html">
                   <span data-feather="file-text"></span>
                   Morning Slides
                 </a>
               </li>
               <li class="nav-item" id="personnel_stats_div">
-                <a class="nav-link" href="./personnelStats.html">
+                <a class="nav-link" href="personnelStats.html">
                   <span data-feather="file-text"></span>
                   Personnel Stats
                 </a>
               </li>
               <li class="nav-item" id="monthly_metrics_div">
-                <a class="nav-link" href="./metrics.html">
+                <a class="nav-link" href="metrics.html">
                   <span data-feather="file-text"></span>
                   Monthly Metrics
                 </a>
               </li>
               <li class="nav-item" id="permissions_div">
-                <a class="nav-link" href="./permissions.html">
+                <a class="nav-link" href="permissions.html">
                   <span data-feather="file-text"></span>
                   Permissions
                 </a>
@@ -193,15 +193,15 @@
           class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
           <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
-              <a class="nav-link active" id="home-tab" data-toggle="tab" href="./index.html" role="tab"
+              <a class="nav-link active" id="home-tab" data-toggle="tab" href="index.html" role="tab"
                 aria-controls="home" aria-selected="true">Overview</a>
             </li>
             <li class="nav-item" role="presentation" id="dv_details_div">
-              <a class="nav-link" id="profile-tab" href="./dvdetails.html" role="tab" aria-controls="profile"
+              <a class="nav-link" id="profile-tab" href="dvdetails.html" role="tab" aria-controls="profile"
                 aria-selected="false">DV Details</a>
             </li>
             <li class="nav-item" role="presentation" id="open_tickets_div">
-              <a class="nav-link" id="contact-tab" href="./opentickets.html" role="tab" aria-controls="contact"
+              <a class="nav-link" id="contact-tab" href="opentickets.html" role="tab" aria-controls="contact"
                 aria-selected="false">Open Tickets</a>
             </li>
           </ul>

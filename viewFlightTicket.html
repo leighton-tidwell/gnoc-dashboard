@@ -46,6 +46,14 @@
     var departure_date;
 
     $(function () {
+    /*
+    	var realConsoleLog = console.log;
+      console.log = function () {
+        var message = [].join.call(arguments, " ");
+        $("#debugDiv").text(message);
+        realConsoleLog.apply(console, arguments);
+      };
+      */
       if (!checkPermissions("VklFVyBGTElHSFQgVElDS0VU", false, true)) {
         $("html").remove();
       }
@@ -119,7 +127,49 @@
         });
 
         //Populate IATA
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('iata_list')/items?$top=5000&$orderby=Title%20asc";
+        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Airports_Codes')/items?$select=gps_code&$top=1000&$orderby=Title%20asc";
+        var iata_list = iata_list || [];
+
+        function getIataList(){
+        	return $.ajax({
+          	url: urlLoad,
+            async: false,
+            method: "GET",
+            headers: {
+              "Accept": "application/json;odata=verbose"
+            },
+            success: function (data) {
+            	iata_list = iata_list.concat(data.d.results);
+              if(data.d.__next){
+              	urlLoad = data.d.__next;
+                getIataList();
+              }
+            }
+          });
+        }
+        getIataList(); // recursively get all airport codes
+        
+        // assign them to drop down
+        var select = document.getElementById('arrival_iata');
+        for (var i = 0; i < iata_list.length; i++) {
+          // looping through all results
+          var opt = document.createElement('option');
+          opt.innerHTML = iata_list[i].gps_code;
+          select.appendChild(opt);
+        }
+        $('.selectpicker').selectpicker('refresh');
+
+        var select = document.getElementById('departure_iata');
+        for (var i = 0; i < iata_list.length; i++) {
+          // looping through all results
+          var opt = document.createElement('option');
+          opt.innerHTML = iata_list[i].gps_code;
+          select.appendChild(opt);
+        }
+        $('.selectpicker').selectpicker('refresh');
+ 
+        
+        /*
         $.ajax({
           url: urlLoad,
           async: false,
@@ -153,7 +203,7 @@
           error: function (data) {
             //alert("Error: " + JSON.stringify(data));
           }
-        });
+        });*/
 
         // Populate Aircraft Drop Down
         var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('TailNumbers')/items?$top=5000&$orderby=Tail_x0020_Numbers%20asc";
@@ -244,6 +294,24 @@
         });
         $("#datetimepicker2").datetimepicker({
           format: 'MM/DD/YYYY, HH:mm',
+        });
+        
+        // Generate Location
+        $('#departure_iata').change(function () {
+          // Load location from previous flight tickets
+          var $this = $(this);
+          var iata = $this.val();
+          var location_text = getLocationInformation(iata);
+          $("#departure_location").val(location_text.toUpperCase());
+        });
+
+        // Generate Location
+        $('#arrival_iata').change(function () {
+          // Load location from previous flight tickets
+          var $this = $(this);
+          var iata = $this.val();
+          var location_text = getLocationInformation(iata);
+          $("#arrival_location").val(location_text.toUpperCase());
         });
 
         // Add data handling for said calendar objects
@@ -359,6 +427,91 @@
     function GetItemTypeForListName(name) {
       return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
     }
+    
+    function getLocationInformation(iata) {
+      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Airports_Codes')/items?$filter=ident eq '" + iata + "'&$top=1&$orderby=Created%20desc"
+      var location = "";
+      $.ajax({
+        url: urlLoad,
+        async: false,
+        method: "GET",
+        headers: {
+          "Accept": "application/json;odata=verbose"
+        },
+        success: function (data) {
+          var allResults = data.d.results;
+          if (Number(allResults.length) > 0) {
+            var country = allResults[0].iso_country;
+            var region = allResults[0].iso_region;
+            var municipality = allResults[0].municipality;
+            var name = allResults[0].name;
+
+            if (country == "US") {
+              // need to use region to find state
+              var state = region.split("-");
+              state = state[1];
+              if (name.includes("Air Base") || name.includes("Air Force Base")) {
+                location = name + ", " + state;
+              }
+              else {
+                location = municipality + ", " + state;
+              }
+            }
+            else {
+              if (name.includes("Air Base") || name.includes("Air Force Base")) {
+                location = name + ", " + country;
+              }
+              else {
+                location = municipality + ", " + country;
+              }
+            }
+          }
+          else {
+            // search by other code
+            urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Airports_Codes')/items?$filter=gps_code eq '" + iata + "'&$top=1&$orderby=Created%20desc";
+            $.ajax({
+              url: urlLoad,
+              async: false,
+              method: "GET",
+              headers: {
+                "Accept": "application/json;odata=verbose"
+              },
+              success: function (data) {
+                var allResults = data.d.results;
+                if (Number(allResults.length) > 0) {
+                  var country = allResults[0].iso_country;
+                  var region = allResults[0].iso_region;
+                  var municipality = allResults[0].municipality;
+                  var name = allResults[0].name;
+
+                  if (country == "US") {
+                    // need to use region to find state
+                    var state = region.split("-");
+                    state = state[1];
+                    if (name.includes("Air Base") || name.includes("Air Force Base")) {
+                      location = name + ", " + state;
+                    }
+                    else {
+                      location = municipality + ", " + state;
+                    }
+                  }
+                  else {
+                    if (name.includes("Air Base") || name.includes("Air Force Base")) {
+                      location = name + ", " + country;
+                    }
+                    else {
+                      location = municipality + ", " + country;
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+      });
+      return location;
+    }
+    
 
   </script>
 </head>

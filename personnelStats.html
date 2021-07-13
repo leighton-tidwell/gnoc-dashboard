@@ -27,7 +27,20 @@
     var listName = "Tickets";
 
     $(function () {
+    	/*
+      if (typeof console  != "undefined") 
+      if (typeof console.log != 'undefined')
+          console.olog = console.log;
+      else
+          console.olog = function() {};
 
+      console.log = function(message) {
+          console.olog(message);
+          $('#debugDiv').append('<p>' + message + '</p>');
+      };
+      console.error = console.debug = console.info =  console.log
+			*/
+      
       // Check permissions of page:
       if (!checkPermissions("UEVSU09OTkVMIFNUQVRT", false, true)) {
         $("html").remove();
@@ -224,7 +237,8 @@
           "Accept": "application/json;odata=verbose"
         },
         success: function (data) {
-          var arrayOfTimes = []; // times of tickets unique to mission number
+          var arrayOfUpdates = []; // Unique updates only
+          var arrayOfFixed = []; //Unique fixes only
           var allResults = data.d.results;
           var closed = 0;
           var updates = 0;
@@ -233,16 +247,25 @@
             for (var i = 0; i < allResults.length; i++) {
               var update = allResults[i].update;
               var ticketNumber = allResults[i].ticket_number;
+              
+              var createdString = "GNOC created ticket #" + ticketNumber + ".";
               var openString = "GNOC set ticket #" + ticketNumber + " to OPEN.";
               var fixedString = "GNOC set ticket #" + ticketNumber + " to FIXED.";
               var closedString = "GNOC set ticket #" + ticketNumber + " to CLOSED.";
-              if (update != openString && update != closedString && update != fixedString)
-                updates++;
-              if (update == closedString)
-                closed++;
-              if (update == fixedString)
-                fixed++;
+              var assignedString = "GNOC set ticket #" + ticketNumber + " to ASSIGNED.";
 
+              if(!arrayOfUpdates.includes(allResults[i].update)){
+                if (update != openString && update != closedString && update != fixedString && update != assignedString && update != createdString){
+                  updates++;
+                  arrayOfUpdates.push(allResults[i].update);
+                }
+                if (update == closedString)
+                  closed++;
+                if (update == fixedString && !arrayOfFixed.includes(allResults[i].update)){
+                  fixed++;
+                  arrayOfFixed.push(allResults[i].update);
+                }
+              }
             }
             $("#total_updates").html(updates);
             $("#total_closed").html(closed);
@@ -306,7 +329,8 @@
             "Accept": "application/json;odata=verbose"
           },
           success: function (data) {
-            var arrayOfTimes = []; // times of tickets unique to mission number
+            var arrayOfUpdates = []; // Unique updates only
+            var arrayOfFixed = [];
             var allResults = data.d.results;
             var closed = 0;
             var updates = 0;
@@ -314,16 +338,32 @@
               for (var j = 0; j < allResults.length; j++) {
                 var update = allResults[j].update;
                 var ticketNumber = allResults[j].ticket_number;
+                
+                var createdString = "GNOC created ticket #" + ticketNumber + ".";
                 var openString = "GNOC set ticket #" + ticketNumber + " to OPEN.";
                 var fixedString = "GNOC set ticket #" + ticketNumber + " to FIXED.";
                 var closedString = "GNOC set ticket #" + ticketNumber + " to CLOSED.";
-                if (update != openString && update != closedString && update != fixedString)
-                  currUpdate++;
-                if (update == closedString)
-                  currClosed++;
-                if (update == fixedString)
-                  currFixed++;
+                var assignedString = "GNOC set ticket #" + ticketNumber + " to ASSIGNED.";
+                
+                if(!arrayOfUpdates.includes(allResults[j].update)){
+                  if (update != openString && update != closedString && update != fixedString && update != assignedString && update != createdString){
+                    currUpdate++;
+                    arrayOfUpdates.push(allResults[j].update);
+                  }
+                  if (update == closedString)
+                    currClosed++;
+                  if (update == fixedString && !arrayOfFixed.includes(allResults[j].update)){
+                    currFixed++;
+                    arrayOfFixed.push(allResults[j].update);
+                  }
+                }
               }
+              /*
+              console.log("====== FOR EACH OPERATOR =====");
+              console.log("OPERATOR: " + operators[i]);
+              console.log(arrayOfFixed.join("<br />"));
+              console.log("====== END EACH OPERATOR =====");
+              */
             }
           }
         });

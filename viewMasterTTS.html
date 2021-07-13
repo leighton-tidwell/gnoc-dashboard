@@ -32,6 +32,7 @@
     var ticket_number = getUrlParameter('ticket');
     var ticket_status = "";
     var adw_ticket_number = "";
+    var updateIds = [];
 
     // Global digest value for auth
     var digest = getFormDigest();
@@ -50,6 +51,10 @@
         $("select").prop("disabled", true);
         $("button").remove();
       }
+      checkPermissions("VElDS0VUIEFVVEhPUg==", "createdBy", false);
+      checkPermissions("REVMRVRFIFRJQ0tFVA==", "deleteTicket", false);
+      
+      
       // Permissions of content if page true and let page content run
       if (checkPermissions("VklFVyBNQVNURVIgVFRT", false, false)) {
 
@@ -131,7 +136,7 @@
         var ticket_selection = [];
         var select = document.getElementById('ticket_select');
         // Get all of the tickets:
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$filter=Id eq '" + ticket_number + "'";
+        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$select=Author/Name,Title,ticket_list,issue_description,status,Created&$filter=Id eq '" + ticket_number + "'&$expand=Author";
         $.ajax({
           url: urlLoad,
           async: false,
@@ -153,6 +158,14 @@
               ticket_status = allResults[0].status;
               $("#status").val(allResults[0].status);
               $('.selectpicker').selectpicker('refresh');
+              console.log("trying to assign name: " + allResults[0].Author.Name);
+              var name = allResults[0].Author.Name.split('|');
+              var fullName = name[2];
+              var nameArr = fullName.split('.');
+              if (nameArr[2] === undefined)
+                nameArr[2] = nameArr[1];
+              name = nameArr[0].toUpperCase() + " " + nameArr[2].toUpperCase();
+              $("#createdBy").html("Created By: <b>" + name + "</b>");
             }
           },
           error: function (data) {
@@ -283,6 +296,18 @@
             });
           }
         });
+        
+        $(document).on('click', '#deleteTicket', function () {
+            // Disable Button
+            var $this = $(this);
+            var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            if ($(this).html() !== loadingText) {
+              $this.data('original-text', $(this).html());
+              $this.html(loadingText);
+              $this.attr("disabled", true);
+            }
+            deleteTicket(ticket_number);
+          });
 
         // Show Updates in list
         var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('ticketUpdates')/items?$select=Created,ticket_number,update,update_date,Author/Name&$orderby=Created%20desc&$filter=ticket_number eq '" + adw_ticket_number + "'&$expand=Author";
@@ -301,6 +326,7 @@
                 var created = allResults[i].Created;
                 var update_date = allResults[i].update_date;
                 var update = allResults[i].update;
+                var updateId = allResults[i].Id;
 
                 var name = allResults[i].Author.Name.split('|');
                 var fullName = name[2];
@@ -310,6 +336,7 @@
                 name = nameArr[0].toUpperCase() + " " + nameArr[2].toUpperCase();
 
                 updates.push(created);
+                updateIds.push(updateId);
                 if (i == 0) {
                   if (update.includes("GNOC created ticket") || update.includes("GNOC set ticket"))
                     $("#ticket_update_log").append("<li class=\"list-group-item active\"><b>" + convertTheDate(update_date, 1) + "</b> - " + update + "</b></li>");
@@ -408,6 +435,42 @@
         },
         error: function (data) {
           failure(data);
+        }
+      });
+    }
+    
+    function deleteTicket(id) {
+      $.ajax({
+        url: hostUrl + "/_api/web/lists/getbytitle('masterTickets')/items(" + id + ")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        headers: {
+          "Accept": "application/json;odata=verbose",
+          "X-RequestDigest": digest,
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE",
+        },
+        success: function (data) {
+          // Now we need to delete all updates with ticket:
+          for (var i = 0; i < updateIds.length; i++) {
+            $.ajax({
+              url: hostUrl + "/_api/web/lists/getbytitle('ticketUpdates')/items(" + updateIds[i] + ")",
+              type: "POST",
+              contentType: "application/json;odata=verbose",
+              headers: {
+                "Accept": "application/json;odata=verbose",
+                "X-RequestDigest": digest,
+                "IF-MATCH": "*",
+                "X-HTTP-Method": "DELETE",
+              },
+              success: function (data) {
+                if (i == updateIds.length) {
+                  alert("Ticket deleted successfully.");
+                  window.location.replace("./viewTickets.html");
+                }
+              }
+            });
+          }
         }
       });
     }
@@ -621,6 +684,7 @@
                 <option>FIXED</option>
                 <option>CLOSED</option>
               </select>
+              &nbsp;|&nbsp;<span id="createdBy"></span>
             </div>
             <div class="card-body">
               <form>
@@ -651,6 +715,11 @@
                     <div class="form-group row">
                       <div class="col-sm-10">
                         <button type="button" id="ticket_submit" class="btn btn-primary">Update Ticket</button>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-sm-10">
+                        <button type="button" id="deleteTicket" class="btn btn-danger">Delete Ticket</button>
                       </div>
                     </div>
                   </div>
