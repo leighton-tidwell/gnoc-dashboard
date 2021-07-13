@@ -1,5 +1,5 @@
 ﻿# 89th CS GSOC Dashboard
- This dashboard is has a fully fleshed flight tracker as well as ticket metrics system. It is used at the 89th Communication Squadron on Joint Base Andrews to provide detailed statistics and metrics on communication issues for Top 5 distinguished visitors (POTUS, VPOTUS, SECDEF, SECSTATE, CJCS) while they are flying aboard the 'blue and white' fleet.
+ This dashboard has a fully fleshed flight tracker as well as ticket metrics system. It is used at the 89th Communication Squadron on Joint Base Andrews to provide detailed statistics and metrics on communication issues for Top 5 distinguished visitors (POTUS, VPOTUS, SECDEF, SECSTATE, CJCS) while they are flying aboard the 'blue and white' fleet.
  
  The tech stack includes:
  - Javascript
