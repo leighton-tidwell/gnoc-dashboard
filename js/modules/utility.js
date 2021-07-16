@@ -28,14 +28,24 @@ export const removeFromList = (listName, id, success, failure) => {
     .catch((error) => failure(error));
 };
 
-export const insertIntoList = (listName, itemProperties, success, failure) => {
+export const insertIntoList = (
+  listName,
+  itemProperties,
+  success,
+  failure,
+  oddIdentifier
+) => {
   const itemType = getItemTypeForListName(listName);
-  itemProperties["__metadata"] = { type: itemType };
+  if (!oddIdentifier) itemProperties["__metadata"] = { type: itemType };
+  else
+    itemProperties["__metadata"] = {
+      type: `SP.Data.${listName.split("_").join("_x005f_")}ListItem`,
+    };
 
   fetch(`${HOST_URL}/_api/web/lists/getbytitle('${listName}')/items`, {
     method: "POST",
     headers: {
-      "Accept": "application/json;odata=verbose",
+      Accept: "application/json;odata=verbose",
       "Content-Type": "application/json;odata=verbose",
       "odata-version": "",
       "X-RequestDigest": FORM_DIGEST,
