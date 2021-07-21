@@ -1,12 +1,11 @@
 import { HOST_URL } from "../modules/constants.js";
 import { insertIntoList, removeFromList } from "../modules/utility.js";
-import { checkPermissions } from "../user.js";
 import permissionsCheck from "../modules/userPermissionsCheck.js";
 const DV_LIST_NAME = "DVList";
 const TICKET_CATEGORIES_LIST_NAME = "Ticket_Categories";
-const TICKET_CATEGORIES_INSERT_NAME = "Ticket_x005f_Categories";
 const TAIL_NUMBER_LIST = "TailNumbers";
 permissionsCheck("VElDS0VUIFNFVFRJTkdT");
+feather.replace();
 
 // Populate DV List
 fetch(

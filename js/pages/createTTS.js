@@ -7,6 +7,7 @@ import {
 import permissionsCheck from "../modules/userPermissionsCheck.js";
 const TICKETS_LIST_NAME = "Tickets";
 const UPDATES_LIST_NAME = "ticketUpdates";
+const BEAM_LIST_NAME = "Viasat_Beams";
 feather.replace();
 permissionsCheck("Q1JFQVRFIFRUUw==");
 
@@ -135,6 +136,29 @@ fetch(
     console.error("Error:", error);
   });
 
+// Populate Beams
+fetch(
+  `${HOST_URL}/_api/web/lists/getbytitle('${BEAM_LIST_NAME}')/items?$orderby=Network asc`,
+  {
+    headers: { Accept: "application/json; odata=verbose" },
+    credentials: "include",
+  }
+)
+  .then((response) => response.json())
+  .then((data) => {
+    const items = data.d.results;
+    const beamSelect = document.getElementById("beam");
+    items.forEach((item) => {
+      let opt = document.createElement("option");
+      opt.innerHTML = item.Beam;
+      beamSelect.appendChild(opt);
+    });
+    $(".selectpicker").selectpicker("refresh");
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });
+
 // Enable and disable CCIR input box depending on if user has designated a CCIR or not.
 document.querySelector("#ccir").addEventListener("change", (event) => {
   const ccirEnteredValue = event.target.value;
@@ -146,93 +170,85 @@ document.querySelector("#ccir").addEventListener("change", (event) => {
 });
 
 // Create Ticket
-document.querySelector("#ticket_submit").addEventListener("click", (event) => {
-  const enteredTicketNumber = document.getElementById("ticket_number").value;
-  const enteredDV = document.getElementById("dv_select").value;
-  const currentDate = new Date();
-  const enteredTailNumber = document.getElementById("tail_number").value;
-  const enteredMissionNumber = document.getElementById("mission_number").value;
-  const enteredImpactLevel = document.getElementById("impact_level").value;
+document
+  .querySelector("#ticket_submit")
+  .addEventListener("click", async (event) => {
+    const enteredDV = document.getElementById("dv_select").value;
+    const currentDate = new Date();
+    const enteredTailNumber = document.getElementById("tail_number").value;
+    const enteredMissionNumber =
+      document.getElementById("mission_number").value;
+    const enteredImpactLevel = document.getElementById("impact_level").value;
 
-  let dvImpact = "false";
-  if (enteredImpactLevel !== "None") dvImpact = "true";
+    let dvImpact = "false";
+    if (enteredImpactLevel !== "None") dvImpact = "true";
 
-  const enteredTicketCategory = document.getElementById("category").value;
-  const enteredSubCategory = document.getElementById("sub_category").value;
-  const STATUS = "ASSIGNED";
-  const enteredIssueDescription =
-    document.getElementById("issue_description").value;
-  const enteredCCIRNumber = document.getElementById("ccir_number").value;
-  const enteredCSO = document.getElementById("cso").value;
-  const enteredLeg = document.getElementById("leg").value;
+    const enteredTicketCategory = document.getElementById("category").value;
+    const enteredSubCategory = document.getElementById("sub_category").value;
+    const STATUS = "ASSIGNED";
+    const enteredIssueDescription =
+      document.getElementById("issue_description").value;
+    const enteredCCIRNumber = document.getElementById("ccir_number").value;
+    const enteredCSO = document.getElementById("cso").value;
+    const enteredLeg = document.getElementById("leg").value;
+    const selectedBeam = document.getElementById("beam").value;
 
-  // if user did not enter data into the required fields, alert them.
-  if (
-    enteredTailNumber === "" ||
-    enteredTicketCategory === "" ||
-    enteredSubCategory === "" ||
-    enteredIssueDescription === ""
-  )
-    return alert(
-      "One or more required field does not contain data. Please try again."
-    );
+    // if user did not enter data into the required fields, alert them.
+    if (
+      enteredTailNumber === "" ||
+      enteredTicketCategory === "" ||
+      enteredSubCategory === "" ||
+      enteredIssueDescription === ""
+    )
+      return alert(
+        "One or more required field does not contain data. Please try again."
+      );
 
-  // Disable button so user can not double click.
-  const LOADING_TEXT =
-    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-  event.target.disabled = true;
-  event.target.innerHTML = LOADING_TEXT;
+    // Disable button so user can not double click.
+    const LOADING_TEXT =
+      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+    event.target.disabled = true;
+    event.target.innerHTML = LOADING_TEXT;
 
-  // Check to make sure ticket was not created while page was idled.
-  while (true) {
-    if (checkIfTicketNumberExists(ticketNumber)) {
-      lastNumberOfTicket++;
-      ticketNumber =
-        "ADWN-" +
-        currentYear +
-        "-" +
-        ("00" + daysIntoYear(new Date())).slice(-3) +
-        "-000" +
-        lastNumberOfTicket;
-    } else {
-      break;
-    }
-  }
+    // Check to make sure ticket was not created while page was idled.
+    await generateTicketNumber();
+    const enteredTicketNumber = document.getElementById("ticket_number").value;
 
-  // Set up sharepoint push action
-  const ticketProperties = {
-    GNOC_Ticket_Number: enteredTicketNumber,
-    DV: enteredDV,
-    Tail_Number: enteredTailNumber,
-    Mission_Number: enteredMissionNumber,
-    DV_Impact: dvImpact,
-    Impact_Level: enteredImpactLevel,
-    Category: enteredTicketCategory,
-    Sub_Category: enteredSubCategory,
-    Status: STATUS,
-    Issue_Description: enteredIssueDescription,
-    CCIR_Number: enteredCCIRNumber,
-    CSO: enteredCSO,
-    Leg: enteredLeg,
-  };
-
-  insertIntoList(TICKETS_LIST_NAME, ticketProperties, () => {
-    // now add update to updates list
-    const updateText = `GNOC created ticket #${enteredTicketNumber}.`;
-    const updateProperties = {
-      ticket_number: enteredTicketNumber,
-      update: updateText,
+    // Set up sharepoint push action
+    const ticketProperties = {
+      GNOC_Ticket_Number: enteredTicketNumber,
+      DV: enteredDV,
+      Tail_Number: enteredTailNumber,
+      Mission_Number: enteredMissionNumber,
+      DV_Impact: dvImpact,
+      Impact_Level: enteredImpactLevel,
+      Category: enteredTicketCategory,
+      Sub_Category: enteredSubCategory,
+      Status: STATUS,
+      Issue_Description: enteredIssueDescription,
+      CCIR_Number: enteredCCIRNumber,
+      CSO: enteredCSO,
+      Leg: enteredLeg,
+      Beam: selectedBeam,
     };
-    insertIntoList(UPDATES_LIST_NAME, updateProperties, () => {
-      alert("Ticket successfully created.");
-      location.reload();
-    });
-  }),
-    (error) => {
-      alert("An error has occured. Please try again.");
-      console.error(error);
-    };
-});
+
+    insertIntoList(TICKETS_LIST_NAME, ticketProperties, () => {
+      // now add update to updates list
+      const updateText = `GNOC created ticket #${enteredTicketNumber}.`;
+      const updateProperties = {
+        ticket_number: enteredTicketNumber,
+        update: updateText,
+      };
+      insertIntoList(UPDATES_LIST_NAME, updateProperties, () => {
+        alert("Ticket successfully created.");
+        location.replace(`./viewTicket.html?ticket=${enteredTicketNumber}`);
+      });
+    }),
+      (error) => {
+        alert("An error has occured. Please try again.");
+        console.error(error);
+      };
+  });
 
 Date.prototype.addHours = function (h) {
   this.setTime(this.getTime() + h * 60 * 60 * 1000);

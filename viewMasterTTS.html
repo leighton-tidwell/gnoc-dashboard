@@ -1,514 +1,20 @@
 <html>
 
 <head>
-  <title>GNOC DV Dashboard</title>
+  <title>GSOC DV Dashboard</title>
+  <meta charset="utf-8"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript"
     src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    // To get ticket Number from URL
-    var getUrlParameter = function getUrlParameter(sParam) {
-      var sPageURL = window.location.search.substring(1),
-        sURLVariables = sPageURL.split('&'),
-        sParameterName,
-        i;
-
-      for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-          return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-        }
-      }
-    };
-    var ticket_number = getUrlParameter('ticket');
-    var ticket_status = "";
-    var adw_ticket_number = "";
-    var updateIds = [];
-
-    // Global digest value for auth
-    var digest = getFormDigest();
-    var listName = "masterTickets";
-
-    $(function () {
-      // Check permissions of page:
-      if (!checkPermissions("VklFVyBNQVNURVIgVFRT", false, true)) {
-        $("html").remove();
-      }
-
-      if (!checkPermissions("RURJVCBUSUNLRVQ=", false, false)) {
-        // if they cant edit ticket
-        $("input").prop("disabled", true);
-        $("textarea").prop("disabled", true);
-        $("select").prop("disabled", true);
-        $("button").remove();
-      }
-      checkPermissions("VElDS0VUIEFVVEhPUg==", "createdBy", false);
-      checkPermissions("REVMRVRFIFRJQ0tFVA==", "deleteTicket", false);
-      
-      
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("VklFVyBNQVNURVIgVFRT", false, false)) {
-
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        // Populate Ticket Dropdown
-        var ticket_selection = [];
-        var select = document.getElementById('ticket_select');
-        // Get all of the tickets:
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=GNOC_Ticket_Number&$top=200&$orderby=Created%20desc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var ticket = allResults[i].GNOC_Ticket_Number;
-
-                if (!ticket_selection.includes(ticket)) {
-                  // this is to make sure no duplicates are included.
-                  ticket_selection.push(ticket);
-                }
-              }
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-        for (var i = 0; i < ticket_selection.length; i++) {
-          var opt = document.createElement('option');
-          opt.innerHTML = ticket_selection[i];
-          select.appendChild(opt);
-        }
-        $('.selectpicker').selectpicker('refresh');
-
-
-        // Populate ticket information:
-        var ticket_selection = [];
-        var select = document.getElementById('ticket_select');
-        // Get all of the tickets:
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$select=Author/Name,Title,ticket_list,issue_description,status,Created&$filter=Id eq '" + ticket_number + "'&$expand=Author";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              $("#ticket_number").val(allResults[0].Title);
-              adw_ticket_number = allResults[0].Title;
-              if (allResults[0].ticket_list != null) {
-                $("#ticket_select").val(allResults[0].ticket_list.split(","));
-                ticket_selection = allResults[0].ticket_list.split(",");
-              }
-              console.log(ticket_selection);
-              $("#issue_description").val(allResults[0].issue_description);
-              ticket_status = allResults[0].status;
-              $("#status").val(allResults[0].status);
-              $('.selectpicker').selectpicker('refresh');
-              console.log("trying to assign name: " + allResults[0].Author.Name);
-              var name = allResults[0].Author.Name.split('|');
-              var fullName = name[2];
-              var nameArr = fullName.split('.');
-              if (nameArr[2] === undefined)
-                nameArr[2] = nameArr[1];
-              name = nameArr[0].toUpperCase() + " " + nameArr[2].toUpperCase();
-              $("#createdBy").html("Created By: <b>" + name + "</b>");
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // Add Ticket Cards
-        var tickets = ticket_selection;
-        var select = document.getElementById('ticket_body');
-        for (var i = 0; i < Number(tickets.length); i++) {
-          // looping through all results
-          var opt = document.createElement('div');
-          opt.className = "card";
-          opt.innerHTML = "<div class=\"card-header\"><b><a href=\"viewTicket.html?ticket=" + tickets[i] + "\">Ticket #" + tickets[i] + "</a></b></div>";
-          var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$filter=GNOC_Ticket_Number eq '" + tickets[i] + "'";
-          $.ajax({
-            url: urlLoad,
-            async: false,
-            method: "GET",
-            headers: {
-              "Accept": "application/json;odata=verbose"
-            },
-            success: function (data) {
-              var allResults = data.d.results;
-              if (Number(allResults.length) > 0) {
-                var openDate = convertTheDate(allResults[0].Date_Opened, 1);
-                var impact = allResults[0].Impact_Level;
-                if (impact == null)
-                  impact = "N/A";
-
-                var lastAction = allResults[0].Last_Reported_Action;
-                if (lastAction == null)
-                  lastAction = "N/A";
-
-                var ccir = allResults[0].CCIR_Number;
-                if (ccir == null)
-                  ccir = "N/A";
-
-                opt.innerHTML = opt.innerHTML + "<div class=\"card-body\"><div class=\"row\"><div class=\"col\"><div class=\"form-group row\"><label for=\"status\" class=\"col-sm-4 col-form-label\">Status</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"status\" value=\"" + allResults[0].Status + "\" disabled></div></div><div class=\"form-group row\"><label for=\"open_date\" class=\"col-sm-4 col-form-label\">Open Date</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"open_date\" value=\"" + openDate + "\" disabled></div></div><div class=\"form-group row\"><label for=\"ticket_number\" class=\"col-sm-4 col-form-label\">Ticket Number</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"ticket_number\" value=\"" + tickets[i] + "\" disabled></div></div><div class=\"form-group row\"><label for=\"dv_select\" class=\"col-sm-4 col-form-label\">DV</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"dv_select\" value=\"" + allResults[0].DV + "\" disabled></div></div><div class=\"form-group row\"><label for=\"impact_level\" class=\"col-sm-4 col-form-label\">DV Impact</label><div class=\"col-sm-8\"><input type=\email\" class=\"form-control\" id=\"impact_level\" value=\"" + impact + "\" disabled></div></div><div class=\"form-group row\"><label for=\"mission_number\" class=\"col-sm-4 col-form-label\">Mission Number</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"mission_number\" value=\"" + allResults[0].Mission_Number + "\" disabled></div></div><div class=\"form-group row\"><label for=\"cso\" class=\"col-sm-4 col-form-label\">CSO Name</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"cso\" value=\"" + allResults[0].CSO + "\" disabled></div></div><div class=\"form-group row\"><label for=\"ccir_number\" class=\"col-sm-4 col-form-label\">CCIR Number</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"ccir_number\" value=\"" + ccir + "\" disabled></div></div><div class=\"form-group row\"><label for=\"tail_number\" class=\"col-sm-4 col-form-label\">Tail Number</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"tail_number\" value=\"" + allResults[0].Tail_Number + "\" disabled></div></div></div><div class=\"row col-md-6\"><div class=\"col\"><div class=\"form-group row\"><label for=\"category\" class=\"col-sm-4 col-form-label\">Category</label><div class=\"col - sm - 8\"><input type=\"email\" class=\"form-control\" id=\"category\" value=\"" + allResults[0].Category + "\" disabled></div></div><div class=\"form-group row\"><label for=\"sub_category\" class=\"col-sm-4 col-form-label\">Sub Category</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"sub_category\" value=\"" + allResults[0].Sub_Category + "\" disabled></div></div><div class=\"form-group row\"><label for=\"issue_description\" class=\"col-sm-4 col-form-label\">Initial Description</label><textarea disabled class=\"form-control col-sm-8\" id=\"issue_description\" rows=\"10\">" + allResults[0].Issue_Description + "</textarea></div><div class=\"form-group row\"><label for=\"issue_description\" class=\"col-sm-4 col-form-label\">Most Recent Update</label><textarea class=\"form-control col-sm-8\" id=\"update_text\" rows=\"10\" disabled>" + lastAction + "</textarea></div></div></div></div></div><br />";
-              }
-            },
-            error: function (data) {
-              //alert("Error: " + JSON.stringify(data));
-            }
-          });
-
-          select.appendChild(opt);
-          var br = document.createElement("br");
-          select.appendChild(br);
-        }
-
-
-        // Update Ticket
-        $(document).on('click', '#ticket_submit', function () {
-          // Disable Button
-          var $this = $(this);
-          var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-          if ($(this).html() !== loadingText) {
-            $this.data('original-text', $(this).html());
-            $this.html(loadingText);
-            $this.attr("disabled", true);
-          }
-
-          var ticket_number = $("#ticket_number").val();
-          var ticket_select = String($("#ticket_select").val());
-          var update = $("#update").val();
-          var status = $("#status").val();
-
-          var itemProperties = { 'Title': ticket_number, 'ticket_list': ticket_select, 'status': status };
-          var updateProperties = { 'ticket_number': ticket_number, 'update': update };
-
-          console.log(itemProperties);
-          if (!$.trim($("#update").text()) && $("#update").val() != "") {
-            // There is text in the update status box
-            // first update ticket with new values
-            updateTicket(hostUrl, itemProperties, function () {
-              // now add update to db
-              if (ticket_status == status) {
-                // only update message no status change
-                addUpdate(hostUrl, updateProperties, function () {
-                  // Add update to main ticket DB
-                  alert("Ticket successfully update.");
-                  location.reload();
-                });
-              }
-              else {
-                // status has also changed
-                var status_update_text = "GNOC set ticket #" + ticket_number + " to " + status + ".";
-
-                // Add update for update text
-                itemProperties = { 'ticket_number': ticket_number, 'update': update };
-                addUpdate(hostUrl, itemProperties, function () {
-                  // add update for status change
-                  itemProperties = { 'ticket_number': ticket_number, 'update': status_update_text };
-                  addUpdate(hostUrl, itemProperties, function () {
-                    // Add update to main ticket DB
-                    // update successful.
-                    alert("Ticket successfully update.");
-                    location.reload();
-                  });
-                });
-
-              }
-            }, function () {
-              alert("An error has occured. Please try again.");
-            });
-          }
-          else if (ticket_status != status) {
-            // Only the status message has changed. Update ticket status first
-            updateTicket(hostUrl, itemProperties, function () {
-              // Now add update message
-              var status_update_text = "GNOC set ticket #" + ticket_number + " to " + status + ".";
-              itemProperties = { 'ticket_number': ticket_number, 'update': status_update_text };
-              addUpdate(hostUrl, itemProperties, function () {
-                alert("Ticket successfully updated.");
-                location.reload();
-              })
-            }, function () {
-              alert("An error has occured. Please try again.");
-            });
-          }
-          else {
-            // No update text detected, perhaps a value of the ticket changed.
-            updateTicket(hostUrl, itemProperties, function () {
-              alert("Ticket successfully updated.");
-              location.reload();
-            });
-          }
-        });
-        
-        $(document).on('click', '#deleteTicket', function () {
-            // Disable Button
-            var $this = $(this);
-            var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-            if ($(this).html() !== loadingText) {
-              $this.data('original-text', $(this).html());
-              $this.html(loadingText);
-              $this.attr("disabled", true);
-            }
-            deleteTicket(ticket_number);
-          });
-
-        // Show Updates in list
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('ticketUpdates')/items?$select=Created,ticket_number,update,update_date,Author/Name&$orderby=Created%20desc&$filter=ticket_number eq '" + adw_ticket_number + "'&$expand=Author";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var allResults = data.d.results;
-            var updates = [];
-            if (Number(allResults.length) > 0) {
-              for (var i = 0; i < Number(allResults.length); i++) {
-                var created = allResults[i].Created;
-                var update_date = allResults[i].update_date;
-                var update = allResults[i].update;
-                var updateId = allResults[i].Id;
-
-                var name = allResults[i].Author.Name.split('|');
-                var fullName = name[2];
-                var nameArr = fullName.split('.');
-                if (nameArr[2] === undefined)
-                  nameArr[2] = nameArr[1];
-                name = nameArr[0].toUpperCase() + " " + nameArr[2].toUpperCase();
-
-                updates.push(created);
-                updateIds.push(updateId);
-                if (i == 0) {
-                  if (update.includes("GNOC created ticket") || update.includes("GNOC set ticket"))
-                    $("#ticket_update_log").append("<li class=\"list-group-item active\"><b>" + convertTheDate(update_date, 1) + "</b> - " + update + "</b></li>");
-                  else
-                    $("#ticket_update_log").append("<li class=\"list-group-item active\"><b>" + convertTheDate(update_date, 1) + " - " + name + ":</b> " + update + "</b></li>");
-
-                }
-                else {
-                  if (update.includes("GNOC created ticket") || update.includes("GNOC set ticket"))
-                    $("#ticket_update_log").append("<li class=\"list-group-item\"><b>" + convertTheDate(update_date, 1) + "</b> - " + update + "</b></li>");
-                  else
-                    $("#ticket_update_log").append("<li class=\"list-group-item\"><b>" + convertTheDate(update_date, 1) + " - " + name + ":</b> " + update + "</b></li>");
-                }
-              }
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-      }
-      feather.replace();
-
-    });
-
-    function addUpdate(webUrl, itemProperties, success, failure) {
-      listName = "ticketUpdates";
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-
-
-    // Get Digest
-    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
-    function getFormDigest() {
-      console.log("Getting Form Digest..");
-      $.support.cors = true;
-      var _formDigest;
-      $.ajax({
-        url: hostUrl + "/_api/contextinfo",
-        type: "POST",
-        dataType: "json",
-
-        headers: { "Accept": "application/json; odata=verbose" },
-        xhrFields: { withCredentials: true },
-        async: false,
-        success: function (data) {
-          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
-          console.log(data.d.GetContextWebInformation.FormDigestValue);
-          console.log("Form Digest Done");
-
-        },
-        error: function () {
-          console.log("Error Occured");
-        }
-      });
-
-      return _formDigest;
-    }
-
-    // Update flight ticket
-    function updateTicket(webUrl, itemProperties, success, failure) {
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items('" + ticket_number + "')",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest,
-          "IF-MATCH": "*", // Overwrite changes
-          "X-HTTP-Method": "MERGE" // update operation
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-    
-    function deleteTicket(id) {
-      $.ajax({
-        url: hostUrl + "/_api/web/lists/getbytitle('masterTickets')/items(" + id + ")",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest,
-          "IF-MATCH": "*",
-          "X-HTTP-Method": "DELETE",
-        },
-        success: function (data) {
-          // Now we need to delete all updates with ticket:
-          for (var i = 0; i < updateIds.length; i++) {
-            $.ajax({
-              url: hostUrl + "/_api/web/lists/getbytitle('ticketUpdates')/items(" + updateIds[i] + ")",
-              type: "POST",
-              contentType: "application/json;odata=verbose",
-              headers: {
-                "Accept": "application/json;odata=verbose",
-                "X-RequestDigest": digest,
-                "IF-MATCH": "*",
-                "X-HTTP-Method": "DELETE",
-              },
-              success: function (data) {
-                if (i == updateIds.length) {
-                  alert("Ticket deleted successfully.");
-                  window.location.replace("./viewTickets.html");
-                }
-              }
-            });
-          }
-        }
-      });
-    }
-
-    function convertTheDate(dateVar, offset) {
-      // date conversion
-      var convertDate = new Date(dateVar);
-      var month = convertDate.getUTCMonth();
-      month = ("0" + (convertDate.getMonth() + 1)).slice(-2)
-
-      var date = convertDate.getDate();
-      if (convertDate.getDate() < 10)
-        date = "0" + convertDate.getDate();
-
-      var minutes = convertDate.getUTCMinutes();
-      if (convertDate.getUTCMinutes() < 10)
-        minutes = "0" + convertDate.getUTCMinutes();
-
-      var t = new Date();
-      if (offset == 1) {
-        var currentoffset = convertDate.getTimezoneOffset() * 60000;
-        convertDate.setTime(convertDate.getTime() + currentoffset);
-      }
-      var hours = convertDate.getHours();
-
-      if (convertDate.getHours() < 10)
-        hours = "0" + hours;
-
-      var dateString = month + "/" + date + "/" + convertDate.getUTCFullYear() + " " + hours + ":" + minutes + "Z";
-      return dateString;
-    }
-
-    // Get List Item Type metadata
-    function GetItemTypeForListName(name) {
-      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
-    }
-
-  </script>
+  <script type="module" src="./js/user.js"></script>
+  <script type="module" src="./js/pages/viewMasterTTS.js"></script>
 </head>
 
 <body>
@@ -519,12 +25,12 @@
         <path fill-rule="evenodd"
           d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z" />
       </svg> &nbsp;
-      <b>GNOC DV Dashboard</b>
+      <b>GSOC DV Dashboard</b>
     </a>
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -706,11 +212,15 @@
                     </div>
                     <div class="form-group row">
                       <label for="issue_description" class="col-sm-4 col-form-label">Issue Description</label>
-                      <textarea class="form-control col-sm-8" id="issue_description" rows="10" disabled></textarea>
+                      <div class="col-sm-8">
+                        <textarea class="form-control" id="issue_description" rows="10" disabled></textarea>
+                      </div>
                     </div>
                     <div class="form-group row">
                       <label for="update" class="col-sm-4 col-form-label">Add Update</label>
-                      <textarea class="form-control col-sm-8" id="update" rows="10"></textarea>
+                      <div class="col-sm-8">
+                        <textarea class="form-control" id="update" rows="10"></textarea>
+                      </div>
                     </div>
                     <div class="form-group row">
                       <div class="col-sm-10">
@@ -744,10 +254,10 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
+            <div class="text-muted">GSOC DV Dashboard - maintained by GSOC @ JBA<br />
               <a href="mailto:89CS.SCOV.VIP.COMM@us.af.mil">89CS.SCOV.VIP.COMM@us.af.mil</a>
             </div>
           </div>
