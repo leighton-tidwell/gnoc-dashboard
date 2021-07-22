@@ -13,9 +13,6 @@ const MISSION_LIST_NAME = "Missions";
 feather.replace();
 permissionsCheck("REFTSEJPQVJE");
 
-let uniqueDVs = [];
-let allTicketCount = [];
-
 /* High Charts Configs */
 let barGraphOptions = {
   chart: {
@@ -84,10 +81,16 @@ let lineOptions = {
   title: {
     text: "Monthly Ticket Snapshot",
     align: "center",
+    style: {
+      color: "#FFF",
+    },
   },
   subtitle: {
     text: "current year",
     align: "left",
+    style: {
+      color: "#FFF",
+    },
   },
   xAxis: {
     categories: [
@@ -108,6 +111,9 @@ let lineOptions = {
   yAxis: {
     title: {
       text: " Tickets",
+      style: {
+        color: "#FFF",
+      },
     },
     plotLines: [
       {
@@ -129,6 +135,9 @@ let lineOptions = {
     borderWidth: 0,
     marginTop: 5,
     marginBottom: 5,
+    itemStyle: {
+      color: "#FFF",
+    },
   },
   lang: {
     noData: "No Data Found",
@@ -137,7 +146,7 @@ let lineOptions = {
     style: {
       fontWeight: "bold",
       fontSize: "15px",
-      color: "#303030",
+      color: "#FFF",
     },
   },
   series: [],
@@ -209,9 +218,9 @@ for (let i = currentYear; i > 2018; i--) {
   const opt = document.createElement("option");
   opt.innerHTML = i;
   yearSelect.appendChild(opt);
+  if (i == currentYear) $("#year_select").val(currentYear);
+  $(".selectpicker").selectpicker("refresh");
 }
-document.getElementById("year_select").value = currentYear;
-$(".selectpicker").selectpicker("refresh");
 
 const getListOfDvsWithTickets = async (startDate, endDate, listOfTails) => {
   let listOfDvs = [];
@@ -292,13 +301,8 @@ const fetchTickets = async (startDate, endDate, DV, listOfTails) => {
 
   for (let item in items) {
     if (tailsProvided) {
-      if (!listOfTails.includes(items[item].Tail_Number)) {
-        console.log("didnt find the tail");
-        continue;
-      }
+      if (!listOfTails.includes(items[item].Tail_Number)) continue;
     }
-
-    console.log("but i kept going");
 
     // add them to the ticket table
     const dateOpened = convertDateToTicketHTMLString(items[item].Date_Opened);
@@ -420,7 +424,6 @@ const gatherData = async (startDate, endDate, listOfDvs, listOfTails) => {
   const loadingIndicator = document.getElementById("loading_results");
   loadingIndicator.style.display = "block";
 
-  console.log(startDate, endDate, listOfDvs, listOfTails);
   if (!$.fn.DataTable.isDataTable("#overviewTickets")) {
     $("#overviewTickets").DataTable({
       dom: "Bfrtip",
@@ -445,13 +448,11 @@ const gatherData = async (startDate, endDate, listOfDvs, listOfTails) => {
         listOfTails
       );
   }
-  const ticketsPerDv = await getTotalTicketsPerDv(
-    startDate,
-    endDate,
-    listOfDvs,
-    listOfTails
-  );
-  const statTotals = await getStatTotals(startDate, endDate, listOfDvs);
+
+  const [ticketsPerDv, statTotals] = await Promise.all([
+    getTotalTicketsPerDv(startDate, endDate, listOfDvs, listOfTails),
+    getStatTotals(startDate, endDate, listOfDvs),
+  ]);
 
   let counter = 0;
   for (let ticketCount in ticketsPerDv) {
@@ -463,12 +464,84 @@ const gatherData = async (startDate, endDate, listOfDvs, listOfTails) => {
   else new Highcharts.Chart(barGraphOptions);
 
   loadingIndicator.style.display = "none";
+  return;
 };
-gatherData(chartStartDateISO, chartEndDateISO);
+
+const getDaysInMonth = (month, year) => {
+  return new Date(year, month, 0).getDate();
+};
+
+const dvTicketAmountsPerMonth = async (selectedYear, Dv) => {
+  // Looping through month
+  let dvMonthlyTicketTotals = [];
+  for (let month = 1; month < 13; month++) {
+    const filterStartDate = `${selectedYear}-${
+      month < 10 ? "0" + month : month
+    }-01T00:00:00Z`;
+    const filterEndDate = `${selectedYear}-${
+      month < 10 ? "0" + month : month
+    }-${getDaysInMonth(month, selectedYear)}T23:59:59Z`;
+    const fetchUrl = `${HOST_URL}/_api/web/lists/getbytitle('${TICKETS_LIST_NAME}')/items?$top=5000&$filter=DV eq '${encodeURIComponent(
+      Dv
+    )}' and Created le datetime'${encodeURIComponent(
+      filterEndDate
+    )}' and Created ge datetime'${encodeURIComponent(filterStartDate)}'`;
+    const response = await fetch(fetchUrl, {
+      headers: { Accept: "application/json; odata=verbose" },
+      credentials: "include",
+    });
+    const data = await response.json();
+    if (data.d) {
+      const itemsLength = data.d.results.length;
+      dvMonthlyTicketTotals.push(itemsLength);
+    } else dvMonthlyTicketTotals.push(0);
+  }
+  return dvMonthlyTicketTotals;
+};
+
+const runLineChart = async (selectedYear) => {
+  const loadingIndicator = document.getElementById("loading_results");
+  loadingIndicator.style.display = "block";
+
+  const staticDvList = ["POTUS", "VPOTUS", "SECDEF", "SECSTATE", "CJCS"]; // Top 5 DVs only
+  const startDate = `${selectedYear}-01-01T00:00:00Z`;
+  const endDate = `${selectedYear}-12-31T23:59:59Z`;
+  const lineChartColors = [
+    "#00bc8c",
+    "#BD002F",
+    "#BD8E00",
+    "#227D92",
+    "#515397",
+  ];
+
+  for (let dv in staticDvList) {
+    const dvMonthlyTicketTotals = await dvTicketAmountsPerMonth(
+      selectedYear,
+      staticDvList[dv]
+    );
+    lineOptions.series.push({
+      name: staticDvList[dv],
+      data: dvMonthlyTicketTotals,
+      color: lineChartColors[dv],
+    });
+  }
+  const lineChart = new Highcharts.Chart(lineOptions);
+
+  loadingIndicator.style.display = "none";
+
+  return;
+};
+
+const runInitialCharts = async () => {
+  return await Promise.all([
+    gatherData(chartStartDateISO, chartEndDateISO),
+    runLineChart(currentYear),
+  ]);
+};
+runInitialCharts();
 
 /* Event Handlers */
 document.querySelector("#tail_select").addEventListener("change", (event) => {
-  console.log("Tail changed");
   barGraphOptions.series = [];
   barGraphOptions.xAxis.categories = [];
   let selectedTails;
@@ -484,7 +557,6 @@ document.querySelector("#tail_select").addEventListener("change", (event) => {
 });
 
 document.querySelector("#dv_select").addEventListener("change", (event) => {
-  console.log("dv changed");
   barGraphOptions.series = [];
   barGraphOptions.xAxis.categories = [];
   let selectedTails;
@@ -529,580 +601,9 @@ document.querySelector("#end_date").addEventListener("change", (event) => {
   gatherData(startDate, endDate, selectedDvs, selectedTails);
 });
 
-// const runLineChart = () => {};
-// runLineChart();
-
-// $("#tail_select").on("change", function (e) {
-//   // User has selected a different aircraft
-//   uniqueDVs = [];
-//   allTicketCount = [];
-//   barGraphOptions.series = [];
-//   barGraphOptions.xAxis.categories = [];
-//   var tails = undefined;
-//   if ($("#tail_select").val() != "") {
-//     tails = $("#tail_select").val();
-//   }
-
-//   var dvs = undefined;
-//   if ($("#dv_select").val() != "") {
-//     dvs = $("#dv_select").val();
-//   }
-//   var selected = $(this).val();
-//   var startDate = $("#start_date").val() + "T00:00:00Z";
-//   var endDate = $("#end_date").val() + "T23:59:59Z";
-//   runChart(dvs, startDate, endDate, tails);
-// });
-
-// $("#year_select").on("change", function (e) {
-//   var selected = $(this).val();
-//   lineOptions.subtitle.text = selected;
-//   lineOptions.series = [];
-
-//   runLineChart(selected);
-// });
-
-// $("#dv_select").on("change", function () {
-//   // User has selected a different DV
-//   uniqueDVs = [];
-//   allTicketCount = [];
-//   barGraphOptions.series = [];
-//   barGraphOptions.xAxis.categories = [];
-//   var tails = undefined;
-//   if ($("#tail_select").val() != "") {
-//     tails = $("#tail_select").val();
-//   }
-
-//   var dvs = undefined;
-//   if ($("#dv_select").val() != "") {
-//     dvs = $("#dv_select").val();
-//   }
-//   var startDate = $("#start_date").val() + "T00:00:00Z";
-//   var endDate = $("#end_date").val() + "T23:59:59Z";
-//   runChart(dvs, startDate, endDate, tails);
-// });
-
-// $("#start_date").change(function () {
-//   var tails = undefined;
-//   if ($("#tail_select").val() != "") {
-//     tails = $("#tail_select").val();
-//   }
-
-//   var dvs = undefined;
-//   if ($("#dv_select").val() != "") {
-//     dvs = $("#dv_select").val();
-//   }
-//   uniqueDVs = [];
-//   allTicketCount = [];
-//   barGraphOptions.series = [];
-//   barGraphOptions.xAxis.categories = [];
-//   var startDate = $("#start_date").val() + "T00:00:00Z";
-//   var endDate = $("#end_date").val() + "T23:59:59Z";
-//   runChart(dvs, startDate, endDate, tails);
-// });
-
-// $("#end_date").change(function () {
-//   var tails = undefined;
-//   if ($("#tail_select").val() != "") {
-//     tails = $("#tail_select").val();
-//   }
-
-//   var dvs = undefined;
-//   if ($("#dv_select").val() != "") {
-//     dvs = $("#dv_select").val();
-//   }
-//   uniqueDVs = [];
-//   allTicketCount = [];
-//   barGraphOptions.series = [];
-//   barGraphOptions.xAxis.categories = [];
-//   var startDate = $("#start_date").val() + "T00:00:00Z";
-//   var endDate = $("#end_date").val() + "T23:59:59Z";
-//   runChart(dvs, startDate, endDate, tails);
-// });
-
-// On page load, settings are blank.
-
-// runChart(undefined, start_date, end_date, undefined);
-
-// var total_overall_tickets = 0;
-// function runChart(listOfDvs, startDate, endDate, listOfTails) {
-//   // Clear the tickets table is we've already made one, else lets make one.
-//   if (!$.fn.DataTable.isDataTable("#overviewTickets")) {
-//     $("#overviewTickets").DataTable({
-//       dom: "Bfrtip",
-//       buttons: ["copy", "csv", "excel", "pdf", "print"],
-//       columnDefs: [
-//         { width: "150px", targets: [0, 1, 10] },
-//         { width: "300px", targets: [8] },
-//       ],
-//       order: [[0, "desc"]],
-//     });
-//   } else {
-//     $("#overviewTickets").DataTable().clear().draw();
-//   }
-
-//   var dvs = [];
-//   var ticketsPerDv = [];
-//   var dvCheck = false;
-//   if (listOfDvs === undefined) {
-//     var noDVS = 1;
-//     dvs = getAllDvs(startDate, endDate);
-//   } else {
-//     dvs = listOfDvs;
-//     dvCheck = true;
-//   }
-//   total_overall_tickets = 0;
-//   ticketsPerDv = getTicketsPerDV(dvs, startDate, endDate, listOfTails, dvCheck);
-//   if (noDVS) getStatTotals(undefined, startDate, endDate);
-//   else getStatTotals(dvs, startDate, endDate);
-
-//   var counter = 0;
-//   for (var i = 0; i < ticketsPerDv.length; i++) {
-//     if (ticketsPerDv[i] == 0) {
-//       counter++;
-//     }
-//   }
-
-//   if (counter == ticketsPerDv.length) {
-//     $("#containerGraph").text("No Data Found");
-//   } else {
-//     var chart = new Highcharts.Chart(barGraphOptions);
-//   }
-//   //alert(options.series[1].data);
-// }
-
-// function getTicketsPerDV(dvArray, startDate, endDate, tails, dvCheck) {
-//   var searchText;
-//   for (var i = 0; i < dvArray.length; i++) {
-//     searchText = dvArray[i];
-//     var _count = fetchTicketCount(
-//       searchText,
-//       startDate,
-//       endDate,
-//       tails,
-//       dvCheck
-//     );
-//     total_overall_tickets += _count;
-//     allTicketCount.push(_count);
-//   }
-//   $("#total_tickets").text(total_overall_tickets);
-//   barGraphOptions.series.push({
-//     name: "Tickets",
-//     data: allTicketCount,
-//   });
-//   return allTicketCount;
-// }
-
-// function fetchTicketCount(searchItem, startDate, endDate, tails, dvCheck) {
-//   var date_specified = 0;
-//   var tails_specified = 0;
-
-//   if (startDate === undefined && endDate === undefined && tails === undefined) {
-//     // no date no tail
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=DV,Created,GNOC_Ticket_Number,Date_Opened,Tail_Number,Mission_Number,DV_Impact,Impact_Level,Category,Status,Issue_Description,Last_Reported_Action,Update_Date,CCIR,CCIR_Number,CSO&$top=5000&$filter=DV eq '" +
-//       encodeURI(searchItem) +
-//       "' and Created le '" +
-//       endDate +
-//       "' and Created ge '" +
-//       startDate +
-//       "'&$orderby=DV%20asc";
-//   }
-//   if (startDate !== undefined && endDate !== undefined && tails == undefined) {
-//     // date no tail
-//     date_specified = 1;
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=DV,Created,GNOC_Ticket_Number,Date_Opened,Tail_Number,Mission_Number,DV_Impact,Impact_Level,Category,Status,Issue_Description,Last_Reported_Action,Update_Date,CCIR,CCIR_Number,CSO&$top=5000&$filter=DV eq '" +
-//       encodeURIComponent(searchItem) +
-//       "'and Created le '" +
-//       endDate +
-//       "' and Created ge '" +
-//       startDate +
-//       "'&$orderby=DV%20asc";
-//   }
-//   if (startDate !== undefined && endDate !== undefined && tails !== undefined) {
-//     // date and tail
-//     date_specified = 1;
-//     tails_specified = 1;
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=DV,Created,GNOC_Ticket_Number,Date_Opened,Tail_Number,Mission_Number,DV_Impact,Impact_Level,Category,Status,Issue_Description,Last_Reported_Action,Update_Date,CCIR,CCIR_Number,CSO&$top=5000&$filter=DV eq '" +
-//       encodeURIComponent(searchItem) +
-//       "'and Created le '" +
-//       endDate +
-//       "' and Created ge '" +
-//       startDate +
-//       "'&$orderby=DV%20asc";
-//   }
-//   var myTicketCount = 0;
-//   $.ajax({
-//     url: urlLoad,
-//     async: false,
-//     method: "GET",
-//     headers: {
-//       Accept: "application/json;odata=verbose",
-//     },
-//     success: function (myData) {
-//       if (myData.d.results.length > 0) {
-//         if (date_specified == 0 && tails_specified == 0) {
-//           // just get all from current DVs
-//           /*options.series.push({
-//                         name: searchItem,
-//                         data: [total]
-//                       });*/
-//           barGraphOptions.xAxis.categories.push(searchItem);
-//           myTicketCount = myData.d.results.length;
-//         } else if (date_specified == 1 && tails_specified == 0) {
-//           // date specified without tail or DV
-//           var total = 0;
-//           var arrayOfTimes = [];
-//           var allResults = myData.d.results;
-//           for (var i = 0; i < Number(allResults.length); i++) {
-//             var currentCreateDate = allResults[i].Created;
-//             if (arrayOfTimes.includes(currentCreateDate)) {
-//               // dont wanna push any duplicates
-//             } else {
-//               if (
-//                 currentCreateDate <= endDate &&
-//                 currentCreateDate >= startDate
-//               ) {
-//                 arrayOfTimes.push(currentTime);
-//                 var dateOpened = convertTheDate(allResults[i].Date_Opened, 1);
-//                 var dateUpdated = convertTheDate(allResults[i].Update_Date, 1);
-//                 if (checkPermissions("VklFVyBNSVNTSU9O", false, false)) {
-//                   var missionhref =
-//                     '<a href="./viewMission.html?mission=' +
-//                     allResults[i].Mission_Number +
-//                     '">' +
-//                     allResults[i].Mission_Number +
-//                     "</a>";
-//                 } else {
-//                   var missionhref = allResults[i].Mission_Number;
-//                 }
-//                 if (
-//                   allResults[i].Mission_Number == "N/A" ||
-//                   allResults[i].Mission_Number == null
-//                 ) {
-//                   missionhref = "N/A";
-//                 }
-//                 var href =
-//                   '<a href="./viewTicket.html?ticket=' +
-//                   allResults[i].GNOC_Ticket_Number +
-//                   '">' +
-//                   allResults[i].GNOC_Ticket_Number +
-//                   "</a>";
-
-//                 $("#overviewTickets")
-//                   .DataTable()
-//                   .row.add([
-//                     href,
-//                     dateOpened,
-//                     allResults[i].Tail_Number,
-//                     missionhref,
-//                     allResults[i].DV,
-//                     allResults[i].Impact_Level,
-//                     allResults[i].Category,
-//                     allResults[i].Status,
-//                     allResults[i].Issue_Description,
-//                     allResults[i].Last_Reported_Action,
-//                     dateUpdated,
-//                   ])
-//                   .draw();
-//                 total++;
-//               }
-//             }
-//           }
-//           if (total != 0) {
-//             /*options.series.push({
-//                           name: searchItem,
-//                           data: [total]
-//                         });*/
-//             barGraphOptions.xAxis.categories.push(searchItem);
-//           }
-
-//           myTicketCount = total;
-//         } else if (date_specified == 1 && tails_specified == 1) {
-//           // Tail is specified
-//           var total = 0;
-//           var arrayOfTimes = [];
-//           var allResults = myData.d.results;
-//           for (var i = 0; i < Number(allResults.length); i++) {
-//             var currentTail = allResults[i].Tail_Number;
-//             var currentTime = allResults[i].Created;
-
-//             if (
-//               tails.includes(currentTail) &&
-//               currentTime <= endDate &&
-//               currentTime >= startDate
-//             ) {
-//               if (arrayOfTimes.includes(currentTime)) {
-//               } else {
-//                 arrayOfTimes.push(currentTime);
-//                 var dateOpened = convertTheDate(allResults[i].Date_Opened, 1);
-//                 var dateUpdated = convertTheDate(allResults[i].Update_Date, 1);
-//                 var href =
-//                   '<a href="./viewTicket.html?ticket=' +
-//                   allResults[i].GNOC_Ticket_Number +
-//                   '">' +
-//                   allResults[i].GNOC_Ticket_Number +
-//                   "</a>";
-//                 var missionhref =
-//                   '<a href="./viewMission.html?mission=' +
-//                   allResults[i].Mission_Number +
-//                   '">' +
-//                   allResults[i].Mission_Number +
-//                   "</a>";
-//                 $("#overviewTickets")
-//                   .DataTable()
-//                   .row.add([
-//                     href,
-//                     dateOpened,
-//                     allResults[i].Tail_Number,
-//                     missionhref,
-//                     allResults[i].DV,
-//                     allResults[i].Impact_Level,
-//                     allResults[i].Category,
-//                     allResults[i].Status,
-//                     allResults[i].Issue_Description,
-//                     allResults[i].Last_Reported_Action,
-//                     dateUpdated,
-//                     allResults[i].CCIR_Number,
-//                     allResults[i].CSO,
-//                   ])
-//                   .draw();
-//                 total++;
-//               }
-//             }
-//           }
-//           if (total != 0) {
-//             /*options.series.push({
-//                           name: searchItem,
-//                           data: [total]
-//                         });*/
-//             barGraphOptions.xAxis.categories.push(searchItem);
-//           }
-//           myTicketCount = total;
-//         }
-//       } else if (dvCheck == true) {
-//         barGraphOptions.xAxis.categories.push(searchItem);
-//       }
-//     },
-//     error: function (data) {
-//       //alert("Error: " + JSON.stringify(data));
-//     },
-//   });
-
-//   return myTicketCount;
-// }
-
-// // function getStatTotals(dv, start, end, tails) {
-// //   var totalCCIR = 0;
-// //   var totalMission = 0;
-// //   var totalLeg = 0;
-// //   if (dv !== undefined) {
-// //     for (var i = 0; i < dv.length; i++) {
-// //       totalCCIR += getCCIRTotal(dv[i], start, end);
-// //       totalMission += getMissionTotal(dv[i], start, end);
-// //       totalLeg += getLegTotal(dv[i], start, end);
-// //     }
-// //   } else {
-// //     totalCCIR += getCCIRTotal(undefined, start, end);
-// //     totalMission += getMissionTotal(undefined, start, end);
-// //     totalLeg += getLegTotal(undefined, start, end);
-// //   }
-
-// //   $("#total_ccirs").text(totalCCIR);
-// //   $("#total_missions").text(totalMission);
-// //   $("#total_legs").text(totalLeg);
-// // }
-
-// function getCCIRTotal(dv, start, end) {
-//   var total = 0;
-//   if (dv !== undefined)
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('CCIR')/items?$top=5000&$filter=DV eq '" +
-//       encodeURI(dv) +
-//       "' and Created le '" +
-//       end +
-//       "' and Created ge '" +
-//       start +
-//       "'";
-//   else
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('CCIR')/items?$top=5000&$filter=Created le '" +
-//       end +
-//       "' and Created ge '" +
-//       start +
-//       "'";
-//   $.ajax({
-//     url: urlLoad,
-//     async: false,
-//     method: "GET",
-//     headers: {
-//       Accept: "application/json;odata=verbose",
-//     },
-//     success: function (data) {
-//       if (data.d.results.length > 0) {
-//         total = Number(data.d.results.length);
-//       }
-//     },
-//   });
-
-//   return total;
-// }
-
-// function getMissionTotal(dv, start, end) {
-//   var missions = [];
-//   var total = 0;
-//   if (dv !== undefined)
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=DV eq '" +
-//       encodeURI(dv) +
-//       "' and Created le '" +
-//       end +
-//       "' and Created ge '" +
-//       start +
-//       "'";
-//   else
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=Created le '" +
-//       end +
-//       "' and Created ge '" +
-//       start +
-//       "'";
-
-//   $.ajax({
-//     url: urlLoad,
-//     async: false,
-//     method: "GET",
-//     headers: {
-//       Accept: "application/json;odata=verbose",
-//     },
-//     success: function (data) {
-//       var allResults = data.d.results;
-//       if (data.d.results.length > 0) {
-//         for (var i = 0; i < Number(allResults.length); i++) {
-//           if (!missions.includes(allResults[i].Mission_Number))
-//             missions.push(allResults[i].Mission_Number);
-//         }
-//       }
-//     },
-//   });
-//   total = missions.length;
-//   return total;
-// }
-
-// function getLegTotal(dv, start, end) {
-//   var total = 0;
-//   if (dv !== undefined)
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=DV eq '" +
-//       encodeURI(dv) +
-//       "' and Created le '" +
-//       end +
-//       "' and Created ge '" +
-//       start +
-//       "'";
-//   else
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=Created le '" +
-//       end +
-//       "' and Created ge '" +
-//       start +
-//       "'";
-
-//   $.ajax({
-//     url: urlLoad,
-//     async: false,
-//     method: "GET",
-//     headers: {
-//       Accept: "application/json;odata=verbose",
-//     },
-//     success: function (data) {
-//       if (data.d.results.length > 0) {
-//         total = Number(data.d.results.length);
-//       }
-//     },
-//   });
-
-//   return total;
-// }
-
-// function runLineChart(year) {
-//   var dvList = ["POTUS", "VPOTUS", "SECDEF", "SECSTATE", "CJCS"]; // Top 5
-//   var startDate;
-//   var endDate;
-//   if (year === undefined) {
-//     var now = new Date();
-//     year = now.getFullYear();
-//     startDate = year + "-01-01T23:59:59Z";
-//     endDate = year + "-12-31T23:59:59Z";
-//   } else {
-//     startDate = year + "-01-01T23:59:59Z";
-//     endDate = year + "-12-31T23:59:59Z";
-//   }
-
-//   // Now, per DV, per month we need ticket counts my guy:
-
-//   for (var i = 0; i < dvList.length; i++) {
-//     var searchItem = dvList[i];
-//     var urlLoad =
-//       "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=DV,Created&$top=5000&$filter=DV eq '" +
-//       encodeURI(searchItem) +
-//       "'";
-//     $.ajax({
-//       url: urlLoad,
-//       async: false,
-//       method: "GET",
-//       headers: {
-//         Accept: "application/json;odata=verbose",
-//       },
-//       success: function (data) {
-//         var total = 0;
-//         var arrayOfTimes = [];
-//         var allResults = data.d.results;
-//         if (Number(allResults.length) > 0) {
-//           //alert("success");
-
-//           for (var n = 0; n < Number(allResults.length); n++) {
-//             // so we put all the times of this DV's tickets in an array for post processing
-//             var currentTime = allResults[n].Created;
-
-//             if (arrayOfTimes.includes(currentTime)) {
-//               // this is to make sure no duplicates are included.
-//             } else {
-//               arrayOfTimes.push(currentTime);
-//             }
-//           }
-
-//           var yearlyTicketNumbers = [];
-//           // Now we need to loop, per month.
-//           for (var j = 1; j < 13; j++) {
-//             total = 0;
-//             if (j < 10) {
-//               var currentMonth = "0" + j;
-//             } else {
-//               var currentMonth = j;
-//             }
-
-//             var startDate = year + "-" + currentMonth + "-01T23:59:59Z";
-//             var endDate = year + "-" + currentMonth + "-31T23:59:59Z";
-
-//             for (var k = 0; k < arrayOfTimes.length; k++) {
-//               if (arrayOfTimes[k] <= endDate && arrayOfTimes[k] >= startDate) {
-//                 total++;
-//               }
-//             }
-//             yearlyTicketNumbers.push(total);
-//           }
-//           lineOptions.series.push({
-//             name: searchItem,
-//             data: yearlyTicketNumbers,
-//           });
-//         }
-//       },
-//       error: function (data) {
-//         //alert("Error: " + JSON.stringify(data));
-//       },
-//     });
-//   }
-//   var lineChart = new Highcharts.Chart(lineOptions);
-// }
+document.querySelector("#year_select").addEventListener("change", (event) => {
+  const selectedYear = event.target.value;
+  lineOptions.subtitle.text = selectedYear;
+  lineOptions.series = [];
+  runLineChart(selectedYear);
+});
