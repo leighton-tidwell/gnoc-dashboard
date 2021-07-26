@@ -2,13 +2,14 @@
 
 <head>
   <title>GNOC DV Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" />
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
     integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   <link rel="stylesheet"
     href="https://unpkg.com/tempusdominus-bootstrap@5.37.0/build/css/tempusdominus-bootstrap.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="./css/global.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
@@ -18,227 +19,9 @@
   <script type="text/javascript"
     src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
   <script src="https://unpkg.com/tempusdominus-bootstrap@5.37.0/build/js/tempusdominus-bootstrap.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
+  <script type="module" src="./js/user.js" defer></script>
+  <script type="module" src="./js/pages/createCCIR.js" defer></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    // Global digest value for auth
-    var digest = getFormDigest();
-    var listName = "CCIR";
-    var dateSelected = "";
-
-    $(function () {
-      // Check permissions of page:
-      if (!checkPermissions("QUREIEEgQ0NJUg==", false, true)) {
-        $("html").remove();
-      }
-
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("QUREIEEgQ0NJUg==", false, false)) {
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-
-        // Populate DV Drop down
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('DVList')/items?$top=5000&$orderby=DV%20asc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              var select = document.getElementById('dv_select');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].DV;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // Populate Aircraft Drop Down
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('TailNumbers')/items?$top=5000&$orderby=Tail_x0020_Numbers%20asc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              var select = document.getElementById('tail_number');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].Tail_x0020_Numbers;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // generate calendar objects
-        $("#datetimepicker1").datetimepicker({
-          format: 'MM/DD/YYYY, HH:mm',
-        });
-
-        // Add data handling for said calendar objects
-        $('#datetimepicker1').on("change.datetimepicker", function (e) {
-          var date = $('#datetimepicker1').datetimepicker('viewDate');
-          //date = new Date(date);
-          //date.setHours(date.getHours() - date.getTimezoneOffset()/60);
-
-          // now you can get the string
-          var isodate = date.toISOString();
-          dateSelected = isodate;
-        });
-
-        // Create Ticket
-        $(document).on('click', '#ticket_submit', function () {
-          // Disable Button
-          var $this = $(this);
-          var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-          if ($(this).html() !== loadingText) {
-            $this.data('original-text', $(this).html());
-            $this.html(loadingText);
-            $this.attr("disabled", true);
-          }
-
-          var ticket_number = $("#ticket_number").val();
-          var dv = $("#dv_select").val();
-          var tail_number = $("#tail_number").val();
-          var ac_type = $("#ac_type").val();
-          var mission_number = $("#mission_number").val();
-          var impact_level = $("#impact_level").val();
-          var remarks = $("#remarks").val();
-          var hotrep_number = $("#hotrep_number").val();
-          var ogo_officer = $("#ogo_officer").val();
-
-          var itemProperties = { 'HOTREP_Number': hotrep_number, 'AC_Type': ac_type, 'Tail_Number': tail_number, 'Mission_Number': mission_number, 'DV': dv, 'Date': dateSelected, 'GNOC_Ticket_Number': ticket_number, 'OGO_Duty_Officer': ogo_officer, 'Impact_Level': impact_level, 'Remarks': remarks };
-
-          console.log(itemProperties);
-          CreateListItemWithDetails(listName, hostUrl, itemProperties, function () {
-            alert("CCIR Successfully Added.");
-            location.reload();
-          }, function () {
-            alert("An error has occured. Please try again.");
-          });
-        });
-      }
-      feather.replace();
-    });
-
-
-    // Get Digest
-    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
-    function getFormDigest() {
-      console.log("Getting Form Digest..");
-      $.support.cors = true;
-      var _formDigest;
-      $.ajax({
-        url: hostUrl + "/_api/contextinfo",
-        type: "POST",
-        dataType: "json",
-
-        headers: { "Accept": "application/json; odata=verbose" },
-        xhrFields: { withCredentials: true },
-        async: false,
-        success: function (data) {
-          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
-          console.log(data.d.GetContextWebInformation.FormDigestValue);
-          console.log("Form Digest Done");
-
-        },
-        error: function () {
-          console.log("Error Occured");
-        }
-      });
-
-      return _formDigest;
-    }
-
-    // CREATE Operation
-    // listName: The name of the list you want to get items from
-    // weburl: The url of the web that the list is in. 
-    // newItemTitle: New Item title.
-    // success: The function to execute if the call is sucesfull
-    // failure: The function to execute if the call fails
-    function CreateListItemWithDetails(listName, webUrl, itemProperties, success, failure) {
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-
-    // Get List Item Type metadata
-    function GetItemTypeForListName(name) {
-      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
-    }
-  </script>
 </head>
 
 <body>
@@ -254,7 +37,7 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -519,7 +302,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
