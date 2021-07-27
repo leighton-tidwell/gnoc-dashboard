@@ -1,167 +1,21 @@
 <html>
 
 <head>
-  <title>GNOC DV Dashboard</title>
+  <title>GSOC DV Dashboard</title>
+  <meta charset="utf-8"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.3.1/dist/pptxgen.bundle.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    var accessGroups = {};
-    var userPermissions = {};
-
-    $(function () {
-
-      // Check permissions of page:
-      if (!checkPermissions("TU9STklORyBTTElERVM=", false, true)) {
-        $("html").remove();
-      }
-
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("TU9STklORyBTTElERVM=", false, false)) {
-
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        publishData();
-
-        $("select[id^='permissions_'").on('change', function (e) {
-          var user_id = this.id.split("_")[1];
-          var group = getKeyByValue(accessGroups, this.value);
-
-          var itemProperties = { 'permission':group };
-          updatePermissions(itemProperties, user_id);
-
-        });
-        feather.replace();
-      }
-    });
-
-    function publishData() {
-
-      // Get Access Groups
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('accessGroups')/items?$select=group_id,group_name,access_list";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var temp = data.d.results;
-          for (i = 0; i < temp.length; i++) {
-            accessGroups[temp[i].group_id] = [temp[i].group_name, temp[i].access_list];
-          }
-        }
-      });
-
-      // Get Personnel List
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('permissions')/items?$orderby=user%20asc";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var temp = data.d.results;
-          for (i = 0; i < temp.length; i++) {
-            userPermissions[temp[i].ID] = [temp[i].user, temp[i].permission];
-          }
-        }
-      });
-
-      var selectOptions = "";
-
-      for (item in accessGroups) {
-        var tr = document.createElement("tr");
-        tr.innerHTML = "<th scope=\"row\">" + item + "</th><td>" + accessGroups[item][0] + "</td><td>" + accessGroups[item][1] + "</td>";
-        selectOptions += "<option>" + accessGroups[item][0] + "</option>";
-        document.getElementById("access_groups_list").appendChild(tr);
-      }
-
-      for (item in userPermissions) {
-        var tr = document.createElement("tr");
-        tr.innerHTML = "<th scope=\"row\">" + userPermissions[item][0] + "</th><td><select class=\"form-control\" id=\"permissions_" + item + "\">" + selectOptions + "</td>";
-        document.getElementById("permissions_list").appendChild(tr);
-        document.getElementById("permissions_" + item).value = accessGroups[userPermissions[item][1]][0];
-
-      }
-
-    }
-
-    function getKeyByValue(object, value) {
-      return Object.keys(object).find(key => object[key][0] === value);
-    }
-
-    var digest = getFormDigest();
-    function updatePermissions(itemProperties,user_id) {
-      listName = "permissions";
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items('" + user_id + "')",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest,
-          "IF-MATCH": "*", // Overwrite changes
-          "X-HTTP-Method": "MERGE" // update operation
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-  </script>
+  <script type="module" src="./js/user.js" defer></script>
+  <script type="module" src="./js/pages/permissions.js" defer></script>
 </head>
 
 <body>
@@ -177,7 +31,7 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -365,7 +219,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />

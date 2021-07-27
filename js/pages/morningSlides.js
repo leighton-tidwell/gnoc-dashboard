@@ -553,6 +553,11 @@ const populateRows = async () => {
 
   const formLoader = document.getElementById("powerpoint_loader");
   formLoader.style.display = "none";
+
+  document.getElementById("genAllPdf").disabled = false;
+  document.getElementById("genDvsPdf").disabled = false;
+  document.getElementById("genOpenPdf").disabled = false;
+  document.getElementById("genFixedPdf").disabled = false;
 };
 
 populateRows();
