@@ -4,6 +4,7 @@ import permissionsCheck from "../modules/userPermissionsCheck.js";
 const DV_LIST_NAME = "DVList";
 const TICKET_CATEGORIES_LIST_NAME = "Ticket_Categories";
 const TAIL_NUMBER_LIST = "TailNumbers";
+const BEAM_LIST_NAME = "Viasat_Beams";
 permissionsCheck("VElDS0VUIFNFVFRJTkdT");
 feather.replace();
 
@@ -177,6 +178,70 @@ document.querySelector("#add_aircraft").addEventListener("click", (event) => {
   );
 });
 
+// Populate Beam list
+fetch(
+  `${HOST_URL}/_api/web/lists/getbytitle('${BEAM_LIST_NAME}')/items?$top=5000&$orderby=Network asc`,
+  {
+    headers: { Accept: "application/json; odata=verbose" },
+    credentials: "include",
+  }
+)
+  .then((response) => response.json())
+  .then((data) => {
+    const beamListContainer = document.getElementById("beam_list");
+    const items = data.d.results;
+
+    items.forEach((beam) => {
+      let beamListItem = document.createElement("li");
+      beamListItem.classList.add("list-group-item");
+      beamListItem.setAttribute("id", `beam-${beam.Id}`);
+      beamListItem.innerHTML = `${beam.Beam}<a href="javascript: void(0);" class="float-right" id="delete-beam-${beam.Id}"><span data-feather="trash-2"></span></a>`;
+      beamListContainer.appendChild(beamListItem);
+    });
+
+    addLinkListeners();
+    feather.replace();
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });
+
+// add Beam add click handler
+document.querySelector("#add_beam").addEventListener("click", (event) => {
+  const enteredBeam = document.getElementById("beam").value;
+  const enteredNetwork = document.getElementById("beam_network").value;
+  const enteredBand = document.getElementById("beam_band").value;
+  if (!enteredBeam && !enteredNetwork && !enteredBand)
+    return alert("Please fill in all beam fields.");
+
+  // Disable button to prevent double clicking
+  const LOADING_TEXT =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+  event.target.disabled = true;
+  event.target.innerHTML = LOADING_TEXT;
+
+  const beamProperties = {
+    Network: enteredNetwork,
+    FrequencyBand: enteredBand,
+    Beam: enteredBeam,
+  };
+
+  insertIntoList(
+    BEAM_LIST_NAME,
+    beamProperties,
+    () => {
+      event.target.disabled = false;
+      event.target.innerHTML = "Add Aircraft";
+      document.getElementById("beam").value = "";
+      alert("Beam added successfully.");
+    },
+    (error) => {
+      console.error("Error: ", error);
+    },
+    true
+  );
+});
+
 // add event handlers
 const addLinkListeners = () => {
   document.querySelectorAll("[id^='delete-']").forEach((item) => {
@@ -185,6 +250,7 @@ const addLinkListeners = () => {
     if (deleteType === "dv") list = DV_LIST_NAME;
     if (deleteType === "category") list = TICKET_CATEGORIES_LIST_NAME;
     if (deleteType === "aircraft") list = TAIL_NUMBER_LIST;
+    if (deleteType === "beam") list = BEAM_LIST_NAME;
 
     item.addEventListener("click", (event) => {
       const currentButton = event.currentTarget;

@@ -165,7 +165,7 @@ fetch(
 )
   .then((response) => response.json())
   .then((data) => {
-    const items = data.d.results;
+    const items = data.d.results || [];
     const aircraftSelectInput = document.getElementById("tail_select");
     items.forEach((item) => {
       let opt = document.createElement("option");
@@ -185,7 +185,7 @@ fetch(`${HOST_URL}/_api/web/lists/getbytitle('DVList')/items?$top=5000`, {
 })
   .then((response) => response.json())
   .then((data) => {
-    const items = data.d.results;
+    const items = data.d.results || [];
     const dvSelectInput = document.getElementById("dv_select");
     items.forEach((item) => {
       let opt = document.createElement("option");
@@ -240,7 +240,7 @@ const getListOfDvsWithTickets = async (startDate, endDate, listOfTails) => {
     }
   );
   const data = await response.json();
-  const items = data.d.results;
+  const items = data.d.results || [];
   for (let item in items) {
     if (!listOfDvs.includes(items[item].DV) && items[item].DV !== null) {
       if (tailsProvided && !listOfTails.includes(items[item].Tail_Number))
@@ -355,7 +355,7 @@ const getCCIRTotal = async (startDate, endDate, Dv) => {
     credentials: "include",
   });
   const data = await response.json();
-  const items = data.d.results;
+  const items = data.d.results || [];
   const totalCCIRs = items.length;
 
   return totalCCIRs;
@@ -378,7 +378,7 @@ const getMissionsAndLegsTotal = async (startDate, endDate, Dv) => {
     credentials: "include",
   });
   const data = await response.json();
-  const items = data.d.results;
+  const items = data.d.results || [];
   let totalMissions = [];
   for (let item in items) {
     if (!totalMissions.includes(items[item].Mission_Number))

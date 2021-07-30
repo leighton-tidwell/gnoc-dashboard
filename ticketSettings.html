@@ -292,7 +292,6 @@
             </div>
           </div>
           <br />
-          <!--
           <div class="card" id="add_airport_div">
             <div class="card-header">
               <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
@@ -300,29 +299,49 @@
                 <path fill-rule="evenodd"
                   d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
               </svg>
-              <b>Airport IATAs</b>
+              <b>Viasat Beams</b>
             </div>
             <div class="card-body">
               <form>
                 <div class="row">
                   <div class="col">
                     <div class="form-group row">
-                      <label for="iata" class="col-sm-4 col-form-label">IATA</label>
+                      <label for="beam" class="col-sm-4 col-form-label">Beam</label>
                       <div class="col-sm-8">
-                        <input type="text" class="form-control" id="iata" placeholder="KADW">
+                        <input type="text" class="form-control" id="beam" placeholder="">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="beam_network" class="col-sm-4 col-form-label">Network</label>
+                      <div class="col-sm-8">
+                        <select id="beam_network" class="form-control">
+                          <option>HCX</option>
+                          <option>VGNET</option>
+                          <option>VI</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="beam_band" class="col-sm-4 col-form-label">Frequency Band</label>
+                      <div class="col-sm-8">
+                        <select id="beam_band" class="form-control">
+                          <option>MIL-Ka</option>
+                          <option>Ku</option>
+                          <option>Ka</option>
+                        </select>
                       </div>
                     </div>
                     <div class="form-group row">
                       <div class="col-sm-10">
-                        <button type="button" id="add_iata" class="btn btn-primary">Add
-                          IATA</button>
+                        <button type="button" id="add_beam" class="btn btn-primary">Add
+                          Beam</button>
                       </div>
                     </div>
                   </div>
                   <div class="row col-md-6">
                     <div class="col">
                       <div class="form-group row" style="height:300px;overflow:auto;">
-                        <ul class="list-group" id="iata_list" style="width:99%;">
+                        <ul class="list-group" id="beam_list" style="width:99%;">
                         </ul>
                       </div>
                     </div>
