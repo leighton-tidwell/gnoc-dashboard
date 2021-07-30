@@ -2,13 +2,14 @@
 
 <head>
   <title>GNOC DV Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" />
+  <meta charset="utf-8"/>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
     integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   <link rel="stylesheet"
     href="https://unpkg.com/tempusdominus-bootstrap@5.37.0/build/css/tempusdominus-bootstrap.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
@@ -18,340 +19,9 @@
   <script type="text/javascript"
     src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
   <script src="https://unpkg.com/tempusdominus-bootstrap@5.37.0/build/js/tempusdominus-bootstrap.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    // Global digest value for auth
-    var digest = getFormDigest();
-    var listName = "CCIR";
-    var dateSelected = "";
-
-    // To get ticket Number from URL
-    var getUrlParameter = function getUrlParameter(sParam) {
-      var sPageURL = window.location.search.substring(1),
-        sURLVariables = sPageURL.split('&'),
-        sParameterName,
-        i;
-
-      for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-          return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-        }
-      }
-    };
-    var ccir_id = getUrlParameter('ccir');
-
-    $(function () {
-      // page specific
-      if (!checkPermissions("VklFVyBDQ0lS", false, true)) {
-        $("html").remove();
-      }
-
-      if (checkPermissions("VklFVyBDQ0lS", false, false)) {
-
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        // Populate DV Drop down
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('DVList')/items?$top=5000&$orderby=DV%20asc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              var select = document.getElementById('dv_select');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].DV;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // Populate Aircraft Drop Down
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('TailNumbers')/items?$top=5000&$orderby=Tail_x0020_Numbers%20asc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              var select = document.getElementById('tail_number');
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                opt.innerHTML = allResults[i].Tail_x0020_Numbers;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // generate calendar objects
-        $("#datetimepicker1").datetimepicker({
-          format: 'MM/DD/YYYY, HH:mm',
-        });
-
-        // Add data handling for said calendar objects
-        $('#datetimepicker1').on("change.datetimepicker", function (e) {
-          var date = $('#datetimepicker1').datetimepicker('viewDate');
-          //date = new Date(date);
-          //date.setHours(date.getHours() - date.getTimezoneOffset()/60);
-
-          // now you can get the string
-          var isodate = date.toISOString();
-          dateSelected = isodate;
-        });
-
-        // Update CCIR
-        $(document).on('click', '#ticket_submit', function () {
-          // Disable Button
-          var $this = $(this);
-          var loadingText = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-          if ($(this).html() !== loadingText) {
-            $this.data('original-text', $(this).html());
-            $this.html(loadingText);
-            $this.attr("disabled", true);
-          }
-
-          var ticket_number = $("#ticket_number").val();
-          var dv = $("#dv_select").val();
-          var tail_number = $("#tail_number").val();
-          var ac_type = $("#ac_type").val();
-          var mission_number = $("#mission_number").val();
-          var impact_level = $("#impact_level").val();
-          var remarks = $("#remarks").val();
-          var hotrep_number = $("#hotrep_number").val();
-          var ogo_officer = $("#ogo_officer").val();
-
-          var itemProperties = { 'HOTREP_Number': hotrep_number, 'AC_Type': ac_type, 'Tail_Number': tail_number, 'Mission_Number': mission_number, 'DV': dv, 'Date': dateSelected, 'GNOC_Ticket_Number': ticket_number, 'OGO_Duty_Officer': ogo_officer, 'Impact_Level': impact_level, 'Remarks': remarks };
-
-          console.log(itemProperties);
-          updateCCIR(hostUrl, itemProperties, function () {
-            alert("CCIR Successfully Updated.");
-            location.reload();
-          }, function () {
-            alert("An error has occured. Please try again.");
-          });
-        });
-
-        // Populate Fields
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('CCIR')/items?$filter=Id eq '" + ccir_id + "'";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-              $("#mission_number").val(allResults[0].Mission_Number);
-              $("#dv_select").val(allResults[0].DV);
-
-              $("#datetimepicker1").datetimepicker('date', allResults[0].Date);
-              $("#tail_number").val(allResults[0].Tail_Number);
-              $("#ac_type").val(allResults[0].AC_Type);
-
-              $("#hotrep_number").val(allResults[0].HOTREP_Number);
-              $("#impact_level").val(allResults[0].Impact_Level);
-              $("#ogo_officer").val(allResults[0].OGO_Duty_Officer);
-              $("#remarks").val(allResults[0].Remarks);
-              $("#ticket_number").val(allResults[0].GNOC_Ticket_Number);
-
-              $('.selectpicker').selectpicker('refresh');
-            }
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-
-        // Add Ticket Cards
-        var ticket = $("#ticket_number").val();
-        if (ticket != "") {
-          var select = document.getElementById('ticket_show');
-          var opt = document.createElement('div');
-          opt.className = "card";
-          opt.innerHTML = "<div class=\"card-header\"><b><a href=\"viewTicket.html?ticket=" + ticket + "\">Ticket #" + ticket + "</a></b></div>";
-          var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$filter=GNOC_Ticket_Number eq '" + ticket + "'";
-          $.ajax({
-            url: urlLoad,
-            async: false,
-            method: "GET",
-            headers: {
-              "Accept": "application/json;odata=verbose"
-            },
-            success: function (data) {
-              var allResults = data.d.results;
-              if (Number(allResults.length) > 0) {
-                var openDate = convertTheDate(allResults[0].Date_Opened);
-                var impact = allResults[0].Impact_Level;
-                if (impact == null)
-                  impact = "N/A";
-
-                var lastAction = allResults[0].Last_Reported_Action;
-                if (lastAction == null)
-                  lastAction = "N/A";
-
-                var ccir = allResults[0].CCIR_Number;
-                if (ccir == null)
-                  ccir = "N/A";
-
-                opt.innerHTML = opt.innerHTML + "<div class=\"card-body\"><div class=\"row\"><div class=\"col\"><div class=\"form-group row\"><label for=\"status\" class=\"col-sm-4 col-form-label\">Status</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"status\" value=\"" + allResults[0].Status + "\" disabled></div></div><div class=\"form-group row\"><label for=\"open_date\" class=\"col-sm-4 col-form-label\">Open Date</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"open_date\" value=\"" + openDate + "\" disabled></div></div><div class=\"form-group row\"><label for=\"ticket_number\" class=\"col-sm-4 col-form-label\">Ticket Number</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"ticket_number\" value=\"" + ticket + "\" disabled></div></div><div class=\"form-group row\"><label for=\"dv_select\" class=\"col-sm-4 col-form-label\">DV</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"dv_select\" value=\"" + allResults[0].DV + "\" disabled></div></div><div class=\"form-group row\"><label for=\"impact_level\" class=\"col-sm-4 col-form-label\">DV Impact</label><div class=\"col-sm-8\"><input type=\email\" class=\"form-control\" id=\"impact_level\" value=\"" + impact + "\" disabled></div></div><div class=\"form-group row\"><label for=\"mission_number\" class=\"col-sm-4 col-form-label\">Mission Number</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"mission_number\" value=\"" + allResults[0].Mission_Number + "\" disabled></div></div><div class=\"form-group row\"><label for=\"cso\" class=\"col-sm-4 col-form-label\">CSO Name</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"cso\" value=\"" + allResults[0].CSO + "\" disabled></div></div><div class=\"form-group row\"><label for=\"ccir_number\" class=\"col-sm-4 col-form-label\">CCIR Number</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"ccir_number\" value=\"" + ccir + "\" disabled></div></div><div class=\"form-group row\"><label for=\"tail_number\" class=\"col-sm-4 col-form-label\">Tail Number</label><div class=\"col-sm-8\"><input type=\"email\" class=\"form-control\" id=\"tail_number\" value=\"" + allResults[0].Tail_Number + "\" disabled></div></div></div><div class=\"row col-md-6\"><div class=\"col\"><div class=\"form-group row\"><label for=\"category\" class=\"col-sm-4 col-form-label\">Category</label><div class=\"col - sm - 8\"><input type=\"email\" class=\"form-control\" id=\"category\" value=\"" + allResults[0].Category + "\" disabled></div></div><div class=\"form-group row\"><label for=\"sub_category\" class=\"col-sm-4 col-form-label\">Sub Category</label><div class=\"col-sm-8\"><input type=\"text\" class=\"form-control\" id=\"sub_category\" value=\"" + allResults[0].Sub_Category + "\" disabled></div></div><div class=\"form-group row\"><label for=\"issue_description\" class=\"col-sm-4 col-form-label\">Initial Description</label><textarea disabled class=\"form-control col-sm-8\" id=\"issue_description\" rows=\"10\">" + allResults[0].Issue_Description + "</textarea></div><div class=\"form-group row\"><label for=\"issue_description\" class=\"col-sm-4 col-form-label\">Most Recent Update</label><textarea class=\"form-control col-sm-8\" id=\"update_text\" rows=\"10\" disabled>" + lastAction + "</textarea></div></div></div></div></div><br />";
-                select.appendChild(opt);
-                var br = document.createElement("br");
-                select.appendChild(br);
-              }
-            },
-            error: function (data) {
-              //alert("Error: " + JSON.stringify(data));
-            }
-          });
-
-        }
-      }
-      feather.replace();
-    });
-
-    function convertTheDate(dateVar) {
-      // date conversion
-      var convertDate = new Date(dateVar);
-      var month = convertDate.getUTCMonth();
-      month = ("0" + (convertDate.getMonth() + 1)).slice(-2);
-
-      var date = convertDate.getDate();
-      if (convertDate.getDate() < 10)
-        date = "0" + convertDate.getDate();
-
-      var minutes = convertDate.getUTCMinutes();
-      if (convertDate.getUTCMinutes() < 10)
-        minutes = "0" + convertDate.getUTCMinutes();
-
-      var t = new Date();
-      var hours = convertDate.getHours();
-
-      if (convertDate.getHours() < 10)
-        hours = "0" + hours;
-
-      var dateString = month + "/" + date + "/" + convertDate.getUTCFullYear() + " " + hours + ":" + minutes;
-      return dateString;
-    }
-
-    // Get Digest
-    var hostUrl = "https://intelshare.intelink.gov/sites/89cs/GNOC/";
-    function getFormDigest() {
-      console.log("Getting Form Digest..");
-      $.support.cors = true;
-      var _formDigest;
-      $.ajax({
-        url: hostUrl + "/_api/contextinfo",
-        type: "POST",
-        dataType: "json",
-
-        headers: { "Accept": "application/json; odata=verbose" },
-        xhrFields: { withCredentials: true },
-        async: false,
-        success: function (data) {
-          _formDigest = data.d.GetContextWebInformation.FormDigestValue;
-          console.log(data.d.GetContextWebInformation.FormDigestValue);
-          console.log("Form Digest Done");
-
-        },
-        error: function () {
-          console.log("Error Occured");
-        }
-      });
-
-      return _formDigest;
-    }
-
-    // Update flight ticket
-    function updateCCIR(webUrl, itemProperties, success, failure) {
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-      $.ajax({
-        url: webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items('" + ccir_id + "')",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest,
-          "IF-MATCH": "*", // Overwrite changes
-          "X-HTTP-Method": "MERGE" // update operation
-        },
-        success: function (data) {
-          success(data);
-        },
-        error: function (data) {
-          failure(data);
-        }
-      });
-    }
-
-    // Get List Item Type metadata
-    function GetItemTypeForListName(name) {
-      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
-    }
-  </script>
+  <script type="module" src="./js/user.js" defer></script>
+  <script type="module" src="./js/pages/viewCCIR.js" defer></script>
 </head>
 
 <body>
@@ -367,7 +37,7 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -634,7 +304,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />

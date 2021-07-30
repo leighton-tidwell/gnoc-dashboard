@@ -1,12 +1,13 @@
 <html>
 
 <head>
-  <title>GNOC DV Dashboard</title>
+  <title>GSOC DV Dashboard</title>
+  <meta charset="utf-8"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
@@ -21,353 +22,9 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
   <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    var listName = "Tickets";
-
-    $(function () {
-
-      // Check permissions of page:
-      if (!checkPermissions("UEVSU09OTkVMIFNUQVRT", false, true)) {
-        $("html").remove();
-      }
-
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("UEVSU09OTkVMIFNUQVRT", false, false)) {
-
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        // Get start date
-        var now = new Date();
-        year = now.getFullYear();
-        var day = ("0" + now.getDate()).slice(-2);
-        var month = ("0" + (now.getMonth() + 1)).slice(-2);
-
-        var start_date = now.getFullYear() + "-" + (month) + "-01";
-        var end_date = now.getFullYear() + "-" + (month) + "-" + (day);
-
-        // Load date objects
-        $('#start_date').val(start_date);
-        $('#end_date').val(end_date);
-
-        $.fn.dataTable.moment('MM/DD/YYYY HH:mmZ');
-        // Get Personnel List
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('permissions')/items?$orderby=user%20asc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var allResults = data.d.results;
-            if (allResults.length > 0) {
-              var select = document.getElementById('operator');
-              for (var i = 0; i < allResults.length; i++) {
-                // looping through all results
-                var opt = document.createElement('option');
-                var name = allResults[i].user;
-                name = name.split('.');
-                name = (name[0] + " " + name[1].split('@')[0]).toUpperCase();
-                opt.value = allResults[i].user;
-                operators.push(allResults[i].user);
-                opt.innerHTML = name;
-                select.appendChild(opt);
-              }
-              $('.selectpicker').selectpicker('refresh');
-            }
-          }
-        });
-
-
-        // Change the start_date
-        $('#start_date').change(function () {
-          var startDate = $('#start_date').val() + "T00:00:00Z";
-          var endDate = $('#end_date').val() + "T23:59:59Z";
-          var operator = $("#operator").val();
-          if (operator != "")
-            runStats(operator, startDate, endDate);
-        });
-
-        // change end date
-        $('#end_date').change(function () {
-          var startDate = $('#start_date').val() + "T00:00:00Z";
-          var endDate = $('#end_date').val() + "T23:59:59Z";
-          var operator = $("#operator").val();
-          if ($.fn.DataTable.isDataTable('#operators'))
-            $('#operators').DataTable().clear().draw();
-
-          if (operator != "")
-            runStats(operator, startDate, endDate);
-        });
-
-        $("#operator").change(function () {
-          var startDate = $('#start_date').val() + "T00:00:00Z";
-          var endDate = $('#end_date').val() + "T23:59:59Z";
-          var operator = $("#operator").val();
-          if ($.fn.DataTable.isDataTable('#operators'))
-            $('#operators').DataTable().clear().draw();
-
-          if (operator != "")
-            runStats(operator, startDate, endDate);
-        });
-
-        $(document).on('click', '#refresh', function () {
-          var startDate = $('#start_date').val() + "T00:00:00Z";
-          var endDate = $('#end_date').val() + "T23:59:59Z";
-          overall(startDate, endDate);
-        });
-      }
-      feather.replace();
-    });
-
-    function runStats(operator, startDate, endDate) {
-      // Generate DataTable object
-      if (!$.fn.DataTable.isDataTable('#ticketsTable')) {
-        $('#ticketsTable').DataTable({
-          dom: 'Bfrtip',
-          buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-          ],
-          "columnDefs": [
-            { "width": "140px", targets: [0] },
-            { "width": "150px", targets: [1] },
-            { "width": "50px", targets: [2] },
-            { "width": "100px", targets: [3, 4, 5] }
-          ],
-          "order": [[0, "desc"]]
-        });
-      }
-      else {
-        $('#ticketsTable').DataTable().clear().draw();
-      }
-
-      // First lets pull ALL of the tickets TOTAL
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=Author/EMail,DV,Created,GNOC_Ticket_Number,Date_Opened,Tail_Number,Mission_Number,DV_Impact,Impact_Level,Category,Status,Issue_Description,Last_Reported_Action,Update_Date,CCIR,CCIR_Number,CSO&$top=5000&$filter=Author/EMail eq '" + operator + "' and Created le '" + endDate + "' and Created ge '" + startDate + "'&$expand=Author";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var arrayOfTimes = []; // times of tickets unique to mission number
-          var allResults = data.d.results;
-          if (allResults.length > 0) {
-            $("#total_tickets").html(allResults.length);
-            for (var i = 0; i < allResults.length; i++) {
-              var ticketNumber = allResults[i].GNOC_Ticket_Number;
-              ticketNumber = "<a href=\"./viewTicket.html?ticket=" + ticketNumber + "\">" + ticketNumber + "</a>";
-              var dateOpened = convertDate(allResults[i].Date_Opened, 1);
-              var tailNumber = allResults[i].Tail_Number;
-              if (tailNumber == null)
-                tailNumber = "N/A";
-              var missionNumber = allResults[i].Mission_Number;
-              if (missionNumber == null)
-                missionNumber = "N/A";
-              var dv = allResults[i].DV;
-              var status = allResults[i].Status;
-              var issue = allResults[i].Issue_Description;
-
-              $('#ticketsTable').DataTable().row.add([dateOpened, ticketNumber, tailNumber, missionNumber, dv, status, issue]).draw();
-            }
-          }
-          else {
-            $("#total_tickets").html("0");
-          }
-        }
-      });
-
-      // Now ticket Updates
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('ticketUpdates')/items?$select=Author/EMail,ticket_number,update&$top=5000&$filter=Author/EMail eq '" + operator + "' and Created le '" + endDate + "' and Created ge '" + startDate + "'&$expand=Author";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var arrayOfTimes = []; // times of tickets unique to mission number
-          var allResults = data.d.results;
-          var closed = 0;
-          var updates = 0;
-          var fixed = 0;
-          if (allResults.length > 0) {
-            for (var i = 0; i < allResults.length; i++) {
-              var update = allResults[i].update;
-              var ticketNumber = allResults[i].ticket_number;
-              var openString = "GNOC set ticket #" + ticketNumber + " to OPEN.";
-              var fixedString = "GNOC set ticket #" + ticketNumber + " to FIXED.";
-              var closedString = "GNOC set ticket #" + ticketNumber + " to CLOSED.";
-              if (update != openString && update != closedString && update != fixedString)
-                updates++;
-              if (update == closedString)
-                closed++;
-              if (update == fixedString)
-                fixed++;
-
-            }
-            $("#total_updates").html(updates);
-            $("#total_closed").html(closed);
-          }
-          else {
-            $("#total_updates").html("0");
-            $("#total_closed").html("0");
-          }
-        }
-      });
-    }
-
-    var operators = [];
-    function overall(startDate, endDate) {
-      // Generate DataTable object
-      if (!$.fn.DataTable.isDataTable('#operators')) {
-        $('#operators').DataTable({
-          dom: 'Bfrtip',
-          buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-          ],
-          "columnDefs": [
-          ],
-          "order": [[3, "desc"]]
-        });
-      }
-      else {
-        $('#operators').DataTable().clear().draw();
-      }
-
-      for (var i = 0; i < operators.length; i++) {
-        var currOpen = 0;
-        var currUpdate = 0;
-        var currFixed = 0;
-        var currClosed = 0;
-        // First lets pull ALL of the tickets TOTAL
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$select=Author/EMail,DV,Created,GNOC_Ticket_Number,Date_Opened,Tail_Number,Mission_Number,DV_Impact,Impact_Level,Category,Status,Issue_Description,Last_Reported_Action,Update_Date,CCIR,CCIR_Number,CSO&$top=5000&$filter=Author/EMail eq '" + operators[i] + "' and Created le '" + endDate + "' and Created ge '" + startDate + "'&$expand=Author";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var arrayOfTimes = []; // times of tickets unique to mission number
-            var allResults = data.d.results;
-            if (allResults.length > 0) {
-              currOpen = allResults.length;
-            }
-          }
-        });
-
-        // Now ticket Updates
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('ticketUpdates')/items?$select=Author/EMail,ticket_number,update&$top=5000&$filter=Author/EMail eq '" + operators[i] + "' and Created le '" + endDate + "' and Created ge '" + startDate + "'&$expand=Author";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var arrayOfTimes = []; // times of tickets unique to mission number
-            var allResults = data.d.results;
-            var closed = 0;
-            var updates = 0;
-            if (allResults.length > 0) {
-              for (var j = 0; j < allResults.length; j++) {
-                var update = allResults[j].update;
-                var ticketNumber = allResults[j].ticket_number;
-                var openString = "GNOC set ticket #" + ticketNumber + " to OPEN.";
-                var fixedString = "GNOC set ticket #" + ticketNumber + " to FIXED.";
-                var closedString = "GNOC set ticket #" + ticketNumber + " to CLOSED.";
-                if (update != openString && update != closedString && update != fixedString)
-                  currUpdate++;
-                if (update == closedString)
-                  currClosed++;
-                if (update == fixedString)
-                  currFixed++;
-              }
-            }
-          }
-        });
-
-        var name = operators[i];
-        name = name.split('.');
-        name = (name[0] + " " + name[1].split('@')[0]).toUpperCase();
-        $('#operators').DataTable().row.add([name, currOpen, currUpdate, currFixed, currClosed]).draw();
-
-      }
-    }
-
-
-    function convertDate(date, offset) {
-      var convertDate = new Date(date);
-      var month = convertDate.getUTCMonth();
-      if (convertDate.getUTCMonth() + 1 < 10) {
-        month = convertDate.getUTCMonth() + 1;
-        month = "0" + month;
-      }
-      else
-        month = convertDate.getUTCMonth() + 1;
-
-      var date = convertDate.getDate();
-      if (convertDate.getDate() < 10)
-        date = "0" + convertDate.getDate();
-
-      var minutes = convertDate.getUTCMinutes();
-      if (convertDate.getUTCMinutes() < 10)
-        minutes = "0" + convertDate.getUTCMinutes();
-
-      var t = new Date();
-      if (offset == 1) {
-        var currentoffset = convertDate.getTimezoneOffset() * 60000;
-        convertDate.setTime(convertDate.getTime() + currentoffset);
-      }
-      var hours = convertDate.getHours();
-
-      if (convertDate.getHours() < 10)
-        hours = "0" + hours;
-
-      return dateString = month + "/" + date + "/" + convertDate.getUTCFullYear() + " " + hours + ":" + minutes + "Z";
-    }
-  </script>
+  <script type="module" src="./js/user.js" defer></script>
+  <script type="module" src="./js/pages/personnelStats.js" defer></script>
 </head>
 
 <body>
@@ -383,7 +40,7 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -580,13 +237,10 @@
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">
-                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd"
-                    d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
-                </svg>
-                <b>&nbsp;Operator Stats</b> <button id="refresh" type="button" class="btn btn-primary">Refresh
-                  Table</button>
+                <b>Operator Stats</b>
+                <div class="spinner-border" id="total_loader" style="width:1em;height:1em" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
               </div>
               <div class="card-body">
                 <table id="operators" class="display" style="width:100%">
@@ -616,12 +270,10 @@
             <br>
             <div class="card">
               <div class="card-header">
-                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-archive" fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd"
-                    d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
-                </svg>
-                <b>&nbsp;Tickets Opened</b>
+                <b>Tickets Opened</b>
+                <div class="spinner-border" id="operator_loader" style="width:1em;height:1em" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
               </div>
               <div class="card-body">
                 <table id="ticketsTable" class="display" style="width:100%">
@@ -656,7 +308,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />

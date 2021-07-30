@@ -2,11 +2,12 @@
 
 <head>
   <title>GNOC DV Dashboard</title>
+  <meta charset="utf-8"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
@@ -20,229 +21,10 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
-  <script type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    var listName = "contactList";
-    var digest = getFormDigest();
-    $(function () {
-      // Check permissions of page:
-      if (!checkPermissions("Q09OVEFDVCBMSVNU", false, true)) {
-        $("html").remove();
-      }
-
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("Q09OVEFDVCBMSVNU", false, false)) {
-
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        // Create Contact Table
-        $('#listContacts').DataTable({
-          dom: 'Bfrtip',
-          buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-          ],
-          "columnDefs": [
-            { "width": "4px", targets: [5] },
-            { "width": "300px", targets: [4] },
-            { "orderable": false, targets: [5] }
-          ],
-          "order": [[0, "asc"]],
-          "paging": false
-        });
-        loadContacts();
-
-        $(document).on('click', '#add_contact', function () {
-          var name = $("#name").val();
-          var comm_phone = $("#comm_phone").val();
-          var dsn = $("#dsn").val();
-          var cell_phone = $("#cell_phone").val();
-          var other = $("#other").val();
-
-          // Disable Button
-
-          var itemProperties = { 'Title': name, 'commercial_phone': comm_phone, 'dsn': dsn, 'cell': cell_phone, 'other': other };
-
-          CreateListItemWithDetails(itemProperties)
-            .then(function (data) {
-              // success
-              var newId = data.d.ID;
-              var deleteHref = "<a href=\"javascript: deleteContact(" + newId + ")\"/><span data-feather=\"x-circle\"></span></a>";
-              $('#listContacts').DataTable().row.add([name, comm_phone, dsn, cell_phone, other, deleteHref]).draw();
-              feather.replace();
-              $("#name").val("");
-              $("#comm_phone").val("");
-              $("#dsn").val("");
-              $("#cell_phone").val("");
-              $("#other").val("");
-              alert("Contact added successfully.");
-            },
-              function (data) {
-                // failure
-              });
-        });
-      }
-
-      $("#listContacts").on('click', 'a', function () {
-        $(this).parent().parent().remove();
-      });
-
-      $('#nightMode').click(function () {
-        if (!$.cookie('nightmode')) {
-          nightmode = true;
-          $.cookie('nightmode', 'true');
-          console.log("cookie made");
-        }
-        var $this = $(this);
-        if ($(this).html() == '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun" style="width:23px;height:23px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>') {
-          console.log("currently night mode");
-          $.cookie('nightmode', 'false');
-          nightmode = false;
-          checkNightMode();
-        }
-        else {
-          console.log("currently day mode");
-          $.cookie('nightmode', 'true');
-          nightmode = true;
-          checkNightMode();
-        }
-      });
-      checkNightMode();
-      feather.replace();
-
-    });
-
-
-
-    function CreateListItemWithDetails(itemProperties, success, failure) {
-      var itemType = GetItemTypeForListName(listName);
-      itemProperties["__metadata"] = { "type": itemType };
-
-
-      return $.ajax({
-        url: "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        data: JSON.stringify(itemProperties),
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest
-        }
-      });
-    }
-
-    // Get List Item Type metadata
-    function GetItemTypeForListName(name) {
-      return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
-    }
-
-    function deleteContact(id) {
-      $.ajax({
-        url: "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items(" + id + ")",
-        type: "POST",
-        contentType: "application/json;odata=verbose",
-        headers: {
-          "Accept": "application/json;odata=verbose",
-          "X-RequestDigest": digest,
-          "IF-MATCH": "*",
-          "X-HTTP-Method": "DELETE",
-        },
-        success: function (data) {
-        },
-        error: function (data) {
-          alert("An error has occured. Please try again.");
-        }
-      });
-    }
-
-    function loadContacts() {
-      // Get all of the contacts
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var allResults = data.d.results;
-          if (Number(allResults.length) > 0) {
-            for (var i = 0; i < Number(allResults.length); i++) {
-              // looping through all results
-              var deleteHref = "<a href=\"javascript: deleteContact(" + allResults[i].Id + ")\"/><span data-feather=\"x-circle\"></span></a>";
-              $('#listContacts').DataTable().row.add([allResults[i].Title, allResults[i].commercial_phone, allResults[i].dsn, allResults[i].cell, allResults[i].other, deleteHref]).draw();
-            }
-          }
-        },
-        error: function (data) {
-          //alert("Error: " + JSON.stringify(data));
-        }
-      });
-    }
-
-    function checkNightMode() {
-      if ($.cookie('nightmode') == 'true') {
-        nightmode = true;
-        console.log("cookie true");
-        $('link[href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css"]').attr('href', 'https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css');
-        $('link[href="./css/global.css"]').attr('href', './css/nightMode.css');
-        $(".sidebar").removeClass("bg-light");
-        $(".sidebar").addClass("bg-dark");
-        $(".nav-link.active").removeClass("active").addClass("bg-secondary");
-        $("footer").removeClass("bg-light").addClass("bg-dark");
-        $("#nightMode").html('<span data-feather="sun" style="width:23px;height:23px;"></span>');
-        feather.replace();
-      }
-      else {
-        console.log("cookie false");
-        nightmode = false;
-        $('link[href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css"]').attr('href', 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css');
-        $('link[href="./css/nightMode.css"]').attr('href', './css/global.css');
-        $(".sidebar").addClass("bg-light");
-        $(".sidebar").removeClass("bg-dark");
-        $(".nav-link.bg-secondary").addClass("active").removeClass("bg-secondary");
-        $("footer").addClass("bg-light").removeClass("bg-dark");
-        $("#nightMode").html('<span data-feather="moon" style="width:23px;height:23px;"></span>');
-        feather.replace();
-      }
-    }
-  </script>
+  <script type="module" src="./js/user.js"></script>
+  <script type="module" src="./js/pages/contactList.js"></script>
 </head>
 
 <body>
@@ -255,12 +37,10 @@
       </svg> &nbsp;
       <b>GNOC DV Dashboard</b>
     </a>
-    <button type="button" id="nightMode" class="btn btn-secondary float-right" style="margin-right:5px;"><span
-        data-feather="moon"></span></button>
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -460,6 +240,9 @@
                     d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
                 </svg>
                 <b>&nbsp;Contact List</b>
+                <div class="spinner-border" id="contacts_loader" style="width:1em;height:1em" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
               </div>
               <div class="card-body">
                 <table id="listContacts" class="display" style="width:100%">
@@ -492,7 +275,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />

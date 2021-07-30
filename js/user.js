@@ -1,130 +1,74 @@
-var user = {};
+import { HOST_URL } from "./modules/constants.js";
+import { insertIntoList } from "./modules/utility.js";
 
-getUser();
+let user = {};
+export const getUser = () => {
+  return new Promise(resolve => {
+    fetch(`${HOST_URL}/_api/web/currentuser`, {
+      headers: { "Accept": "application/json; odata=verbose" },
+      credentials: 'include'
+    })
+      .then(response => response.json())
+      .then(data => {
+        user.email = data.d.Email;
+        user.name = data.d.Title;
 
-function getUser() {
-  var name;
-  $.ajax({
-    url: "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/currentuser",
-    async: false,
-    method: "GET",
-    headers: {
-      "Accept": "application/json;odata=verbose"
-    },
-    success: function (data) {
-      user.email = data.d.Email;
-      user.name = data.d.Title;
-      var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Permissions')/items?$filter=user eq '" + user.email + "'";
-      $.ajax({
-        url: urlLoad,
-        async: false,
-        method: "GET",
-        headers: {
-          "Accept": "application/json;odata=verbose"
-        },
-        success: function (data) {
-          var allResults = data.d.results;
-          if (Number(allResults.length) > 0) {
-            user.permission = allResults[0].permission;
-            var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('accessGroups')/items?$filter=group_id eq '" + user.permission + "'";
-            $.ajax({
-              url: urlLoad,
-              async: false,
-              method: "GET",
-              headers: {
-                "Accept": "application/json;odata=verbose"
-              },
-              success: function (data) {
-                var allResults = data.d.results;
-                if (Number(allResults.length) > 0) {
-                  user.accessList = allResults[0].access_list.split(",");
-                }
-              }
-            });
-          }
-          else {
-            // User not found, add them to db:
-            var itemType = GetItemTypeForListName("permissions");
-            var digest = getFormDigest();
-            var itemProperties = { 'user': user.email };
-            itemProperties["__metadata"] = { "type": itemType };
-            $.ajax({
-              url: "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('permissions')/items",
-              type: "POST",
-              contentType: "application/json;odata=verbose",
-              data: JSON.stringify(itemProperties),
-              headers: {
-                "Accept": "application/json;odata=verbose",
-                "X-RequestDigest": digest
-              },
-              success: function (data) {
+        fetch(`${HOST_URL}/_api/web/lists/getbytitle('Permissions')/items?$filter=user eq '${user.email}'`, {
+          headers: { "Accept": "application/json; odata=verbose" },
+          credentials: 'include'
+        })
+          .then(response => response.json())
+          .then(data => {
+            const items = data.d.results;
+            if (items.length !== 0) {
+              user.permission = items[0].permission;
+              fetch(`${HOST_URL}/_api/web/lists/getbytitle('accessGroups')/items?$filter=group_id eq '${user.permission}'`, {
+                headers: { "Accept": "application/json; odata=verbose" },
+                credentials: 'include'
+              })
+                .then(response => response.json())
+                .then(data => {
+                  const items = data.d.results;
+                  if (items.length === 0) return;
+                  user.accessList = items[0].access_list.split(",");
+                  resolve(user);
+                })
+            }
+            else {
+              // User not found, add them to db:
+              let itemProperties = { 'user': user.email };
+              insertIntoList('permissions', itemProperties, () => {
                 console.log("User added successfully.");
                 location.reload();
-              },
-              error: function (data) {
-                console.log("User already in database.");
-              }
-            });
-          }
-        }
-      });
-    },
-    error: function (data) {
-      //alert("Error: " + JSON.stringify(data));
-    }
-  });
+                resolve("User Added");
+              }, () => {
+                console.error("An error has occured adding the user to the database.");
+              })
+            }
+          })
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        resolve("Error");
+      })
+  })
 }
+
 
 // Item is the item being checked
 // div to hide if necessary
 // redirect if necessary to redirect page
-function checkPermissions(item, div, redirect) {
-  var granted = false;
-  if (user.accessList.includes(atob(item)) || user.accessList == "ALL") {
-    // perm granted
-    granted = true;
-    return granted;
-  }
+export const checkPermissions = (user, item, div, redirect) => {
+  if (user.accessList.includes(atob(item)) || user.accessList == "ALL") return true;
   else if (redirect == true) {
     window.location.replace("./index.html");
   }
   else if (div) {
     $("#" + div + "").remove();
   }
-  return granted;
+  return false;
 }
 
-// Get List Item Type metadata
-function GetItemTypeForListName(name) {
-  return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
-}
-
-// Get Digest for Auth purposes
-function getFormDigest() {
-  console.log("Getting Form Digest..");
-  $.support.cors = true;
-  var _formDigest;
-  $.ajax({
-    url: "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/contextinfo",
-    type: "POST",
-    dataType: "json",
-
-    headers: { "Accept": "application/json; odata=verbose" },
-    xhrFields: { withCredentials: true },
-    async: false,
-    success: function (data) {
-      _formDigest = data.d.GetContextWebInformation.FormDigestValue;
-      console.log(data.d.GetContextWebInformation.FormDigestValue);
-      console.log("Form Digest Done");
-
-    },
-    error: function () {
-      console.log("Error Occured");
-    }
-  });
-
-  return _formDigest;
-}
 
 // Check Night mode preference
 function checkNightMode() {

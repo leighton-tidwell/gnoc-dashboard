@@ -1,0 +1,328 @@
+<html>
+
+<head>
+  <title>GSOC DV Dashboard</title>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/modules/export-data.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/modules/accessibility.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
+  <script type="module" src="js/user.js"></script>
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script type="module" src="js/pages/beamstats.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="index.html">
+      <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z" />
+      </svg> &nbsp;
+      <b>GSOC DV Dashboard</b>
+    </a>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item" id="dashboard_div">
+              <a class="nav-link active" href="index.html">
+                <span data-feather="home"></span>
+                Dashboard <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item" id="flight_schedule_div">
+              <a class="nav-link" href="flightschedule.html">
+                <span data-feather="clock"></span>
+                Flight Schedule
+              </a>
+            </li>
+            <li class="nav-item" id="contact_list_div">
+              <a class="nav-link" href="contactList.html">
+                <span data-feather="phone"></span>
+                Contact List
+              </a>
+            </li>
+          </ul>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+            id="tickets_header_div">
+            <span>Trouble Tickets</span>
+            <a class="d-flex align-items-center text-muted" href="ticketSettings.html" id="ticket_settings_div">
+              <span data-feather="settings"></span>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2">
+            <li class="nav-item" id="create_tts_div">
+              <a class="nav-link" href="createTTS.html">
+                <span data-feather="file"></span>
+                Create a TTS
+              </a>
+            </li>
+            <li class="nav-item" id="create_master_tts_div">
+              <a class="nav-link" href="createMasterTTS.html">
+                <span data-feather="file"></span>
+                Create a Master TTS
+              </a>
+            </li>
+            <li class="nav-item" id="view_tickets_div">
+              <a class="nav-link" href="viewTickets.html">
+                <span data-feather="file-text"></span>
+                View Tickets
+              </a>
+            </li>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="flight_tickets_header_div">
+              <span>Flight Tickets</span>
+              <a class="d-flex align-items-center text-muted" href="createFlightTicket.html"
+                id="create_flight_ticket_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="create_flight_ticket_div">
+                <a class="nav-link" href="createFlightTicket.html">
+                  <span data-feather="file"></span>
+                  Create a Flight Ticket
+                </a>
+              </li>
+              <li class="nav-item" id="view_flight_tickets_div">
+                <a class="nav-link" href="viewFlightTickets.html">
+                  <span data-feather="file-text"></span>
+                  View Flight Tickets
+                </a>
+              </li>
+              <li class="nav-item" id="view_missions_div">
+                <a class="nav-link" href="viewMissions.html">
+                  <span data-feather="file-text"></span>
+                  View Missions
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="ccir_header_div">
+              <span>CCIRs</span>
+              <a class="d-flex align-items-center text-muted" href="createCCIR.html" id="add_a_ccir_icon_div">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="add_a_ccir_div">
+                <a class="nav-link" href="createCCIR.html">
+                  <span data-feather="file"></span>
+                  Add a CCIR
+                </a>
+              </li>
+              <li class="nav-item" id="view_ccirs_div">
+                <a class="nav-link" href="viewCCIRS.html">
+                  <span data-feather="file-text"></span>
+                  View CCIRs
+                </a>
+              </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+              id="reports_header_div">
+              <span>Reports</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" id="24_hour_report_div">
+                <a class="nav-link" href="ticketReport.html">
+                  <span data-feather="file-text"></span>
+                  24 Hour Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="weekend_report_div">
+                <a class="nav-link" href="weekendTicketReport.html">
+                  <span data-feather="file-text"></span>
+                  Weekend Ticket Report
+                </a>
+              </li>
+              <li class="nav-item" id="morning_slides_div">
+                <a class="nav-link" href="morningSlides.html">
+                  <span data-feather="file-text"></span>
+                  Morning Slides
+                </a>
+              </li>
+              <li class="nav-item" id="personnel_stats_div">
+                <a class="nav-link" href="personnelStats.html">
+                  <span data-feather="file-text"></span>
+                  Personnel Stats
+                </a>
+              </li>
+              <li class="nav-item" id="monthly_metrics_div">
+                <a class="nav-link" href="metrics.html">
+                  <span data-feather="file-text"></span>
+                  Monthly Metrics
+                </a>
+              </li>
+              <li class="nav-item" id="permissions_div">
+                <a class="nav-link" href="permissions.html">
+                  <span data-feather="file-text"></span>
+                  Permissions
+                </a>
+              </li>
+            </ul>
+        </div>
+      </nav>
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="home-tab" data-toggle="tab" href="index.html" role="tab"
+                aria-controls="home" aria-selected="false">Overview</a>
+            </li>
+            <li class="nav-item" role="presentation" id="dv_details_div">
+              <a class="nav-link" id="profile-tab" href="dvdetails.html" role="tab" aria-controls="profile"
+                aria-selected="false">DV Details</a>
+            </li>
+            <li class="nav-item" role="presentation" id="open_tickets_div">
+              <a class="nav-link active" id="contact-tab" href="beamstats.html" role="tab" aria-controls="contact"
+                aria-selected="true">Beam Stats</a>
+            </li>
+          </ul>
+        </div>
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+            <h1 class="mt-5">
+              Beam Stats
+            </h1>
+            <hr>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill" fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd"
+                        d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z" />
+                    </svg>&nbsp;
+                    <b>Set Parameters</b>
+                  </div>
+                  <div class="card-body">
+                    <div class="form-group row">
+                      <label for="example-date-input" class="col-2 col-form-label">Start Date</label>
+                      <div class="col-4">
+                        <input class="form-control" name="start_date" type="date" id="start_date">
+                      </div>
+                      <label for="example-date-input" class="col-2 col-form-label">End Date</label>
+                      <div class="col-4">
+                        <input class="form-control" name="end_date" type="date" id="end_date">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-sticky-fill" fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd"
+                        d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1h-11zm6 8.5v4.396c0 .223.27.335.427.177l5.146-5.146a.25.25 0 0 0-.177-.427H9.5a1 1 0 0 0-1 1z" />
+                    </svg>&nbsp;
+                    <b>Tickets Per Beam</b>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div id="containerGraph" class="text-center">
+                          <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br />
+            <div class="card">
+              <div class="card-header">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-sticky-fill" fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd"
+                    d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1h-11zm6 8.5v4.396c0 .223.27.335.427.177l5.146-5.146a.25.25 0 0 0-.177-.427H9.5a1 1 0 0 0-1 1z" />
+                </svg>&nbsp;
+                <b>Tickets Per Beam</b>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <br />
+                    <table id="beamTickets" class="display" style="width:100%">
+                      <thead>
+                        <tr>
+                          <th>Ticket #</th>
+                          <th>Date Opened</th>
+                          <th>Tail</th>
+                          <th>Mission</th>
+                          <th>DV</th>
+                          <th>DV Impact</th>
+                          <th>Category</th>
+                          <th>Status</th>
+                          <th>Issue Description</th>
+                          <th>Beam</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th>Ticket #</th>
+                          <th>Date Opened</th>
+                          <th>Tail</th>
+                          <th>Mission</th>
+                          <th>DV</th>
+                          <th>DV Impact</th>
+                          <th>Category</th>
+                          <th>Status</th>
+                          <th>Issue Description</th>
+                          <th>Beam</th>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <br />
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+        <div class="container-fluid">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">GSOC DV Dashboard - maintained by GSOC @ JBA<br />
+              <a href="mailto:89CS.SCOV.VIP.COMM@us.af.mil">89CS.SCOV.VIP.COMM@us.af.mil</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+
+</html>

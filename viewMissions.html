@@ -2,11 +2,12 @@
 
 <head>
   <title>GNOC DV Dashboard</title>
+  <meta charset="utf-8"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.3/darkly/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" />
-  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="./css/nightMode.css" />
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript"
@@ -20,230 +21,10 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
-  <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js"></script>
-  <script type="text/javascript" src="./js/user.js"></script>
+  <script type="text/javascript" src="//cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
   <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-    var listName = "Missions";
-    $(function () {
-      if (!checkPermissions("VklFVyBNSVNTSU9OUw==", false, true)) {
-        $("html").remove();
-      }
-
-      // Permissions of content if page true and let page content run
-      if (checkPermissions("VklFVyBNSVNTSU9OUw==", false, false)) {
-
-        // page specific
-        if (!checkPermissions("RURJVCBUSUNLRVQ=", "ticket_attachments_div", false)) {
-          // if they cant edit ticket
-          $("input").prop("disabled", true);
-          $("textarea").prop("disabled", true);
-          $("select").prop("disabled", true);
-          $("button").remove();
-        }
-
-        // nav
-        checkPermissions("REFTSEJPQVJE", "dashboard_div", false);
-        checkPermissions("RkxJR0hUIFNDSEVEVUxF", "flight_schedule_div", false);
-        if (!checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false) && !checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false) && !checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false) && !checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false)) {
-          $("#tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIFRUUw==", "create_tts_div", false);
-        checkPermissions("Q1JFQVRFIE1BU1RFUiBUVFM=", "create_master_tts_div", false);
-        checkPermissions("VElDS0VUIFNFVFRJTkdT", "ticket_settings_div", false);
-        checkPermissions("VklFVyBUSUNLRVRT", "view_tickets_div", false);
-        if (!checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false) && !checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false) && !checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false)) {
-          $("#flight_tickets_header_div").remove();
-        }
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_div", false);
-        checkPermissions("Q1JFQVRFIEZMSUdIVCBUSUNLRVQ=", "create_flight_ticket_icon_div", false);
-        checkPermissions("VklFVyBGTElHSFQgVElDS0VUUw==", "view_flight_tickets_div", false);
-        checkPermissions("VklFVyBNSVNTSU9OUw==", "view_missions_div", false);
-        if (!checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false) && !checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false)) {
-          $("#ccir_header_div").remove();
-        }
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_div", false);
-        checkPermissions("QUREIEEgQ0NJUg==", "add_a_ccir_icon_div", false);
-        checkPermissions("VklFVyBDQ0lSUw==", "view_ccirs_div", false);
-        if (!checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false)) {
-          $("#reports_header_div").remove();
-        }
-        checkPermissions("MjQgSE9VUiBSRVBPUlQ=", "24_hour_report_div", false);
-        checkPermissions("Q09OVEFDVCBMSVNU", "contact_list_div", false);
-        checkPermissions("V0VFS0VORCBUSUNLRVQgUkVQT1JU", "weekend_report_div", false);
-        checkPermissions("TU9STklORyBTTElERVM=", "morning_slides_div", false);
-        checkPermissions("UEVSU09OTkVMIFNUQVRT", "personnel_stats_div", false);
-        checkPermissions("TUVUUklDUw==", "monthly_metrics_div", false);
-        checkPermissions("UEVSTUlTU0lPTlM=", "permissions_div", false);
-
-        $.fn.dataTable.moment('MM/DD/YYYY HH:mm');
-        // Create Ticket Table
-        $('#listMissions').DataTable({
-          dom: 'Bfrtip',
-          buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-          ],
-          "order": [[4, "desc"]]
-        });
-
-        // Get all of the tickets:
-        var urlLoad = "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('" + listName + "')/items?$top=1000&$orderby=Created%20desc";
-        $.ajax({
-          url: urlLoad,
-          async: false,
-          method: "GET",
-          headers: {
-            "Accept": "application/json;odata=verbose"
-          },
-          success: function (data) {
-            var total = 0;
-            var arrayOfTimes = [];
-            var arrayOfMissions = [];
-            var allResults = data.d.results;
-            if (Number(allResults.length) > 0) {
-
-              for (var i = 0; i < Number(allResults.length); i++) {
-                // looping through all results
-                var currentTime = allResults[i].Created;
-
-                if (!arrayOfTimes.includes(currentTime) && allResults[i].Mission_Number != null && allResults[i].Mission_Number !== undefined && allResults[i].Mission_Number != "N/A") {
-                  // this is to make sure no duplicates are included.
-                  // Now lets add each mission to array
-                  /*
-                      ARRAY SETUP:
-                      MISSION NUMBER, DVS, START DATE, LAST DATE   TAILS
-                             0         1       2          3          4
-                  */
-                  var currentMission = allResults[i].Mission_Number;
-                  if (!exists(arrayOfMissions, currentMission)) {
-                    // Mission hasnt been included yet.
-                    arrayOfMissions.push([currentMission, [allResults[i].DV], allResults[i].Departure_Date, allResults[i].Arrival_Date, [allResults[i].Tail_Number]]);
-                    // arrayOfMissions[row][1].push(dv);
-                  }
-                  else {
-                    // lets check if the DV needs to be updated:
-                    var missionRow = findRow(arrayOfMissions, currentMission);
-                    if (!exists(arrayOfMissions[missionRow][1], allResults[i].DV)) {
-                      arrayOfMissions[missionRow][1].push(allResults[i].DV);
-                    }
-
-                    // Lets see if the date we found now is before the departure date
-                    var currentDep = new Date(arrayOfMissions[missionRow][2]);
-                    var foundDep = new Date(allResults[i].Departure_Date);
-                    if (foundDep.getTime() < currentDep.getTime())
-                      arrayOfMissions[missionRow][2] = allResults[i].Departure_Date;
-
-                    // Lets see if the date we found is after the arrival date
-                    var currentArr = new Date(arrayOfMissions[missionRow][3]);
-                    var foundArr = new Date(allResults[i].Arrival_Date);
-                    if (currentArr.getTime() < foundArr.getTime())
-                      arrayOfMissions[missionRow][3] = allResults[i].Arrival_Date;
-
-                    // Lets check if the tail numbers need to be added to:
-                    if (!exists(arrayOfMissions[missionRow][4], allResults[i].Tail_Number)) {
-                      arrayOfMissions[missionRow][4].push(allResults[i].Tail_Number);
-                    }
-
-                  }
-                  /*var href = "<a href=\"./viewFlightTicket.html?ticket=" + allResults[i].Id + "\">" + allResults[i].Mission_Number + "</a>";
-                  var depDate = convertDate(allResults[i].Departure_Date);
-                  var arrDate = convertDate(allResults[i].Arrival_Date);*/
-
-
-                  //$('#listTickets').DataTable().row.add([href, allResults[i].Tail_Number, allResults[i].DV, allResults[i].Departure_IATA, allResults[i].Departure_Location, allResults[i].Arrival_IATA, allResults[i].Arrival_Location, depDate, arrDate]).draw();
-                  arrayOfTimes.push(currentTime);
-                }
-              }
-              for (var i = 0; i < arrayOfMissions.length; i++) {
-                var mission = arrayOfMissions[i][0];
-                var dvs = arrayOfMissions[i][1];
-                var start = arrayOfMissions[i][2];
-                var end = arrayOfMissions[i][3];
-                var tails = arrayOfMissions[i][4];
-
-                var href = "<a href=\"viewMission.html?mission=" + mission + "\">" + mission + "</a>";
-                var dvString = "";
-                if (dvs.length > 1) {
-                  for (var j = 0; j < dvs.length; j++) {
-                    if (j == 0) {
-                      dvString = dvs[j];
-                    }
-                    else {
-                      dvString = dvString + ", " + dvs[j];
-                    }
-                  }
-                }
-                else {
-                  dvString = dvs[0];
-                }
-
-                var tailString = "";
-                if (tails.length > 1) {
-                  for (var j = 0; j < tails.length; j++) {
-                    if (j == 0) {
-                      tailString = tails[j];
-                    }
-                    else {
-                      tailString = tailString + ", " + tails[j];
-                    }
-
-                  }
-                }
-                else {
-                  tailString = tails[0];
-                }
-
-                $('#listMissions').DataTable().row.add([href, tailString, dvString, convertDate(start), convertDate(end)]).draw();
-
-              }
-            }
-
-          },
-          error: function (data) {
-            //alert("Error: " + JSON.stringify(data));
-          }
-        });
-      }
-      feather.replace();
-
-    });
-
-    function exists(arr, search) {
-      if (search != null)
-        return arr.some(row => row.includes(search));
-    }
-
-    function findRow(arr, search) {
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i][0].includes(search)) {
-          return i;
-        }
-      }
-    }
-
-    function convertDate(date) {
-      var convertDate = new Date(date);
-      var month = convertDate.getMonth();
-      month = ("0" + (convertDate.getMonth() + 1)).slice(-2);
-
-      var date = convertDate.getDate();
-      if (convertDate.getDate() < 10)
-        date = "0" + convertDate.getDate();
-
-      var minutes = convertDate.getUTCMinutes();
-      if (convertDate.getUTCMinutes() < 10)
-        minutes = "0" + convertDate.getUTCMinutes();
-
-      var t = new Date();
-      var hours = convertDate.getHours();
-
-      if (convertDate.getHours() < 10)
-        hours = "0" + hours;
-
-
-      return dateString = month + "/" + date + "/" + convertDate.getUTCFullYear() + " " + hours + ":" + minutes + "Z";
-    }
-  </script>
+  <script type="module" src="./js/user.js"></script>
+  <script type="module" src="./js/pages/viewMissions.js"></script>
 </head>
 
 <body>
@@ -259,7 +40,7 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <nav class="col-md-2 d-none d-md-block bg-dark sidebar">
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item" id="dashboard_div">
@@ -414,6 +195,9 @@
                   d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z" />
               </svg>
               <b>&nbsp;Missions</b>
+              <div class="spinner-border" id="missions_loader" style="width:1em;height:1em" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
             </div>
             <div class="card-body">
               <table id="listMissions" class="display" style="width:100%">
@@ -444,7 +228,7 @@
         </div>
       </main>
       <br />
-      <footer class="py-4 col-md-2 bg-light" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
+      <footer class="py-4 col-md-2 bg-dark" style="box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">GNOC DV Dashboard - maintained by GNOC @ JBA<br />
