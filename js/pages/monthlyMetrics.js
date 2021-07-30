@@ -1,36 +1,30 @@
 import { HOST_URL } from "../modules/constants.js";
 import permissionsCheck from "../modules/userPermissionsCheck.js";
-import {
-  daysIntoYear,
-  insertIntoList,
-  convertDateToISOString,
-  convertDateToHTMLString,
-  convertDateToTicketHTMLString,
-} from "../modules/utility.js";
+import { daysIntoYear, insertIntoList } from "../modules/utility.js";
 const TICKETS_LIST_NAME = "Tickets";
 const CCIR_LIST_NAME = "CCIR";
 const MISSION_LIST_NAME = "Missions";
 feather.replace();
 permissionsCheck("TU9STklORyBTTElERVM=");
 
-var now = new Date();
-var now3, month3, lastDay3, startDate3, endDate3;
+let now = new Date();
+let now3, month3, lastDay3, startDate3, endDate3;
 now.setMonth(now.getMonth() - 1);
-var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-var month = ("0" + (now.getMonth() + 1)).slice(-2);
-var startDate = now.getFullYear() + "-" + month + "-01T00:00:00Z";
-var endDate = now.getFullYear() + "-" + month + "-" + lastDay + "T23:59:59Z";
-var options = { month: "long" };
+let lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+let month = ("0" + (now.getMonth() + 1)).slice(-2);
+let startDate = now.getFullYear() + "-" + month + "-01T00:00:00Z";
+let endDate = now.getFullYear() + "-" + month + "-" + lastDay + "T23:59:59Z";
+let options = { month: "long" };
 console.log(startDate + " -(INITIAL)  " + endDate);
-var previousMonths = [0, 0, now.toLocaleDateString("en-US", options)];
+let previousMonths = [0, 0, now.toLocaleDateString("en-US", options)];
 
 $(function () {
   $("#selected_date").val(now.getFullYear() + "-" + month);
   $("#selected_date").on("change", function (e) {
-    var dateVal = $(this).val();
-    var dateSplit = dateVal.split("-");
-    var dateMonth = Number(dateSplit[1]) - 1;
-    var dateYear = dateSplit[0];
+    let dateVal = $(this).val();
+    let dateSplit = dateVal.split("-");
+    let dateMonth = Number(dateSplit[1]) - 1;
+    let dateYear = dateSplit[0];
 
     now = new Date(dateYear, dateMonth, 1, 0, 0, 0);
     lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -43,10 +37,10 @@ $(function () {
   });
 
   $(document).on("click", "#genAllPdf", function () {
-    var dateVal = $("#selected_date").val();
-    var dateSplit = dateVal.split("-");
-    var dateMonth = Number(dateSplit[1]) - 1;
-    var dateYear = dateSplit[0];
+    let dateVal = $("#selected_date").val();
+    let dateSplit = dateVal.split("-");
+    let dateMonth = Number(dateSplit[1]) - 1;
+    let dateYear = dateSplit[0];
 
     // Lets set the date up for the 3 months:
     now3 = new Date(dateYear, dateMonth, 1, 0, 0, 0);
@@ -64,8 +58,8 @@ $(function () {
     console.log("Start Date & End Date 3: " + startDate3 + " - " + endDate3);
     // the above is probably not the most efficient way to do this lol - but for now it works.
 
-    var $this = $(this);
-    var loadingText =
+    let $this = $(this);
+    let loadingText =
       '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
     if ($(this).html() !== loadingText) {
       $this.data("original-text", $(this).html());
@@ -80,102 +74,65 @@ $(function () {
   feather.replace();
 });
 
-function convertDate(date, offset) {
-  var convertDate = new Date(date);
-  var month = convertDate.getUTCMonth();
-  if (convertDate.getUTCMonth() + 1 < 10) {
-    month = convertDate.getUTCMonth() + 1;
-    month = "0" + month;
-  } else month = convertDate.getUTCMonth() + 1;
-
-  var date = convertDate.getDate();
-  if (convertDate.getDate() < 10) date = "0" + convertDate.getDate();
-
-  var minutes = convertDate.getUTCMinutes();
-  if (convertDate.getUTCMinutes() < 10)
-    minutes = "0" + convertDate.getUTCMinutes();
-
-  var t = new Date();
-  if (offset == 1) {
-    var currentoffset = convertDate.getTimezoneOffset() * 60000;
-    convertDate.setTime(convertDate.getTime() + currentoffset);
-  }
-  var hours = convertDate.getHours();
-
-  if (convertDate.getHours() < 10) hours = "0" + hours;
-
-  return (dateString =
-    month +
-    "/" +
-    date +
-    "/" +
-    convertDate.getUTCFullYear() +
-    " " +
-    hours +
-    ":" +
-    minutes +
-    "Z");
-}
-
 // Globals
-var ticketData;
-var ticketData3Months;
-var ccirData;
-var missionData;
-var missionData3Months;
-var dvTotalCCIRs = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
-var dvTotalTickets = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
-var dvMissionImpact = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
-var dvMissionImpact3Months = {
+let ticketData;
+let ticketData3Months;
+let ccirData;
+let missionData;
+let missionData3Months;
+let dvTotalCCIRs = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+let dvTotalTickets = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+let dvMissionImpact = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+let dvMissionImpact3Months = {
   VPOTUS: [0, 0, 0],
   SECSTATE: [0, 0, 0],
   SECDEF: [0, 0, 0],
   CJCS: [0, 0, 0],
 };
-var legsPerDv = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
-var legsPerDv3Months = {
+let legsPerDv = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+let legsPerDv3Months = {
   VPOTUS: [0, 0, 0],
   SECSTATE: [0, 0, 0],
   SECDEF: [0, 0, 0],
   CJCS: [0, 0, 0],
 };
-var legsPerAc = { VPOTUS: {}, SECSTATE: {}, SECDEF: {}, CJCS: {} };
-var missionsPerDV = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
-var missionsPerDv3Months = {
+let legsPerAc = { VPOTUS: {}, SECSTATE: {}, SECDEF: {}, CJCS: {} };
+let missionsPerDV = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+let missionsPerDv3Months = {
   VPOTUS: [0, 0, 0],
   SECSTATE: [0, 0, 0],
   SECDEF: [0, 0, 0],
   CJCS: [0, 0, 0],
 };
-var percentMissionsIssues = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
-var percentMissionIssues3Months = {
+let percentMissionsIssues = { VPOTUS: 0, SECSTATE: 0, SECDEF: 0, CJCS: 0 };
+let percentMissionIssues3Months = {
   VPOTUS: [0, 0, 0],
   SECSTATE: [0, 0, 0],
   SECDEF: [0, 0, 0],
   CJCS: [0, 0, 0],
 };
-var legImpactPer3Months = { VPOTUS: {}, SECSTATE: {}, SECDEF: {}, CJCS: {} };
-var ticketCategories3Months = {
+let legImpactPer3Months = { VPOTUS: {}, SECSTATE: {}, SECDEF: {}, CJCS: {} };
+let ticketCategories3Months = {
   VPOTUS: [0, 0, 0],
   SECSTATE: [0, 0, 0],
   SECDEF: [0, 0, 0],
   CJCS: [0, 0, 0],
 };
-var ticketCategories = [];
-var dvTicketCategories = {
+let ticketCategories = [];
+let dvTicketCategories = {
   VPOTUS: [[], [], []],
   SECSTATE: [[], [], []],
   SECDEF: [[], [], []],
   CJCS: [[], [], []],
 };
-var ticketCategoryNumbers = [];
-var tailsWithTickets = [];
-var tailsNoImpact = [];
-var tailsLowImpact = [];
-var tailsMedImpact = [];
-var tailsHighImpact = [];
+let ticketCategoryNumbers = [];
+let tailsWithTickets = [];
+let tailsNoImpact = [];
+let tailsLowImpact = [];
+let tailsMedImpact = [];
+let tailsHighImpact = [];
 function dataGrab() {
-  var dvs = ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"];
+  let dvs = ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"];
   grabAllTickets();
   grabAllMissions();
   totalCCIRS();
@@ -183,30 +140,30 @@ function dataGrab() {
   dvTotalMissionImpact();
   legsPerDvCount();
   missionsPerDvCount();
-  for (var i = 0; i < dvs.length; i++) {
+  for (let i = 0; i < dvs.length; i++) {
     legsPerAcCount(dvs[i]);
   }
-  for (var i = 0; i < dvs.length; i++) {
+  for (let i = 0; i < dvs.length; i++) {
     percentMissionsIssuesCount(dvs[i]);
   }
   ticketsByCategoryFunc();
   ticketsByTail();
   grabAllData3Months();
   //dvTotalTicketCount3Months()
-  for (var i = 0; i < dvs.length; i++) {
+  for (let i = 0; i < dvs.length; i++) {
     legsWithIssues3Months(dvs[i]);
   }
-  for (var i = 0; i < dvs.length; i++) {
+  for (let i = 0; i < dvs.length; i++) {
     legsImpact3Months(dvs[i]);
   }
-  for (var i = 0; i < dvs.length; i++) {
+  for (let i = 0; i < dvs.length; i++) {
     dvTicketCatFunc(dvs[i]);
   }
 }
 
 function grabAllTickets() {
   // First lets pull ALL of the tickets TOTAL
-  var urlLoad =
+  let urlLoad =
     "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$top=5000&$filter=Created le '" +
     endDate +
     "' and Created ge '" +
@@ -226,7 +183,7 @@ function grabAllTickets() {
 }
 
 function grabAllMissions() {
-  var urlLoad =
+  let urlLoad =
     "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=Created le '" +
     endDate +
     "' and Created ge '" +
@@ -247,7 +204,7 @@ function grabAllMissions() {
 
 function totalCCIRS() {
   // First lets pull ALL of the CCIRs TOTAL
-  var urlLoad =
+  let urlLoad =
     "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('CCIR')/items?$top=5000&$filter=Date le '" +
     endDate +
     "' and Date ge '" +
@@ -261,12 +218,12 @@ function totalCCIRS() {
       Accept: "application/json;odata=verbose",
     },
     success: function (data) {
-      var allResults = data.d.results;
+      let allResults = data.d.results;
       ccirData = data.d.results;
       if (allResults.length > 0) {
-        for (var i = 0; i < allResults.length; i++) {
+        for (let i = 0; i < allResults.length; i++) {
           // looping through all results
-          var currentTime = allResults[i].Created;
+          let currentTime = allResults[i].Created;
           if (allResults[i].DV == "VPOTUS") {
             dvTotalCCIRs.VPOTUS++;
           } else if (allResults[i].DV == "SECSTATE") {
@@ -283,8 +240,8 @@ function totalCCIRS() {
 }
 
 function dvTotalTicketCount() {
-  var total = 0;
-  for (i = 0; i < ticketData.length; i++) {
+  let total = 0;
+  for (let i = 0; i < ticketData.length; i++) {
     if (ticketData[i].DV == "VPOTUS") dvTotalTickets.VPOTUS++;
     if (ticketData[i].DV == "SECSTATE") dvTotalTickets.SECSTATE++;
     if (ticketData[i].DV == "SECDEF") dvTotalTickets.SECDEF++;
@@ -293,8 +250,8 @@ function dvTotalTicketCount() {
 }
 
 function dvTotalMissionImpact() {
-  var total = 0;
-  for (i = 0; i < ticketData.length; i++) {
+  let total = 0;
+  for (let i = 0; i < ticketData.length; i++) {
     if (
       ticketData[i].DV == "VPOTUS" &&
       ticketData[i].Leg != "N/A" &&
@@ -327,8 +284,8 @@ function dvTotalMissionImpact() {
 }
 
 function legsPerDvCount() {
-  var total = 0;
-  for (i = 0; i < missionData.length; i++) {
+  let total = 0;
+  for (let i = 0; i < missionData.length; i++) {
     if (missionData[i].DV == "VPOTUS") legsPerDv.VPOTUS++;
     if (missionData[i].DV == "SECSTATE") legsPerDv.SECSTATE++;
     if (missionData[i].DV == "SECDEF") legsPerDv.SECDEF++;
@@ -337,9 +294,9 @@ function legsPerDvCount() {
 }
 
 function missionsPerDvCount() {
-  var total = 0;
-  var missions = [];
-  for (i = 0; i < missionData.length; i++) {
+  let total = 0;
+  let missions = [];
+  for (let i = 0; i < missionData.length; i++) {
     if (
       missionData[i].DV == "VPOTUS" &&
       !missions.includes(missionData[i].Mission_Number)
@@ -372,7 +329,7 @@ function missionsPerDvCount() {
 }
 
 function legsPerAcCount(dv) {
-  for (i = 0; i < missionData.length; i++) {
+  for (let i = 0; i < missionData.length; i++) {
     if (missionData[i].DV == dv) {
       if (!legsPerAc[dv][missionData[i].Tail_Number])
         legsPerAc[dv][missionData[i].Tail_Number] = 1;
@@ -383,10 +340,10 @@ function legsPerAcCount(dv) {
 
 function percentMissionsIssuesCount(dv) {
   // first get count of mission legs
-  var missionCounter = {};
-  var totalMissions = 0;
-  var unsuccess = 0;
-  for (j = 0; j < missionData.length; j++) {
+  let missionCounter = {};
+  let totalMissions = 0;
+  let unsuccess = 0;
+  for (let j = 0; j < missionData.length; j++) {
     if (missionData[j].DV == dv) {
       if (!missionCounter[missionData[j].Mission_Number]) {
         missionCounter[missionData[j].Mission_Number] = 1;
@@ -397,14 +354,14 @@ function percentMissionsIssuesCount(dv) {
     }
   }
 
-  for (j = 0; j < ticketData.length; j++) {
+  for (let j = 0; j < ticketData.length; j++) {
     if (ticketData[j].DV == dv && ticketData[j].Leg != "N/A") {
       unsuccess++;
     }
   }
 
-  var success = totalMissions - unsuccess;
-  var percentile = success / totalMissions;
+  let success = totalMissions - unsuccess;
+  let percentile = success / totalMissions;
   if (success != 0) {
     percentMissionsIssues[dv] = percentile;
     percentMissionIssues3Months[dv][2] = percentile;
@@ -412,23 +369,23 @@ function percentMissionsIssuesCount(dv) {
 }
 
 function searchMission(mission) {
-  for (i = 0; i < missionData.length; i++) {
+  for (let i = 0; i < missionData.length; i++) {
     if (missionData[i].Mission_Number == mission) return true;
   }
   return false;
 }
 
 function ticketsByCategoryFunc() {
-  for (var i = 0; i < ticketData.length; i++) {
+  for (let i = 0; i < ticketData.length; i++) {
     // Add ticket category
     if (!ticketCategories.includes(ticketData[i].Category)) {
       ticketCategories.push(ticketData[i].Category);
     }
   }
 
-  for (var i = 0; i < ticketCategories.length; i++) {
-    var count = 0;
-    for (var j = 0; j < ticketData.length; j++) {
+  for (let i = 0; i < ticketCategories.length; i++) {
+    let count = 0;
+    for (let j = 0; j < ticketData.length; j++) {
       if (ticketData[j].Category == ticketCategories[i]) count++;
     }
     ticketCategoryNumbers.push(count);
@@ -436,15 +393,15 @@ function ticketsByCategoryFunc() {
 }
 
 function totalTicketsByCategoryFunc() {
-  var total = 0;
-  for (var i = 0; i < ticketCategoryNumbers.length; i++) {
+  let total = 0;
+  for (let i = 0; i < ticketCategoryNumbers.length; i++) {
     total = total + ticketCategoryNumbers[i];
   }
   return total;
 }
 
 function ticketsByTail() {
-  for (var i = 0; i < ticketData.length; i++) {
+  for (let i = 0; i < ticketData.length; i++) {
     if (
       !tailsWithTickets.includes(ticketData[i].Tail_Number) &&
       ticketData[i].Tail_Number != null
@@ -453,12 +410,12 @@ function ticketsByTail() {
     }
   }
 
-  for (var i = 0; i < tailsWithTickets.length; i++) {
-    var none = 0;
-    var low = 0;
-    var med = 0;
-    var high = 0;
-    for (var j = 0; j < ticketData.length; j++) {
+  for (let i = 0; i < tailsWithTickets.length; i++) {
+    let none = 0;
+    let low = 0;
+    let med = 0;
+    let high = 0;
+    for (let j = 0; j < ticketData.length; j++) {
       if (ticketData[j].Tail_Number == tailsWithTickets[i]) {
         if (ticketData[j].Impact_Level == "None") none++;
         if (ticketData[j].Impact_Level == "Low") low++;
@@ -477,7 +434,7 @@ function grabAllData3Months() {
   // We are getting the tickets from the 2 months prior to last month so that we can have a 3 month setting of tickets. We've already done calculations on the past month so only need to
   // do calculations on the months prior to that.
 
-  var urlLoad =
+  let urlLoad =
     "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Tickets')/items?$top=5000&$filter=Created le '" +
     endDate3 +
     "' and Created ge '" +
@@ -496,7 +453,7 @@ function grabAllData3Months() {
   });
 
   // lets get the missions
-  var urlLoad =
+  urlLoad =
     "https://intelshare.intelink.gov/sites/89cs/GNOC/_api/web/lists/getbytitle('Missions')/items?$top=5000&$filter=Created le '" +
     endDate3 +
     "' and Created ge '" +
@@ -516,21 +473,21 @@ function grabAllData3Months() {
 }
 
 function legsWithIssues3Months(dv) {
-  var d = new Date(now);
+  let d = new Date(now);
   d.setMonth(d.getMonth() - 2);
-  var m = ("0" + (d.getMonth() + 1)).slice(-2);
-  var strt = d.getFullYear() + "-" + m + "-01T00:00:00Z";
-  lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  var end = d.getFullYear() + "-" + m + "-" + lday + "T23:59:59Z";
+  let m = ("0" + (d.getMonth() + 1)).slice(-2);
+  let strt = d.getFullYear() + "-" + m + "-01T00:00:00Z";
+  let lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  let end = d.getFullYear() + "-" + m + "-" + lday + "T23:59:59Z";
 
   // first get count of mission legs
-  var missionCounter = {};
-  var totalMissions = [0, 0];
-  var unsuccess = [0, 0];
-  for (var i = 0; i < 2; i++) {
-    var options = { month: "long" };
+  let missionCounter = {};
+  let totalMissions = [0, 0];
+  let unsuccess = [0, 0];
+  for (let i = 0; i < 2; i++) {
+    let options = { month: "long" };
     previousMonths[i] = d.toLocaleDateString("en-US", options);
-    for (j = 0; j < missionData3Months.length; j++) {
+    for (let j = 0; j < missionData3Months.length; j++) {
       if (
         missionData3Months[j].Created < end &&
         missionData3Months[j].Created > strt &&
@@ -546,7 +503,7 @@ function legsWithIssues3Months(dv) {
       }
     }
 
-    for (j = 0; j < ticketData3Months.length; j++) {
+    for (let j = 0; j < ticketData3Months.length; j++) {
       if (
         ticketData3Months[j].DV == dv &&
         ticketData3Months[j].Created < end &&
@@ -557,8 +514,8 @@ function legsWithIssues3Months(dv) {
       }
     }
 
-    var success = totalMissions[i] - unsuccess[i];
-    var percentile = success / totalMissions[i];
+    let success = totalMissions[i] - unsuccess[i];
+    let percentile = success / totalMissions[i];
     if (success != 0) percentMissionIssues3Months[dv][i] = percentile;
 
     d.setMonth(d.getMonth() + 1);
@@ -570,24 +527,24 @@ function legsWithIssues3Months(dv) {
 }
 
 function legsImpact3Months(dv) {
-  var d = new Date(now);
+  let d = new Date(now);
   d.setMonth(d.getMonth() - 2);
-  var m = ("0" + (d.getMonth() + 1)).slice(-2);
-  var strt = d.getFullYear() + "-" + m + "-01T00:00:00Z";
-  lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  var end = d.getFullYear() + "-" + m + "-" + lday + "T23:59:59Z";
+  let m = ("0" + (d.getMonth() + 1)).slice(-2);
+  let strt = d.getFullYear() + "-" + m + "-01T00:00:00Z";
+  let lday = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  let end = d.getFullYear() + "-" + m + "-" + lday + "T23:59:59Z";
 
-  var totalMissions = [0, 0, 0];
-  var noImpact = [0, 0, 0];
-  var impact = [0, 0, 0];
+  let totalMissions = [0, 0, 0];
+  let noImpact = [0, 0, 0];
+  let impact = [0, 0, 0];
 
-  for (var i = 0; i < missionData.length; i++) {
+  for (let i = 0; i < missionData.length; i++) {
     if (missionData[i].DV == dv) {
       totalMissions[2]++;
     }
   }
 
-  for (i = 0; i < ticketData.length; i++) {
+  for (let i = 0; i < ticketData.length; i++) {
     if (
       ticketData[i].DV == dv &&
       ticketData[i].Impact_Level == "None" &&
@@ -613,8 +570,8 @@ function legsImpact3Months(dv) {
     totalMissions[2],
   ];
 
-  for (var i = 0; i < 2; i++) {
-    for (j = 0; j < missionData3Months.length; j++) {
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < missionData3Months.length; j++) {
       if (
         missionData3Months[j].Created < end &&
         missionData3Months[j].Created > strt &&
@@ -623,7 +580,7 @@ function legsImpact3Months(dv) {
         totalMissions[i]++;
       }
     }
-    for (j = 0; j < ticketData3Months.length; j++) {
+    for (let j = 0; j < ticketData3Months.length; j++) {
       if (
         ticketData3Months[j].Created < end &&
         ticketData3Months[j].Created > strt
@@ -662,11 +619,11 @@ function legsImpact3Months(dv) {
 }
 
 function dvTicketCatFunc(dv) {
-  var currentCategories = [];
-  var ccirNum = [];
-  var noCcirNum = [];
+  let currentCategories = [];
+  let ccirNum = [];
+  let noCcirNum = [];
 
-  for (i = 0; i < ticketData.length; i++) {
+  for (let i = 0; i < ticketData.length; i++) {
     if (ticketData[i].DV == dv) {
       if (!currentCategories.includes(ticketData[i].Category)) {
         currentCategories.push(ticketData[i].Category);
@@ -686,7 +643,7 @@ function dvTicketCatFunc(dv) {
 }
 
 function generatePDF() {
-  var pptx = new PptxGenJS();
+  let pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE";
   pptx.author = "GNOC";
   pptx.suject = "MONTHLY METRICS";
@@ -780,15 +737,15 @@ function generatePDF() {
     ],
   });
 
-  var slide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
-  var options = {
+  let slide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
+  let options = {
     timeZone: "UTC",
     year: "numeric",
     month: "short",
     day: "numeric",
   };
-  var parsedate1 = new Date(startDate);
-  var parsedate2 = new Date(endDate);
+  let parsedate1 = new Date(startDate);
+  let parsedate2 = new Date(endDate);
   slide.addText("GNOC METRICS REPORT", { placeholder: "body" });
   slide.addText(
     parsedate1.toLocaleDateString("en-US", options) +
@@ -964,7 +921,7 @@ function generatePDF() {
   ); // Total VIPSAM Tickets
 
   /* Missions w DV Impact data */
-  var missionsWithDVImpactData = [
+  let missionsWithDVImpactData = [
     {
       name: "Legs With DV Impact",
       labels: ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"],
@@ -977,7 +934,7 @@ function generatePDF() {
     },
   ];
   // S2 Missions w DV Impact
-  var missionsWithDVImpactChart = {
+  let missionsWithDVImpactChart = {
     x: "3.67",
     y: "1.51",
     w: "6.0",
@@ -996,7 +953,7 @@ function generatePDF() {
   /* END MISSIONS w DV Impact Chart */
 
   /* Total VIPSAM Tickets Chart */
-  var totalVipsamTicketsData = [
+  let totalVipsamTicketsData = [
     {
       name: "Total VIPSAM Tickets",
       labels: ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"],
@@ -1008,7 +965,7 @@ function generatePDF() {
       ],
     },
   ];
-  var totalVipsamTicketsChart = {
+  let totalVipsamTicketsChart = {
     x: 9.67,
     y: 1.51,
     w: 3.4,
@@ -1032,7 +989,7 @@ function generatePDF() {
   /* End TOTAL VIPSAM tickets chart */
 
   /* Percent of Missions Without Issues Chart */
-  var percentMissionsIssuesData = [
+  let percentMissionsIssuesData = [
     {
       name: "Percentage of Legs Without Issues",
       labels: ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"],
@@ -1045,7 +1002,7 @@ function generatePDF() {
     },
   ];
 
-  var percentMissionsIssuesChart = {
+  let percentMissionsIssuesChart = {
     x: 0.27,
     y: 4.1,
     w: 6.4,
@@ -1070,7 +1027,7 @@ function generatePDF() {
   /* END Percent of Missions Without Issues */
 
   /* Legs Per DV Chart */
-  var legsPerDvData = [
+  let legsPerDvData = [
     {
       name: "Legs Per DV",
       labels: ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"],
@@ -1083,7 +1040,7 @@ function generatePDF() {
     },
   ];
 
-  var legsPerDvChart = {
+  let legsPerDvChart = {
     x: 6.67,
     y: 4.1,
     w: 6.4,
@@ -1193,7 +1150,7 @@ function generatePDF() {
 
   /* Tickets by Tail Data */
   // None, low, med, high
-  var ticketsByTailData = [
+  let ticketsByTailData = [
     {
       name: "None",
       labels: tailsWithTickets,
@@ -1217,7 +1174,7 @@ function generatePDF() {
   ];
 
   // tickets by tail chart
-  var ticketsByTailChart = {
+  let ticketsByTailChart = {
     x: 0.26,
     y: 1.51,
     w: 8.7,
@@ -1247,7 +1204,7 @@ function generatePDF() {
 
   /* Tickets By Category Data */
 
-  var ticketsByCategoryData = [
+  let ticketsByCategoryData = [
     {
       name: "Total Tickets by Category",
       labels: ticketCategories,
@@ -1256,7 +1213,7 @@ function generatePDF() {
   ];
 
   // tickets by category chart
-  var ticketsByCategoryChart = {
+  let ticketsByCategoryChart = {
     x: 8.97,
     y: 1.51,
     w: 4.1,
@@ -1280,14 +1237,14 @@ function generatePDF() {
   /* End Tickets by Category Data */
 
   /* END SLIDE 3 MONTHLY TICKET SUMMARY */
-  var dvs = ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"];
-  var dvColors = {
+  let dvs = ["VPOTUS", "SECSTATE", "SECDEF", "CJCS"];
+  let dvColors = {
     VPOTUS: ["BDD7EE", "DBDBDB", "ED7D31"],
     SECSTATE: ["BDD7EE", "DBDBDB", "FFC000"],
     SECDEF: ["BDD7EE", "DBDBDB", "70AD47"],
     CJCS: ["BDD7EE", "DBDBDB", "4472C4"],
   };
-  for (i = 0; i < dvs.length; i++) {
+  for (let i = 0; i < dvs.length; i++) {
     /* BEGIN SLIDE 4 VPOTUS */
     pptx.defineSlideMaster({
       title: "MASTER_SLIDE",
@@ -1426,7 +1383,7 @@ function generatePDF() {
 
     /* DV Data */
     /* Percent of Legs without Issues Chart */
-    var percentLegsIssuesDataVpotus = [
+    let percentLegsIssuesDataVpotus = [
       {
         name: "Percentage of Legs Without Issues",
         labels: [
@@ -1438,7 +1395,7 @@ function generatePDF() {
       },
     ];
 
-    var percentLegsIssuesChartVpotus = {
+    let percentLegsIssuesChartVpotus = {
       x: 3.36,
       y: 1.51,
       w: 4.31,
@@ -1462,15 +1419,15 @@ function generatePDF() {
     );
     /* END Percent of Missions Without Issues */
     /* Legs Per AC Chart */
-    var templable = [];
-    var tempvalue = [];
-    for (ac in legsPerAc[dvs[i]]) {
+    let templable = [];
+    let tempvalue = [];
+    for (let ac in legsPerAc[dvs[i]]) {
       templable.push(ac);
     }
-    for (ac in legsPerAc[dvs[i]]) {
+    for (let ac in legsPerAc[dvs[i]]) {
       tempvalue.push(legsPerAc[dvs[i]][ac]);
     }
-    var legsPerAcDataVpotus = [
+    let legsPerAcDataVpotus = [
       {
         name: "Total Legs per AC",
         labels: templable,
@@ -1478,7 +1435,7 @@ function generatePDF() {
       },
     ];
 
-    var legsPeracChartVpotus = {
+    let legsPeracChartVpotus = {
       x: 7.66,
       y: 1.51,
       w: 5.37,
@@ -1496,7 +1453,7 @@ function generatePDF() {
 
     /* Legs with Impact */
     // None, low, med, high
-    var legsWithImpactVpotusData = [
+    let legsWithImpactVpotusData = [
       {
         name: "Legs without Issues",
         labels: previousMonths,
@@ -1527,7 +1484,7 @@ function generatePDF() {
     ];
 
     // tickets by tail chart
-    var legsWithImpactVpotusChart = {
+    let legsWithImpactVpotusChart = {
       x: 0.26,
       y: 4.1,
       w: 6.39,
@@ -1560,7 +1517,7 @@ function generatePDF() {
 
     /* End Tickets by Tail Data */
     /* Tickets per Category Chart */
-    var ticketPerCatDataVpotus = [
+    let ticketPerCatDataVpotus = [
       {
         name: "Issues with No CCIR",
         labels: dvTicketCategories[dvs[i]][0],
@@ -1573,7 +1530,7 @@ function generatePDF() {
       },
     ];
 
-    var ticketPerCatChartVpotus = {
+    let ticketPerCatChartVpotus = {
       x: 6.65,
       y: 4.1,
       w: 6.39,
@@ -1680,15 +1637,15 @@ function generatePDF() {
     ],
   });
 
-  var slide = pptx.addSlide({ masterName: "END_SLIDE" });
-  var options = {
+  slide = pptx.addSlide({ masterName: "END_SLIDE" });
+  options = {
     timeZone: "UTC",
     year: "numeric",
     month: "long",
     day: "numeric",
   };
-  var parsedate1 = new Date(startDate);
-  var parsedate2 = new Date(endDate);
+  parsedate1 = new Date(startDate);
+  parsedate2 = new Date(endDate);
   slide.addText("Contact Information", { placeholder: "title" });
   slide.addText(
     "If you have any questions regarding this report, please contact the org box at 89CS.SCOV.VIP.COMM@us.af.mil or via DSN 858-2411.",
