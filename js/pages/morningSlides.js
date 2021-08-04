@@ -418,6 +418,7 @@ const getAllDvsFlying = async (listOfMissions) => {
   for (let mission in listOfMissions) {
     if (
       !listOfDvs.includes(listOfMissions[mission].DV) &&
+      listOfMissions[mission].DV != null &&
       listOfMissions[mission].DV != "GDSS" &&
       listOfMissions[mission].DV != "DH"
     )
@@ -450,7 +451,7 @@ const getAircraftType = async (tailNumber) => {
     }
   );
   const data = await response.json();
-  const items = data.d.results[0] || "";
+  const items = data.d.results[0] || "UNKNOWN";
   return items.Aircraft_Model;
 };
 
@@ -458,7 +459,8 @@ const processDvsFlying = async (startOfDay, endOfDay, listOfDvs) => {
   for (let dv in listOfDvs) {
     const currentDv = listOfDvs[dv];
     const dvsMissions = await getMissionsForDv(startOfDay, endOfDay, currentDv);
-    const tailNumber = dvsMissions[0].Tail_Number;
+    console.log(currentDv);
+    const tailNumber = dvsMissions[0].Tail_Number || "UNKNOWN";
     const aircraftType = await getAircraftType(tailNumber);
     const aircraftString = `${tailNumber} (${aircraftType})`;
 
