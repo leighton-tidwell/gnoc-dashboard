@@ -46,6 +46,7 @@ fetch(
         arrayOfMissions,
         currentMission,
         async (i, search) => {
+          if (i === null) return false;
           if (i.includes(search)) return true;
           return false;
         }
@@ -69,6 +70,7 @@ fetch(
         arrayOfMissions[rowOfMission][1],
         item.DV,
         async (i, search) => {
+          if (i === null) return false;
           if (i.includes(search)) return true;
           return false;
         }
@@ -92,6 +94,7 @@ fetch(
         arrayOfMissions[rowOfMission][4],
         item.Tail_Number,
         async (i, search) => {
+          if (i === null) return false;
           if (i.includes(search)) return true;
           return false;
         }
