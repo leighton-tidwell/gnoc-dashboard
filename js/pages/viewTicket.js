@@ -240,6 +240,9 @@ const populateTicketInformation = async () => {
       if (!result) return;
       const ticketStatusField = document.getElementById("status");
       ticketStatusField.value = result.Status;
+      ticketStatus = result.Status;
+
+      console.log(ticketStatus);
 
       const openDateField = document.getElementById("open_date");
       openDateField.value = convertDateToISOString(result.Date_Opened);
@@ -375,9 +378,24 @@ document.querySelector("#ticket_submit").addEventListener("click", (event) => {
               reportedActionProperties,
               () => {
                 document.getElementById("update_text").value = "";
-                alert("Ticket updated successfully.");
-                location.reload();
-                return;
+                console.log(selectedStatus);
+                if (selectedStatus != ticketStatus) {
+                  const fixedTicketMessage = `GNOC set ticket #${enteredTicketNumber} to ${selectedStatus}.`;
+
+                  const updateProperties = {
+                    ticket_number: enteredTicketNumber,
+                    update: fixedTicketMessage,
+                  };
+                  insertIntoList(UPDATE_LIST, updateProperties, () => {
+                    alert("Ticket updated successfully.");
+                    location.reload();
+                    return;
+                  });
+                } else {
+                  alert("Ticket updated successfully.");
+                  location.reload();
+                  return;
+                }
               },
               (error) => console.error("Error: ", error)
             );
@@ -387,6 +405,20 @@ document.querySelector("#ticket_submit").addEventListener("click", (event) => {
           }
         );
       } else {
+        console.log(selectedStatus);
+        if (selectedStatus != ticketStatus) {
+          const fixedTicketMessage = `GNOC set ticket #${enteredTicketNumber} to ${selectedStatus}.`;
+
+          const updateProperties = {
+            ticket_number: enteredTicketNumber,
+            update: fixedTicketMessage,
+          };
+          insertIntoList(UPDATE_LIST, updateProperties, () => {
+            alert("Ticket updated successfully.");
+            location.reload();
+            return;
+          });
+        }
         alert("Ticket updated successfully.");
         location.reload();
         return;
