@@ -70,7 +70,7 @@ export const getUser = () => {
 // div to hide if necessary
 // redirect if necessary to redirect page
 export const checkPermissions = (user, item, div, redirect) => {
-  if (user?.accessList.includes(atob(item)) || user.accessList == "ALL")
+  if (user?.accessList.includes(atob(item)) || user?.accessList == "ALL")
     return true;
   else if (redirect == true) {
     window.location.replace("./index.html");
