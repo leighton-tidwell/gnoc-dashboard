@@ -10,7 +10,8 @@ export const getUser = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        user.email = data.d.Email;
+        user.email =
+          data.d.Email !== "" ? data.d.Email : data.d.LoginName.split("|")[2];
         user.name = data.d.Title;
 
         fetch(
@@ -70,7 +71,7 @@ export const getUser = () => {
 // div to hide if necessary
 // redirect if necessary to redirect page
 export const checkPermissions = (user, item, div, redirect) => {
-  if (user?.accessList.includes(atob(item)) || user?.accessList == "ALL")
+  if (user?.accessList?.includes(atob(item)) || user?.accessList == "ALL")
     return true;
   else if (redirect == true) {
     window.location.replace("./index.html");

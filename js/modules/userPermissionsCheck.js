@@ -67,7 +67,7 @@ const runPermissionsCheck = (user, currentPage) => {
       const flightTicketsHeaderDiv = document.getElementById(
         "flight_tickets_header_div"
       );
-      flightTicketsHeaderDiv.parentNode.removeChild(ticketsHeaderDiv);
+      flightTicketsHeaderDiv.parentNode.removeChild(flightTicketsHeaderDiv);
     }
     checkPermissions(
       user,
