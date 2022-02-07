@@ -240,8 +240,19 @@ document
         update: updateText,
       };
       insertIntoList(UPDATES_LIST_NAME, updateProperties, () => {
-        alert("Ticket successfully created.");
-        location.replace(`./viewTicket.html?ticket=${enteredTicketNumber}`);
+        insertIntoList(
+          "mslLog",
+          {
+            date: dayjs().toISOString(),
+            time: dayjs().format("HH:mm"),
+            operator: "SYSTEM",
+            entry: `GSOC created ticket ${enteredTicketNumber} for Tail #${enteredTailNumber}.`,
+          },
+          () => {
+            alert("Ticket successfully created.");
+            location.replace(`./viewTicket.html?ticket=${enteredTicketNumber}`);
+          }
+        );
       });
     }),
       (error) => {
