@@ -393,6 +393,7 @@ const getStatTotals = async (startDate, endDate, listOfDvs) => {
   let totalMissions = 0;
   let totalLegs = 0;
   if (!listOfDvs) {
+    console.log("no DVS");
     totalCCIRs += await getCCIRTotal(startDate, endDate);
     const missionAndLegsTotal = await getMissionsAndLegsTotal(
       startDate,
@@ -424,6 +425,8 @@ const gatherData = async (startDate, endDate, listOfDvs, listOfTails) => {
   const loadingIndicator = document.getElementById("loading_results");
   loadingIndicator.style.display = "block";
 
+  const noListProvided = !listOfDvs || !listOfDvs.length ? true : false;
+
   if (!$.fn.DataTable.isDataTable("#overviewTickets")) {
     $("#overviewTickets").DataTable({
       dom: "Bfrtip",
@@ -451,7 +454,7 @@ const gatherData = async (startDate, endDate, listOfDvs, listOfTails) => {
 
   const [ticketsPerDv, statTotals] = await Promise.all([
     getTotalTicketsPerDv(startDate, endDate, listOfDvs, listOfTails),
-    getStatTotals(startDate, endDate, listOfDvs),
+    getStatTotals(startDate, endDate, noListProvided ? null : listOfDvs),
   ]);
 
   let counter = 0;
