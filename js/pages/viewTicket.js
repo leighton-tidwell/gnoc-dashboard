@@ -235,14 +235,12 @@ const populateTicketInformation = async () => {
     }
   )
     .then((response) => response.json())
-    .then((data) => {
+    .then(async (data) => {
       const result = data.d.results[0] || "";
       if (!result) return;
       const ticketStatusField = document.getElementById("status");
       ticketStatusField.value = result.Status;
       ticketStatus = result.Status;
-
-      console.log(ticketStatus);
 
       const openDateField = document.getElementById("open_date");
       openDateField.value = convertDateToISOString(result.Date_Opened);
@@ -255,6 +253,7 @@ const populateTicketInformation = async () => {
 
       const missionNumberField = document.getElementById("mission_number");
       missionNumberField.value = result.Mission_Number;
+      await fetchMissionLegs(result.Mission_Number);
 
       const csoField = document.getElementById("cso");
       csoField.value = result.CSO;
@@ -277,6 +276,10 @@ const populateTicketInformation = async () => {
 
       const beamSelect = document.getElementById("beam");
       beamSelect.value = result.Beam;
+
+      const legInput = document.getElementById("leg");
+      legInput.value = result.Leg;
+      $(".selectpicker").selectpicker("refresh");
 
       const issueDescriptionTextarea =
         document.getElementById("issue_description");
@@ -482,6 +485,47 @@ const addLinkListeners = () => {
     });
   });
 };
+
+const fetchMissionLegs = (missionToSearch) =>
+  new Promise((resolve, reject) => {
+    const legInput = document.getElementById("leg");
+    legInput.innerHTML = "";
+    $(".selectpicker").selectpicker("refresh"); // obligatory refresh.. hate this
+
+    let opt = document.createElement("option");
+    opt.value = "N/A";
+    opt.innerHTML = "N/A";
+    legInput.appendChild(opt);
+    legInput.value = "N/A";
+    $(".selectpicker").selectpicker("refresh");
+
+    fetch(
+      `${HOST_URL}/_api/web/lists/getbytitle('Missions')/items?$filter=Mission_Number eq '${missionToSearch}'&$orderby=Created%20asc`,
+      {
+        headers: { Accept: "application/json; odata=verbose" },
+        credentials: "include",
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const items = data.d.results;
+        if (items.length === 0) return;
+        const legInput = document.getElementById("leg");
+        items.forEach((item, i) => {
+          let opt = document.createElement("option");
+          const legNumber = i + 1;
+          opt.value = legNumber;
+          opt.innerHTML = legNumber;
+          legInput.appendChild(opt);
+          $(".selectpicker").selectpicker("refresh");
+        });
+        resolve(true);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        reject(error);
+      });
+  });
 
 // Upload a file
 /*

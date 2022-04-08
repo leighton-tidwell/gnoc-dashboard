@@ -309,7 +309,9 @@ const processFixedTickets = async (updateList) => {
     const ticketMissionNumber =
       item.Mission_Number == null ? "N/A" : item.Mission_Number;
     const ccirInbound = item.CCIR == false ? "No" : "Yes";
-    const ticketFixAction = item.Last_Reported_Action.replace(/\n/g, "");
+    const ticketFixAction = item?.Last_Reported_Action
+      ? item.Last_Reported_Action.replace(/\n/g, "")
+      : "N/A";
 
     const fill = fixedRows.length % 2 == 0 ? "d9d9d9" : "";
     fixedRows.push([
