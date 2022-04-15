@@ -253,7 +253,7 @@ const populateTicketInformation = async () => {
 
       const missionNumberField = document.getElementById("mission_number");
       missionNumberField.value = result.Mission_Number;
-      await fetchMissionLegs(result.Mission_Number);
+      if (result.Mission_Number) await fetchMissionLegs(result.Mission_Number);
 
       const csoField = document.getElementById("cso");
       csoField.value = result.CSO;
@@ -381,7 +381,6 @@ document.querySelector("#ticket_submit").addEventListener("click", (event) => {
               reportedActionProperties,
               () => {
                 document.getElementById("update_text").value = "";
-                console.log(selectedStatus);
                 if (selectedStatus != ticketStatus) {
                   const fixedTicketMessage = `GNOC set ticket #${enteredTicketNumber} to ${selectedStatus}.`;
 
@@ -408,7 +407,6 @@ document.querySelector("#ticket_submit").addEventListener("click", (event) => {
           }
         );
       } else {
-        console.log(selectedStatus);
         if (selectedStatus != ticketStatus) {
           const fixedTicketMessage = `GNOC set ticket #${enteredTicketNumber} to ${selectedStatus}.`;
 
@@ -488,6 +486,7 @@ const addLinkListeners = () => {
 
 const fetchMissionLegs = (missionToSearch) =>
   new Promise((resolve, reject) => {
+    if (!missionToSearch) reject("Mission was null");
     const legInput = document.getElementById("leg");
     legInput.innerHTML = "";
     $(".selectpicker").selectpicker("refresh"); // obligatory refresh.. hate this
